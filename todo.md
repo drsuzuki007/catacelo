@@ -188,3 +188,9 @@
 - [x] GitHub Pages配下のURLでも対戦ページ・静的ページ・言語リンクが正しく解決されるよう調整する。
 - [x] cataceloリポジトリからGitHub Pagesへ公開するワークフローを追加する。
 - [x] 新規GitHub Pages URLでCatacelo Battleの公開動作を確認する。
+
+# GitHub統合とZIP保存の確認
+
+- [ ] drsuzuki007/cataceloの最新コミットとローカル作業コピーの同期状態を確認する。
+- [ ] 必要に応じて現在のCataceloソース一式をGitHubリポジトリへ同期する。
+- [ ] GitHub上にプログラム一式があり、ZIPダウンロードできることを確認する。
