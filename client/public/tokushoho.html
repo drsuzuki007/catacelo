@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>特定商取引法に基づく表記 | Catacelo</title>
+<meta name="robots" content="noindex">
+<style>
+  :root{
+    --board:#1e6f50;
+    --board-deep:#14523a;
+    --ink:#22302a;
+    --ink-soft:#5a6b63;
+    --paper:#f7f8f6;
+    --card:#ffffff;
+    --line:#dde4df;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic",Meiryo,"Noto Sans JP","Noto Sans SC","Noto Sans KR",sans-serif;
+    background:var(--paper);color:var(--ink);line-height:1.9;font-size:15px;
+  }
+  .site-header{background:var(--board-deep);padding:14px 20px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px}
+  .site-header .brand{color:#fff;text-decoration:none;font-weight:700;letter-spacing:.06em;font-size:17px}
+  .site-header .brand::before{
+    content:"";display:inline-block;width:12px;height:12px;border-radius:50%;
+    background:#fff;box-shadow:16px 0 0 -2px var(--board);margin-right:26px;
+  }
+  .lang-bar{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+  .lang-bar button{
+    font:inherit;font-size:12px;font-weight:600;padding:4px 11px;border-radius:999px;cursor:pointer;
+    background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.35);
+  }
+  .lang-bar button:hover{background:rgba(255,255,255,.22)}
+  .lang-bar button.active{background:#fff;color:var(--board-deep);border-color:#fff}
+  main{max-width:760px;margin:0 auto;padding:40px 20px 64px}
+  h1{
+    font-size:24px;font-weight:700;letter-spacing:.04em;
+    border-left:6px solid var(--board);padding-left:14px;margin-bottom:10px;
+  }
+  .updated{color:var(--ink-soft);font-size:13px;margin-bottom:14px}
+  .lang-note{font-size:12.5px;color:var(--ink-soft);background:#eef3f0;border:1px solid var(--line);border-radius:6px;padding:8px 12px;margin-bottom:28px}
+  .lang-note:empty{display:none}
+  .lead{margin-bottom:32px}
+  h2{
+    font-size:17px;font-weight:700;margin:36px 0 12px;
+    padding-bottom:6px;border-bottom:2px solid var(--line);
+  }
+  p{margin-bottom:12px}
+  ul,ol{padding-left:1.6em;margin-bottom:12px}
+  li{margin-bottom:6px}
+  ol.clauses>li{margin-bottom:10px}
+  .contact{
+    margin-top:16px;padding:16px 18px;background:var(--card);
+    border:1px solid var(--line);border-radius:6px;
+  }
+  table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line)}
+  th,td{padding:14px 16px;border-bottom:1px solid var(--line);vertical-align:top;text-align:left;font-weight:400}
+  th{width:32%;background:#eef3f0;font-weight:700;font-size:14px}
+  tr:last-child th,tr:last-child td{border-bottom:none}
+  td small{color:var(--ink-soft)}
+  .note{
+    margin-top:24px;padding:16px 18px;background:#eef3f0;
+    border:1px solid var(--line);border-radius:6px;font-size:13.5px;color:var(--ink-soft);
+  }
+  .back-wrap{margin-top:40px;text-align:center}
+  .back-btn{display:inline-block;padding:11px 32px;background:var(--board);color:#fff;text-decoration:none;border-radius:999px;font-weight:700;letter-spacing:.05em}
+  .site-footer{
+    border-top:1px solid var(--line);background:var(--card);
+    padding:28px 20px;text-align:center;font-size:13px;color:var(--ink-soft);
+  }
+  .site-footer nav{margin-bottom:10px}
+  .site-footer nav a{color:var(--board);text-decoration:underline;text-underline-offset:3px;margin:0 12px;font-weight:600}
+  .site-footer nav a:hover{text-decoration:underline;color:var(--board)}
+  @media (max-width:560px){
+    th,td{display:block;width:100%}
+    th{border-bottom:none;padding-bottom:4px}
+    td{padding-top:4px}
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a class="brand" href="index.html">Catacelo</a>
+<nav class="lang-bar" aria-label="Language">
+  <button type="button" data-lang="ja" lang="ja">日本語</button>
+  <button type="button" data-lang="en" lang="en">English</button>
+  <button type="button" data-lang="zh" lang="zh">中文</button>
+  <button type="button" data-lang="ko" lang="ko">한국어</button>
+  <button type="button" data-lang="es" lang="es">Español</button>
+  <button type="button" data-lang="fr" lang="fr">Français</button>
+</nav>
+</header>
+
+<main>
+  <h1 data-i18n="h1">特定商取引法に基づく表記</h1>
+  <p class="updated" data-i18n="updated">制定日：2026年7月10日</p>
+  <p class="lang-note" data-i18n="langNote"></p>
+  <table>
+    <tr><th data-i18n="r0_h">販売事業者</th><td data-i18n-html="r0_d">MyMedipro株式会社</td></tr>
+    <tr><th data-i18n="r1_h">代表者</th><td data-i18n-html="r1_d">代表取締役　鈴木 吉彦</td></tr>
+    <tr><th data-i18n="r2_h">所在地</th><td data-i18n-html="r2_d">〒102-0082<br>東京都千代田区一番町5番地3　アトラスビル1階</td></tr>
+    <tr><th data-i18n="r3_h">電話番号</th><td data-i18n-html="r3_d">03-3234-8908<br><small>受付時間：平日10:00〜17:00（土日祝を除く）<br>※お問い合わせは原則として下記メールアドレスにて承ります。</small></td></tr>
+    <tr><th data-i18n="r4_h">メールアドレス</th><td data-i18n-html="r4_d">tc@mymedipro.com</td></tr>
+    <tr><th data-i18n="r5_h">販売URL</th><td data-i18n-html="r5_d">https://catacelo.com</td></tr>
+    <tr><th data-i18n="r6_h">販売価格</th><td data-i18n-html="r6_d">・コイン 50枚パック：1,000円（税込）（1コイン＝20円相当）<br>・コインの使い道：逆転の一手 1回の発動につき3コイン／ヒント 1回につき1コイン</td></tr>
+    <tr><th data-i18n="r7_h">商品代金以外に必要な料金</th><td data-i18n-html="r7_d">インターネット接続に係る通信料等はお客様のご負担となります。</td></tr>
+    <tr><th data-i18n="r8_h">お支払い方法</th><td data-i18n-html="r8_d">クレジットカード決済（Stripe社の決済システムを利用）<br><small>※カード情報は決済代行事業者によりトークン化して処理され、当社サーバーには保存されません。</small></td></tr>
+    <tr><th data-i18n="r9_h">お支払い時期</th><td data-i18n-html="r9_d">コインの購入手続の完了時に即時決済されます。逆転の一手・ヒントの対価はコイン残高から消費され、カードに都度請求されることはありません。</td></tr>
+    <tr><th data-i18n="r10_h">商品の提供時期</th><td data-i18n-html="r10_d">決済完了後、直ちにコイン残高に反映され、ご利用いただけます。</td></tr>
+    <tr><th data-i18n="r11_h">返品・キャンセルについて</th><td data-i18n-html="r11_d">デジタルコンテンツという商品の性質上、購入手続完了後の返品・キャンセル・返金はお受けできません。ただし、当社の責めに帰すべき事由によりサービスが提供されなかった場合はこの限りではありません。</td></tr>
+    <tr><th data-i18n="r12_h">コインの有効期限</th><td data-i18n-html="r12_d">購入日から150日間。有効期限を経過したコインは失効し、払戻しはいたしません。</td></tr>
+    <tr><th data-i18n="r13_h">逆転の一手の有効範囲</th><td data-i18n-html="r13_d">発動した対局中のみ有効（1回の発動につき最大3回まで使用可能）。対局の終了・リセットにより未使用分は失効します。</td></tr>
+    <tr><th data-i18n="r14_h">動作環境</th><td data-i18n-html="r14_d">最新版のGoogle Chrome、Safari、Microsoft Edge、Firefoxを推奨します。</td></tr>
+  </table>
+  <div class="note" data-i18n="note">本表記に関するお問い合わせは、上記メールアドレスまでお願いいたします。</div>
+  <p class="back-wrap"><a class="back-btn" href="index.html" data-i18n="back">◀ トップページへ戻る</a></p>
+</main>
+
+<footer class="site-footer">
+  <nav>
+    <a href="terms.html" data-i18n="navTerms">利用規約</a>
+    <a href="privacy.html" data-i18n="navPrivacy">プライバシーポリシー</a>
+    <a href="tokushoho.html" data-i18n="navTokushoho">特定商取引法に基づく表記</a>
+  </nav>
+  <p data-i18n="copy">&copy; 2026 MyMedipro株式会社</p>
+</footer>
+
+<script>
+const I18N = {
+ "ja": {
+  "docTitle": "特定商取引法に基づく表記 | Catacelo",
+  "company": "MyMedipro株式会社",
+  "rep": "代表取締役　鈴木 吉彦",
+  "addr": "〒102-0082 東京都千代田区一番町5番地3　アトラスビル1階",
+  "navTerms": "利用規約",
+  "navPrivacy": "プライバシーポリシー",
+  "navTokushoho": "特定商取引法に基づく表記",
+  "back": "◀ トップページへ戻る",
+  "copy": "© 2026 MyMedipro株式会社",
+  "updated": "制定日：2026年7月10日",
+  "langNote": "",
+  "h1": "特定商取引法に基づく表記",
+  "note": "本表記に関するお問い合わせは、上記メールアドレスまでお願いいたします。",
+  "r0_h": "販売事業者",
+  "r0_d": "MyMedipro株式会社",
+  "r1_h": "代表者",
+  "r1_d": "代表取締役　鈴木 吉彦",
+  "r2_h": "所在地",
+  "r2_d": "〒102-0082<br>東京都千代田区一番町5番地3　アトラスビル1階",
+  "r3_h": "電話番号",
+  "r3_d": "03-3234-8908<br><small>受付時間：平日10:00〜17:00（土日祝を除く）<br>※お問い合わせは原則として下記メールアドレスにて承ります。</small>",
+  "r4_h": "メールアドレス",
+  "r4_d": "tc@mymedipro.com",
+  "r5_h": "販売URL",
+  "r5_d": "https://catacelo.com",
+  "r6_h": "販売価格",
+  "r6_d": "・コイン 50枚パック：1,000円（税込）（1コイン＝20円相当）<br>・コインの使い道：逆転の一手 1回の発動につき3コイン／ヒント 1回につき1コイン",
+  "r7_h": "商品代金以外に必要な料金",
+  "r7_d": "インターネット接続に係る通信料等はお客様のご負担となります。",
+  "r8_h": "お支払い方法",
+  "r8_d": "クレジットカード決済（Stripe社の決済システムを利用）<br><small>※カード情報は決済代行事業者によりトークン化して処理され、当社サーバーには保存されません。</small>",
+  "r9_h": "お支払い時期",
+  "r9_d": "コインの購入手続の完了時に即時決済されます。逆転の一手・ヒントの対価はコイン残高から消費され、カードに都度請求されることはありません。",
+  "r10_h": "商品の提供時期",
+  "r10_d": "決済完了後、直ちにコイン残高に反映され、ご利用いただけます。",
+  "r11_h": "返品・キャンセルについて",
+  "r11_d": "デジタルコンテンツという商品の性質上、購入手続完了後の返品・キャンセル・返金はお受けできません。ただし、当社の責めに帰すべき事由によりサービスが提供されなかった場合はこの限りではありません。",
+  "r12_h": "コインの有効期限",
+  "r12_d": "購入日から150日間。有効期限を経過したコインは失効し、払戻しはいたしません。",
+  "r13_h": "逆転の一手の有効範囲",
+  "r13_d": "発動した対局中のみ有効（1回の発動につき最大3回まで使用可能）。対局の終了・リセットにより未使用分は失効します。",
+  "r14_h": "動作環境",
+  "r14_d": "最新版のGoogle Chrome、Safari、Microsoft Edge、Firefoxを推奨します。"
+ },
+ "en": {
+  "docTitle": "Commercial Transactions Act Notice | Catacelo",
+  "company": "MyMedipro Inc.",
+  "rep": "Representative Director: Yoshihiko Suzuki",
+  "addr": "Atlas Bldg. 1F, 5-3 Ichibancho, Chiyoda-ku, Tokyo 102-0082, Japan",
+  "navTerms": "Terms of Service",
+  "navPrivacy": "Privacy Policy",
+  "navTokushoho": "Commercial Transactions Act Notice",
+  "back": "◀ Back to top page",
+  "copy": "© 2026 MyMedipro Inc.",
+  "updated": "Established: July 10, 2026",
+  "langNote": "The Japanese version of this document is the authoritative text. Translations are provided for reference only; in case of any discrepancy, the Japanese version prevails.",
+  "h1": "Notice under the Act on Specified Commercial Transactions",
+  "note": "Please direct any inquiries about this notice to the e-mail address above.",
+  "r0_h": "Seller",
+  "r0_d": "MyMedipro Inc.",
+  "r1_h": "Representative",
+  "r1_d": "Representative Director: Yoshihiko Suzuki",
+  "r2_h": "Address",
+  "r2_d": "Atlas Bldg. 1F, 5-3 Ichibancho,<br>Chiyoda-ku, Tokyo 102-0082, Japan",
+  "r3_h": "Telephone",
+  "r3_d": "+81-3-3234-8908<br><small>Hours: weekdays 10:00–17:00 JST (excluding weekends and holidays)<br>Inquiries are, as a rule, accepted at the e-mail address below.</small>",
+  "r4_h": "E-mail",
+  "r4_d": "tc@mymedipro.com",
+  "r5_h": "Sales URL",
+  "r5_d": "https://catacelo.com",
+  "r6_h": "Prices",
+  "r6_d": "• 50-Coin pack: 1,000 yen (tax included) (1 Coin = 20 yen equivalent)<br>• Use of Coins: Comeback Move — 3 Coins per activation / Hint — 1 Coin per use",
+  "r7_h": "Charges other than the price",
+  "r7_d": "Telecommunication charges for Internet access are borne by the customer.",
+  "r8_h": "Payment method",
+  "r8_d": "Credit card (via Stripe’s payment system)<br><small>Card information is tokenized and processed by the payment processor and is not stored on our servers.</small>",
+  "r9_h": "Payment timing",
+  "r9_d": "Charged immediately upon completion of the Coin purchase procedure. The price of Comeback Moves and Hints is deducted from the Coin balance; your card is not charged each time.",
+  "r10_h": "Delivery timing",
+  "r10_d": "Reflected in your Coin balance and available for use immediately after payment is completed.",
+  "r11_h": "Returns and cancellations",
+  "r11_d": "Owing to the nature of digital content, returns, cancellations and refunds are not accepted after the purchase procedure is completed, except where the service was not provided for reasons attributable to the Company.",
+  "r12_h": "Expiry of Coins",
+  "r12_d": "150 days from the date of purchase. Expired Coins are forfeited and are not refunded.",
+  "r13_h": "Validity of Comeback Moves",
+  "r13_d": "Valid only during the game in which activated (each activation may be used up to 3 times). Unused uses are forfeited when the game ends or is reset.",
+  "r14_h": "System requirements",
+  "r14_d": "The latest versions of Google Chrome, Safari, Microsoft Edge or Firefox are recommended."
+ },
+ "zh": {
+  "docTitle": "特定商业交易法标示 | Catacelo",
+  "company": "MyMedipro株式会社",
+  "rep": "代表取缔役　铃木 吉彦",
+  "addr": "〒102-0082 日本东京都千代田区一番町5番地3　Atlas大楼1层",
+  "navTerms": "使用条款",
+  "navPrivacy": "隐私政策",
+  "navTokushoho": "特定商业交易法标示",
+  "back": "◀ 返回首页",
+  "copy": "© 2026 MyMedipro株式会社",
+  "updated": "制定日：2026年7月10日",
+  "langNote": "本文件以日文版为正式文本。译文仅供参考，如有歧义，以日文版为准。",
+  "h1": "基于特定商业交易法的标示",
+  "note": "有关本标示的咨询，请发送至上述电子邮件地址。",
+  "r0_h": "销售经营者",
+  "r0_d": "MyMedipro株式会社",
+  "r1_h": "代表者",
+  "r1_d": "代表取缔役　铃木 吉彦",
+  "r2_h": "所在地",
+  "r2_d": "〒102-0082<br>日本东京都千代田区一番町5番地3　Atlas大楼1层",
+  "r3_h": "电话号码",
+  "r3_d": "+81-3-3234-8908<br><small>受理时间：工作日10:00〜17:00（日本时间，周六日及节假日除外）<br>※咨询原则上通过下列电子邮件受理。</small>",
+  "r4_h": "电子邮件",
+  "r4_d": "tc@mymedipro.com",
+  "r5_h": "销售网址",
+  "r5_d": "https://catacelo.com",
+  "r6_h": "销售价格",
+  "r6_d": "・50金币礼包：1,000日元（含税）（1金币＝20日元）<br>・金币用途：逆转一手 每次发动3金币／提示 每次1金币",
+  "r7_h": "商品价格以外的费用",
+  "r7_d": "互联网连接的通信费等由客户承担。",
+  "r8_h": "支付方式",
+  "r8_d": "信用卡支付（使用Stripe支付系统）<br><small>※卡信息由支付代理商令牌化处理，不保存于本公司服务器。</small>",
+  "r9_h": "支付时间",
+  "r9_d": "金币购买手续完成时即时结算。逆转一手·提示的对价从金币余额中扣除，不会每次向信用卡收费。",
+  "r10_h": "商品提供时间",
+  "r10_d": "付款完成后立即计入金币余额，可即时使用。",
+  "r11_h": "退货·取消",
+  "r11_d": "鉴于数字内容的商品性质，购买手续完成后不接受退货、取消或退款。但因本公司应负责的事由未能提供服务的情形除外。",
+  "r12_h": "金币有效期",
+  "r12_d": "自购买日起150天。超过有效期的金币失效，不予退款。",
+  "r13_h": "逆转一手的有效范围",
+  "r13_d": "仅在发动的该局对局中有效（每次发动最多可使用3次）。对局结束或重置后未使用部分失效。",
+  "r14_h": "运行环境",
+  "r14_d": "推荐使用最新版Google Chrome、Safari、Microsoft Edge、Firefox。"
+ },
+ "ko": {
+  "docTitle": "특정상거래법에 따른 표기 | Catacelo",
+  "company": "MyMedipro Inc.",
+  "rep": "대표이사 스즈키 요시히코",
+  "addr": "〒102-0082 일본 도쿄도 지요다구 이치반초 5-3 아틀라스빌딩 1층",
+  "navTerms": "이용약관",
+  "navPrivacy": "개인정보 처리방침",
+  "navTokushoho": "특정상거래법에 따른 표기",
+  "back": "◀ 첫 페이지로 돌아가기",
+  "copy": "© 2026 MyMedipro Inc.",
+  "updated": "제정일: 2026년 7월 10일",
+  "langNote": "이 문서의 정본은 일본어판입니다. 번역본은 참고용이며, 해석에 차이가 있을 경우 일본어판이 우선합니다.",
+  "h1": "특정상거래법에 따른 표기",
+  "note": "본 표기에 관한 문의는 위 이메일 주소로 부탁드립니다.",
+  "r0_h": "판매사업자",
+  "r0_d": "MyMedipro Inc.",
+  "r1_h": "대표자",
+  "r1_d": "대표이사 스즈키 요시히코",
+  "r2_h": "소재지",
+  "r2_d": "〒102-0082<br>일본 도쿄도 지요다구 이치반초 5-3 아틀라스빌딩 1층",
+  "r3_h": "전화번호",
+  "r3_d": "+81-3-3234-8908<br><small>접수 시간: 평일 10:00〜17:00(일본 시간, 토·일·공휴일 제외)<br>※ 문의는 원칙적으로 아래 이메일로 접수합니다.</small>",
+  "r4_h": "이메일",
+  "r4_d": "tc@mymedipro.com",
+  "r5_h": "판매 URL",
+  "r5_d": "https://catacelo.com",
+  "r6_h": "판매 가격",
+  "r6_d": "・코인 50개 팩: 1,000엔(세금 포함) (1코인＝20엔 상당)<br>・코인 사용처: 역전의 한 수 1회 발동당 3코인 / 힌트 1회당 1코인",
+  "r7_h": "상품 대금 이외의 필요 요금",
+  "r7_d": "인터넷 접속에 따른 통신료 등은 고객 부담입니다.",
+  "r8_h": "결제 방법",
+  "r8_d": "신용카드 결제(Stripe 결제 시스템 이용)<br><small>※ 카드 정보는 결제대행사가 토큰화하여 처리하며 당사 서버에 저장되지 않습니다.</small>",
+  "r9_h": "결제 시기",
+  "r9_d": "코인 구매 절차 완료 시 즉시 결제됩니다. 역전의 한 수·힌트의 대가는 코인 잔액에서 소비되며 카드에 매번 청구되지 않습니다.",
+  "r10_h": "상품 제공 시기",
+  "r10_d": "결제 완료 후 즉시 코인 잔액에 반영되어 이용할 수 있습니다.",
+  "r11_h": "반품·취소",
+  "r11_d": "디지털 콘텐츠 상품의 특성상 구매 절차 완료 후 반품·취소·환불은 불가합니다. 다만 당사의 귀책사유로 서비스가 제공되지 않은 경우에는 그러하지 않습니다.",
+  "r12_h": "코인 유효기간",
+  "r12_d": "구매일로부터 150일. 유효기간이 지난 코인은 소멸하며 환불되지 않습니다.",
+  "r13_h": "역전의 한 수의 유효 범위",
+  "r13_d": "발동한 대국 중에만 유효(1회 발동당 최대 3회 사용 가능). 대국 종료·리셋 시 미사용분은 소멸합니다.",
+  "r14_h": "동작 환경",
+  "r14_d": "최신 버전의 Google Chrome, Safari, Microsoft Edge, Firefox를 권장합니다."
+ },
+ "es": {
+  "docTitle": "Aviso legal (Ley de Transacciones Comerciales Específicas) | Catacelo",
+  "company": "MyMedipro Inc.",
+  "rep": "Director representante: Yoshihiko Suzuki",
+  "addr": "Atlas Bldg. 1F, 5-3 Ichibancho, Chiyoda-ku, Tokio 102-0082, Japón",
+  "navTerms": "Términos de uso",
+  "navPrivacy": "Política de privacidad",
+  "navTokushoho": "Aviso conforme a la Ley de Transacciones Comerciales Específicas",
+  "back": "◀ Volver a la página principal",
+  "copy": "© 2026 MyMedipro Inc.",
+  "updated": "Establecido: 10 de julio de 2026",
+  "langNote": "La versión japonesa de este documento es el texto auténtico. Las traducciones se ofrecen solo a título informativo; en caso de discrepancia prevalece la versión japonesa.",
+  "h1": "Aviso conforme a la Ley de Transacciones Comerciales Específicas",
+  "note": "Dirija cualquier consulta sobre este aviso a la dirección de correo electrónico indicada arriba.",
+  "r0_h": "Vendedor",
+  "r0_d": "MyMedipro Inc.",
+  "r1_h": "Representante",
+  "r1_d": "Director representante: Yoshihiko Suzuki",
+  "r2_h": "Domicilio",
+  "r2_d": "Atlas Bldg. 1F, 5-3 Ichibancho,<br>Chiyoda-ku, Tokio 102-0082, Japón",
+  "r3_h": "Teléfono",
+  "r3_d": "+81-3-3234-8908<br><small>Horario: días laborables de 10:00 a 17:00 (hora de Japón, excepto fines de semana y festivos)<br>Las consultas se atienden, por regla general, en la dirección de correo electrónico indicada abajo.</small>",
+  "r4_h": "Correo electrónico",
+  "r4_d": "tc@mymedipro.com",
+  "r5_h": "URL de venta",
+  "r5_d": "https://catacelo.com",
+  "r6_h": "Precios",
+  "r6_d": "• Pack de 50 monedas: 1.000 yenes (impuestos incluidos) (1 moneda = 20 yenes)<br>• Uso de las monedas: Jugada de remontada, 3 monedas por activación / Pista, 1 moneda por uso",
+  "r7_h": "Gastos adicionales al precio",
+  "r7_d": "Los gastos de telecomunicación derivados de la conexión a Internet corren a cargo del cliente.",
+  "r8_h": "Forma de pago",
+  "r8_d": "Tarjeta de crédito (mediante el sistema de pago de Stripe)<br><small>Los datos de la tarjeta son tokenizados y procesados por el proveedor de pagos y no se almacenan en nuestros servidores.</small>",
+  "r9_h": "Momento del pago",
+  "r9_d": "Se cobra de inmediato al completar el procedimiento de compra de monedas. El precio de las jugadas de remontada y las pistas se descuenta del saldo de monedas; no se realizan cargos individuales a la tarjeta.",
+  "r10_h": "Momento de la entrega",
+  "r10_d": "Se refleja en el saldo de monedas y puede usarse inmediatamente después de completar el pago.",
+  "r11_h": "Devoluciones y cancelaciones",
+  "r11_d": "Dada la naturaleza del contenido digital, no se aceptan devoluciones, cancelaciones ni reembolsos una vez completado el procedimiento de compra, salvo que el servicio no se haya prestado por causas imputables a la Empresa.",
+  "r12_h": "Caducidad de las monedas",
+  "r12_d": "150 días desde la fecha de compra. Las monedas caducadas se pierden y no se reembolsan.",
+  "r13_h": "Validez de la jugada de remontada",
+  "r13_d": "Válida solo durante la partida en la que se activó (cada activación puede usarse hasta 3 veces). Los usos no consumidos se pierden al finalizar o reiniciar la partida.",
+  "r14_h": "Requisitos del sistema",
+  "r14_d": "Se recomiendan las últimas versiones de Google Chrome, Safari, Microsoft Edge o Firefox."
+ },
+ "fr": {
+  "docTitle": "Mentions légales (loi sur les transactions commerciales) | Catacelo",
+  "company": "MyMedipro Inc.",
+  "rep": "Directeur représentant : Yoshihiko Suzuki",
+  "addr": "Atlas Bldg. 1F, 5-3 Ichibancho, Chiyoda-ku, Tokyo 102-0082, Japon",
+  "navTerms": "Conditions d’utilisation",
+  "navPrivacy": "Politique de confidentialité",
+  "navTokushoho": "Mentions légales (loi sur les transactions commerciales)",
+  "back": "◀ Retour à la page d’accueil",
+  "copy": "© 2026 MyMedipro Inc.",
+  "updated": "Établi le : 10 juillet 2026",
+  "langNote": "La version japonaise de ce document fait foi. Les traductions sont fournies à titre indicatif ; en cas de divergence, la version japonaise prévaut.",
+  "h1": "Mentions légales au titre de la loi sur les transactions commerciales spécifiées",
+  "note": "Pour toute question relative aux présentes mentions, veuillez écrire à l’adresse e-mail ci-dessus.",
+  "r0_h": "Vendeur",
+  "r0_d": "MyMedipro Inc.",
+  "r1_h": "Représentant",
+  "r1_d": "Directeur représentant : Yoshihiko Suzuki",
+  "r2_h": "Adresse",
+  "r2_d": "Atlas Bldg. 1F, 5-3 Ichibancho,<br>Chiyoda-ku, Tokyo 102-0082, Japon",
+  "r3_h": "Téléphone",
+  "r3_d": "+81-3-3234-8908<br><small>Horaires : jours ouvrés de 10 h à 17 h (heure du Japon, hors week-ends et jours fériés)<br>Les demandes sont, en principe, traitées à l’adresse e-mail ci-dessous.</small>",
+  "r4_h": "E-mail",
+  "r4_d": "tc@mymedipro.com",
+  "r5_h": "URL de vente",
+  "r5_d": "https://catacelo.com",
+  "r6_h": "Prix",
+  "r6_d": "• Pack de 50 pièces : 1 000 yens (TTC) (1 pièce = 20 yens)<br>• Utilisation des pièces : Coup de la remontée, 3 pièces par activation / Indice, 1 pièce par utilisation",
+  "r7_h": "Frais autres que le prix",
+  "r7_d": "Les frais de télécommunication liés à la connexion Internet sont à la charge du client.",
+  "r8_h": "Mode de paiement",
+  "r8_d": "Carte bancaire (via le système de paiement Stripe)<br><small>Les données de carte sont tokenisées et traitées par le prestataire de paiement et ne sont pas stockées sur nos serveurs.</small>",
+  "r9_h": "Moment du paiement",
+  "r9_d": "Débité immédiatement à l’issue de la procédure d’achat de pièces. Le prix des coups de la remontée et des indices est prélevé sur le solde de pièces ; la carte n’est pas débitée à chaque utilisation.",
+  "r10_h": "Moment de la fourniture",
+  "r10_d": "Crédité sur le solde de pièces et utilisable immédiatement après la validation du paiement.",
+  "r11_h": "Retours et annulations",
+  "r11_d": "En raison de la nature des contenus numériques, aucun retour, annulation ou remboursement n’est accepté après la finalisation de l’achat, sauf si le service n’a pas été fourni pour des raisons imputables à la Société.",
+  "r12_h": "Validité des pièces",
+  "r12_d": "150 jours à compter de la date d’achat. Les pièces expirées sont perdues et ne sont pas remboursées.",
+  "r13_h": "Validité du coup de la remontée",
+  "r13_d": "Valable uniquement pendant la partie au cours de laquelle il a été activé (chaque activation peut être utilisée jusqu’à 3 fois). Les utilisations restantes sont perdues à la fin ou à la réinitialisation de la partie.",
+  "r14_h": "Configuration requise",
+  "r14_d": "Les dernières versions de Google Chrome, Safari, Microsoft Edge ou Firefox sont recommandées."
+ }
+};
+
+"use strict";
+/* =========================================================
+   言語判定（index.html と同じ仕組み）
+   1. 利用者が選んだ言語（保存済み／URL の ?lang=）
+   2. ブラウザの表示言語（6言語のいずれかなら採用）
+   3. アクセス元の国（Cloudflare の /geo → 取得できなければタイムゾーンから推定）
+   ========================================================= */
+const CATACELO_LANG_KEY = 'catacelo_lang';
+const CATACELO_LANGS = ['ja','en','zh','ko','es','fr'];
+const GEO_PRIORITY = 'browser';
+const GEO_ENDPOINT = '/geo';
+const COUNTRY_LANG = {
+  ja: ['JP'],
+  zh: ['CN','TW','HK','MO'],
+  ko: ['KR','KP'],
+  es: ['ES','MX','AR','CO','CL','PE','VE','EC','GT','CU','BO','DO','HN','PY','SV','NI','CR','PA','UY','PR','GQ'],
+  fr: ['FR','BE','MC','LU','SN','CI','CM','ML','BF','NE','TG','BJ','GA','CG','CD','MG','TN','DZ','MA','HT','GN','TD','CF','DJ','KM','BI','RW','SC','MU','NC','PF','RE','GP','MQ','GF'],
+  en: ['US','GB','AU','CA','NZ','IE','SG','IN','PH','ZA','NG','KE','GH','MY','PK','JM','TT','BS','BB','FJ','PG','MT','GI','BM','KY','VG','UG','TZ','ZM','ZW','BW','LR','SL','GM']
+};
+const TZ_LANG = [
+  [/^Asia\/(Tokyo)$/, 'ja'],
+  [/^Asia\/(Shanghai|Chongqing|Chungking|Harbin|Urumqi|Kashgar|Taipei|Hong_Kong|Macau|Macao)$/, 'zh'],
+  [/^Asia\/(Seoul|Pyongyang)$/, 'ko'],
+  [/^(Europe\/(Madrid|Ceuta)|Atlantic\/Canary|America\/(Mexico_City|Cancun|Merida|Monterrey|Matamoros|Chihuahua|Ojinaga|Hermosillo|Mazatlan|Bahia_Banderas|Tijuana|Argentina\/.*|Buenos_Aires|Cordoba|Bogota|Santiago|Punta_Arenas|Lima|Caracas|Guayaquil|Guatemala|Havana|La_Paz|Santo_Domingo|Tegucigalpa|Asuncion|El_Salvador|Managua|Costa_Rica|Panama|Montevideo|Puerto_Rico)|Pacific\/(Galapagos|Easter)|Africa\/Malabo)$/, 'es'],
+  [/^(Europe\/(Paris|Brussels|Monaco|Luxembourg)|Africa\/(Dakar|Abidjan|Douala|Bamako|Ouagadougou|Niamey|Lome|Porto-Novo|Libreville|Brazzaville|Kinshasa|Lubumbashi|Tunis|Algiers|Casablanca|Conakry|Ndjamena|Bangui|Djibouti|Bujumbura|Kigali)|Indian\/(Antananarivo|Comoro|Mahe|Mauritius|Reunion)|America\/(Port-au-Prince|Martinique|Guadeloupe|Cayenne)|Pacific\/(Noumea|Tahiti|Marquesas|Gambier))$/, 'fr'],
+  [/^(America\/(New_York|Detroit|Kentucky\/.*|Indiana\/.*|Chicago|Menominee|North_Dakota\/.*|Denver|Boise|Phoenix|Los_Angeles|Anchorage|Juneau|Sitka|Metlakatla|Yakutat|Nome|Adak|Toronto|Vancouver|Edmonton|Winnipeg|Halifax|St_Johns|Regina|Montreal|Jamaica|Port_of_Spain|Nassau|Barbados|Cayman|Tortola|Bermuda)|Pacific\/(Honolulu|Auckland|Chatham|Fiji|Port_Moresby|Guam)|Europe\/(London|Dublin|Belfast|Malta|Gibraltar|Isle_of_Man|Jersey|Guernsey)|Australia\/.*|Asia\/(Singapore|Kolkata|Calcutta|Manila|Kuala_Lumpur|Karachi)|Africa\/(Johannesburg|Lagos|Nairobi|Accra|Kampala|Dar_es_Salaam|Lusaka|Harare|Gaborone|Monrovia|Freetown|Banjul))$/, 'en']
+];
+function langFromCountry(cc){
+  cc = (cc || '').toUpperCase();
+  if (!cc || cc === 'XX' || cc === 'T1') return null;
+  for (const l in COUNTRY_LANG) if (COUNTRY_LANG[l].indexOf(cc) >= 0) return l;
+  return 'en';
+}
+function langFromTimeZone(){
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    for (const [re, l] of TZ_LANG) if (re.test(tz)) return l;
+    if (tz && !/^(Etc\/|UTC|GMT)/.test(tz)) return 'en';
+  } catch(e){}
+  return null;
+}
+function langFromBrowser(){
+  const list = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language || ''];
+  for (const raw of list){
+    const n = String(raw).toLowerCase();
+    for (const l of CATACELO_LANGS) if (n.startsWith(l)) return l;
+  }
+  return null;
+}
+function catSharedLang(){
+  try { const u = new URLSearchParams(location.search).get('lang'); if (u && CATACELO_LANGS.indexOf(u) >= 0) return u; } catch(e){}
+  try { const s = localStorage.getItem(CATACELO_LANG_KEY); if (s && CATACELO_LANGS.indexOf(s) >= 0) return s; } catch(e){}
+  return null;
+}
+function catDecorateLinks(l){
+  document.querySelectorAll('a[href]').forEach(a => {
+    const h = a.getAttribute('href');
+    if (!h || !/^(index|catacelo[\w-]*|terms|privacy|tokushoho)\.html(\?.*)?$/.test(h)) return;
+    a.setAttribute('href', h.split('?')[0] + '?lang=' + l);
+  });
+}
+function applyLang(l, userChosen){
+  if (!I18N[l]) l = 'ja';
+  const d = I18N[l];
+  document.documentElement.lang = l;
+  document.querySelectorAll('[data-i18n]').forEach(el => { const k = el.getAttribute('data-i18n'); if (d[k] != null) el.textContent = d[k]; });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => { const k = el.getAttribute('data-i18n-html'); if (d[k] != null) el.innerHTML = d[k]; });  /* 辞書内の <br>/<small> のみ */
+  document.title = d.docTitle;
+  document.querySelectorAll('.lang-bar button').forEach(b => {
+    const on = b.getAttribute('data-lang') === l;
+    b.classList.toggle('active', on); b.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+  if (userChosen) { try { localStorage.setItem(CATACELO_LANG_KEY, l); } catch(e){} }
+  catDecorateLinks(l);
+}
+function detectLang(){
+  const shared = catSharedLang(); if (shared) return shared;
+  const b = langFromBrowser(), c = langFromTimeZone();
+  if (GEO_PRIORITY === 'country') return c || b || 'ja';
+  return b || c || 'ja';
+}
+function refineLangByCountry(){
+  if (catSharedLang()) return;
+  if (GEO_PRIORITY === 'browser' && langFromBrowser()) return;
+  if (!window.fetch || !window.AbortController) return;
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 1500);
+  fetch(GEO_ENDPOINT, { signal: ctrl.signal, cache: 'no-store' })
+    .then(r => r.ok ? r.json() : null)
+    .then(j => { const l = j && langFromCountry(j.country); if (l && l !== document.documentElement.lang) applyLang(l); })
+    .catch(() => {})
+    .finally(() => clearTimeout(timer));
+}
+document.querySelectorAll('.lang-bar button').forEach(b => {
+  b.addEventListener('click', () => applyLang(b.getAttribute('data-lang'), true));
+});
+const autoDetected = !catSharedLang();
+applyLang(detectLang());
+if (autoDetected) refineLangByCountry();
+</script>
+
+<script src="static-site-seo.js"></script>
+</body>
+</html>

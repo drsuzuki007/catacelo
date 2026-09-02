@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Catacelo Battle</title>
+<meta name="description" content="Catacelo Battle — 駒を動かすリモート対戦">
+</head>
+<body class="catacelo-battle-body">
+<div id="root"></div>
+<script>
+  (function () {
+    var supported = ["ja", "en", "zh", "ko", "es", "fr"];
+    function parseLanguage(value) { var language = String(value || "").toLowerCase().split("-")[0]; return supported.indexOf(language) >= 0 ? language : null; }
+    var query = parseLanguage(new URLSearchParams(location.search).get("lang"));
+    var saved = null;
+    try { saved = parseLanguage(localStorage.getItem("catacelo_lang")); } catch (_) {}
+    var choices = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language];
+    var browser = null;
+    for (var i = 0; i < choices.length && !browser; i += 1) browser = parseLanguage(choices[i]);
+    window.__CATACELO_INITIAL_LANGUAGE__ = query || saved || browser || "ja";
+    window.__CATACELO_INITIAL_LANGUAGE_REASON__ = query ? "url" : saved ? "saved" : browser ? "browser" : "default";
+    document.documentElement.lang = window.__CATACELO_INITIAL_LANGUAGE__;
+  }());
+</script>
+<script type="module" src="/src/battle-main.tsx"></script>
+
+</body>
+</html>

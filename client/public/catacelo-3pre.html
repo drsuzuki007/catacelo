@@ -1,0 +1,2503 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Catacelo｜3手先を読むAIとの対戦（上級）</title>
+<style>
+  body {
+    font-family: 'Segoe UI', 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
+    display: flex; flex-direction: column; align-items: center;
+    background-color: #f5f5f5; margin: 0; padding: 20px;
+  }
+  h1 { color: #333; margin: 10px 0 6px; }
+  .banner {
+    width: 90%; max-width: 640px; background: #eee; border: 1px dashed #bbb;
+    color: #888; text-align: center; padding: 14px 0; margin-bottom: 12px; font-size: 14px;
+  }
+  .game-info { margin-bottom: 12px; text-align: center; width: 92%; max-width: 640px; color:#444; font-size: 14px; }
+  #status { font-size: 17px; font-weight: bold; color: #222; margin: 4px 0; min-height: 24px; }
+  #modeLabel { font-size: 14px; color: #555; margin-bottom: 8px; }
+  #thinking { display: none; font-size: 14px; color: #b35900; margin: 4px 0; }
+  #deepMsg { display: none; font-size: 13px; color: #b35900; }
+  #aiInfo { font-size: 12px; color: #777; margin-top: 4px; min-height: 16px; }
+  #advantagePanel {
+    width: 92%; max-width: 640px; margin: 8px 0 2px;
+    background: #fff; border: 1px solid #d6d6d6; border-radius: 8px;
+    padding: 10px 12px; box-shadow: 0 1px 3px rgba(0,0,0,.12);
+    color: #333; font-size: 13px;
+  }
+  .advantageTop {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    font-weight: bold; margin-bottom: 7px;
+  }
+  #advantageLabel.blackAdv { color: #111; }
+  #advantageLabel.whiteAdv { color: #1565c0; }
+  #advantageLabel.evenAdv { color: #2e7d32; }
+  .advantageMeter {
+    height: 10px; background: linear-gradient(90deg, #f8f8f8, #ddd 50%, #222);
+    border-radius: 999px; position: relative; overflow: hidden; border: 1px solid #bbb;
+  }
+  #advantageMarker {
+    width: 4px; height: 14px; background: #e65100; position: absolute; top: -3px;
+    left: calc(50% - 2px); border-radius: 2px; transition: left .25s ease;
+  }
+  #advantageReason { margin-top: 6px; color: #666; line-height: 1.45; }
+
+  /* ===== 逆転の一手／収益バー（未登録者のみ表示） ===== */
+  #revenueBar {
+    width: 92%; max-width: 640px; background: #fff7ec; border: 1px solid #f0c98c;
+    border-radius: 10px; padding: 10px 14px; margin-bottom: 10px;
+    font-size: 13px; color: #7a4a00; line-height: 1.6;
+    display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px;
+  }
+  #revenueBar b { color: #b35900; }
+  #cardStatus { font-weight: bold; }
+  #cardStatus.ok { color: #2e7d32; }
+  #cardStatus.ng { color: #c62828; }
+
+  .board {
+    display: grid;
+    grid-template-columns: repeat(8, min(11vw, 60px));
+    grid-template-rows: repeat(8, min(11vw, 60px));
+    gap: 2px; background-color: #000;
+    border: 10px solid #5a3921; border-radius: 5px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.3);
+  }
+  .cell {
+    background-color: #1e8c3a; display: flex; justify-content: center; align-items: center;
+    cursor: pointer; position: relative;
+  }
+  .disc { width: 82%; height: 82%; border-radius: 50%; transition: all .25s ease; }
+  .white { background: radial-gradient(circle at 30% 30%, #fff, #ccc); box-shadow: 0 3px 5px rgba(0,0,0,.2); }
+  .black { background: radial-gradient(circle at 30% 30%, #444, #000); }
+  .black.last-ai { background: radial-gradient(circle at 30% 30%, #9a9a9a, #2e2e2e); box-shadow: 0 0 8px rgba(255,255,160,.9); }
+  .hint::after {
+    content: ""; width: 26%; height: 26%; border-radius: 50%;
+    background: rgba(255,255,255,.45); position: absolute;
+  }
+  /* 逆転の一手で自由配置できるマスのハイライト */
+  .bonusHint { box-shadow: inset 0 0 0 3px rgba(255,153,0,.9); }
+  .bonusHint::after {
+    content: ""; width: 26%; height: 26%; border-radius: 50%;
+    background: rgba(255,153,0,.55); position: absolute;
+  }
+  .selected { outline: 3px solid #ffd54a; outline-offset: -3px; }
+  .moveSrcMark { outline: 2px dashed rgba(255,255,160,.8); outline-offset: -2px; }
+
+  .controls {
+    display: flex; align-items: center; gap: 10px; margin: 14px 0 4px; flex-wrap: wrap; justify-content: center;
+  }
+  .scoreBox {
+    display: flex; align-items: center; gap: 6px; font-size: 18px; font-weight: bold;
+    background: #fff; border-radius: 8px; padding: 6px 12px; box-shadow: 0 1px 3px rgba(0,0,0,.15);
+  }
+  .miniDisc { width: 22px; height: 22px; border-radius: 50%; display: inline-block; }
+  .miniDisc.b { background: radial-gradient(circle at 30% 30%, #444, #000); }
+  .miniDisc.w { background: radial-gradient(circle at 30% 30%, #fff, #ccc); border: 1px solid #aaa; }
+  button {
+    font-size: 15px; padding: 8px 16px; border: none; border-radius: 8px;
+    cursor: pointer; background: #2e7d32; color: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.2);
+  }
+  button:hover { background: #388e3c; }
+  button.modeBtn.active { background: #1b5e20; box-shadow: inset 0 0 0 2px #ffd54a; }
+  button:disabled { background: #9e9e9e; cursor: default; }
+  #passBtn { background: #b35900; display: none; }
+  #resetBtn { background: #555; margin-top: 10px; }
+  #cardRegBtn { background: #1565c0; font-size: 13px; padding: 6px 12px; }
+  #cardRegBtn:hover { background: #1976d2; }
+
+  /* 逆転の一手・ヒント操作エリア */
+  #passBonusArea {
+    width: 92%; max-width: 640px; margin: 6px 0 0;
+    display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+  }
+  #passBonusUseBtn { background: #e65100; display: none; }
+  #passBonusUseBtn:hover { background: #ef6c00; }
+  #passBonusBuyBtn { background: #ad1457; display: none; }
+  #passBonusBuyBtn:hover { background: #c2185b; }
+
+  /* 購入確認パネル */
+  #purchasePanel {
+    display: none; width: 92%; max-width: 480px; margin: 8px 0 0;
+    background: #fff; border: 2px solid #ad1457; border-radius: 10px;
+    padding: 14px 18px; box-shadow: 0 2px 8px rgba(0,0,0,.15); text-align: center;
+  }
+  #purchasePanel h3 { margin: 0 0 8px; color: #ad1457; font-size: 16px; }
+  #purchasePanel p { margin: 6px 0; font-size: 14px; color: #333; }
+  #purchasePanel .price { font-size: 22px; font-weight: bold; color: #ad1457; }
+  #purchaseConfirmBtn { background: #ad1457; }
+  #purchaseConfirmBtn:hover { background: #c2185b; }
+  #purchaseCancelBtn { background: #888; }
+
+  /* カード登録モーダル */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45);
+    justify-content: center; align-items: center; z-index: 100;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: #fff; border-radius: 12px; padding: 22px 24px; width: 90%; max-width: 380px;
+    box-shadow: 0 6px 24px rgba(0,0,0,.3);
+  }
+  .modal h3 { margin: 0 0 4px; color: #1565c0; }
+  .modal .demo-note {
+    font-size: 12px; color: #c62828; background: #fdecea; border-radius: 6px;
+    padding: 8px 10px; margin: 8px 0 14px; line-height: 1.5;
+  }
+  .modal label { display: block; font-size: 13px; color: #444; margin: 10px 0 3px; }
+  .modal input {
+    width: 100%; box-sizing: border-box; padding: 8px 10px; font-size: 14px;
+    border: 1px solid #bbb; border-radius: 6px;
+  }
+  .modal .row { display: flex; gap: 10px; }
+  .modal .row > div { flex: 1; }
+  .modal .modal-actions { display: flex; gap: 10px; margin-top: 16px; }
+  #cardSaveBtn { background: #1565c0; flex: 1; }
+  #cardCancelBtn { background: #888; flex: 1; }
+  #cardError { color: #c62828; font-size: 13px; min-height: 18px; margin-top: 6px; }
+
+  /* ===== 言語切り替えバー ===== */
+  #langBar {
+    width: 92%; max-width: 640px; display: flex; flex-wrap: wrap; gap: 6px;
+    justify-content: center; align-items: center; margin-bottom: 10px;
+  }
+  #langBar .langLabel { font-size: 12px; color: #777; margin-right: 2px; }
+  #langBar button {
+    font-size: 13px; padding: 5px 10px; background: #fff; color: #444;
+    border: 1px solid #cfcfcf; border-radius: 999px; box-shadow: none;
+  }
+  #langBar button:hover { background: #f0f0f0; }
+  #langBar button.activeLang {
+    background: #1565c0; color: #fff; border-color: #1565c0; font-weight: bold;
+  }
+
+  /* ===== コイン残高バー ===== */
+  #creditBar {
+    width: 92%; max-width: 640px; background: #eef7ee; border: 1px solid #aed8ae;
+    border-radius: 10px; padding: 10px 14px; margin-bottom: 10px;
+    font-size: 13px; color: #1b5e20; line-height: 1.6;
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 14px;
+  }
+  #creditBar .creditMain { font-size: 14px; display: inline-flex; align-items: center; gap: 6px; }
+  #creditBar #creditBalance { font-size: 22px; font-weight: bold; color: #7a4a00; font-variant-numeric: tabular-nums; display:inline-block; }
+  #creditBar #creditBalance.bump { animation: coinBump .45s ease-out; }
+  #creditBar .coinWord { color: #7a4a00; font-size: 13px; }
+  #creditBar .creditActions { display: inline-flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  #registerBtn { background: #1565c0; font-size: 13px; padding: 6px 12px; }
+  #registerBtn:hover { background: #1976d2; }
+  #topupBtn { background: #c2570a; font-size: 13px; padding: 6px 12px; }
+  #topupBtn:hover { background: #d2630f; }
+  #streakBadge { font-size: 12px; color: #c62828; background: #ffebee; border-radius: 999px; padding: 2px 8px; font-weight: bold; }
+  #purchasePanel .payFromCredit { color: #7a4a00; font-weight: bold; }
+  #purchasePanel .payFromCard  { color: #555; }
+
+  /* ===== コイン表現 ===== */
+  .coinIcon {
+    display: inline-block; width: 22px; height: 22px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #fff3a3, #f7c53a 55%, #c98a05);
+    box-shadow: inset 0 0 0 2px #e6ad1a, 0 1px 2px rgba(0,0,0,.35);
+    position: relative; vertical-align: middle;
+  }
+  .coinIcon::after {
+    content: "C"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 900; color: #8a5a00; font-family: Georgia, serif;
+  }
+  @keyframes coinBump { 0%{transform:scale(1)} 40%{transform:scale(1.35);color:#e65100} 100%{transform:scale(1)} }
+  @keyframes coinSpin { from{transform:rotateY(0)} to{transform:rotateY(360deg)} }
+  .flyCoin {
+    position: fixed; width: 20px; height: 20px; border-radius: 50%; z-index: 9999; pointer-events: none;
+    background: radial-gradient(circle at 35% 30%, #fff3a3, #f7c53a 55%, #c98a05);
+    box-shadow: inset 0 0 0 2px #e6ad1a, 0 1px 3px rgba(0,0,0,.4);
+    animation: coinSpin .6s linear infinite;
+    transition: transform .75s cubic-bezier(.2,.7,.3,1), opacity .2s;
+  }
+
+  /* ===== トースト通知 ===== */
+  #toastArea { position: fixed; top: 14px; left: 50%; transform: translateX(-50%); z-index: 9000; display: flex; flex-direction: column; gap: 6px; pointer-events: none; }
+  .toast {
+    background: rgba(33,33,33,.92); color: #fff; padding: 9px 16px; border-radius: 999px; font-size: 14px;
+    box-shadow: 0 4px 14px rgba(0,0,0,.3); animation: toastIn .3s ease-out; white-space: nowrap; max-width: 92vw; overflow: hidden; text-overflow: ellipsis;
+  }
+  .toast.gold { background: linear-gradient(90deg, #b8860b, #e6a817); color: #fff; }
+  .toast.out { animation: toastOut .3s ease-in forwards; }
+  @keyframes toastIn { from{opacity:0; transform:translateY(-12px)} to{opacity:1; transform:none} }
+  @keyframes toastOut { to{opacity:0; transform:translateY(-12px)} }
+
+  /* ===== 駒のアニメーション ===== */
+  .board { perspective: 600px; }
+  @keyframes discPop { 0%{transform:scale(.2); opacity:0} 70%{transform:scale(1.12)} 100%{transform:scale(1); opacity:1} }
+  @keyframes discFlip { 0%{transform:rotateY(0)} 50%{transform:rotateY(90deg) scale(.85)} 100%{transform:rotateY(0)} }
+  .disc.pop { animation: discPop .28s ease-out; }
+  .disc.flip { animation: discFlip .42s ease-in-out; }
+  @keyframes wildGlow { 0%,100%{box-shadow:0 0 0 2px #ffd54a, 0 0 10px 2px rgba(255,213,74,.7)} 50%{box-shadow:0 0 0 2px #fff176, 0 0 16px 5px rgba(255,213,74,.95)} }
+  .disc.wild { animation: wildGlow 1.6s ease-in-out infinite; }
+  /* ヒント（おすすめの一手）のハイライト */
+  @keyframes hintPulse { 0%,100%{box-shadow: inset 0 0 0 3px rgba(255,213,74,.95)} 50%{box-shadow: inset 0 0 0 5px rgba(255,235,59,1), inset 0 0 12px rgba(255,235,59,.6)} }
+  .cell.hintBest { animation: hintPulse 1s ease-in-out infinite; }
+  .cell.hintBest::after {
+    content: "💡"; position: absolute; font-size: min(5vw, 26px); line-height: 1;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,.6));
+  }
+  .cell.hintFrom { outline: 3px dashed #ffd54a; outline-offset: -3px; }
+  #hintBtn { background: #6a1b9a; display: none; }
+  #hintBtn:hover { background: #7b1fa2; }
+  /* 逆転の一手ボタン（パワーアップ風） */
+  #passBonusBuyBtn { background: linear-gradient(135deg, #ad1457, #e91e63); }
+  #passBonusUseBtn { background: linear-gradient(135deg, #e65100, #ff9800); }
+  @keyframes powerGlow { 0%,100%{box-shadow:0 1px 3px rgba(0,0,0,.2)} 50%{box-shadow:0 0 14px 3px rgba(233,30,99,.55)} }
+  #passBonusBuyBtn, #passBonusUseBtn { animation: powerGlow 2.2s ease-in-out infinite; }
+
+  /* ===== 紙吹雪 ===== */
+  .confetti { position: fixed; top: -12px; width: 9px; height: 14px; z-index: 8000; pointer-events: none; animation: confettiFall linear forwards; }
+  @keyframes confettiFall { to { transform: translateY(105vh) rotate(720deg); opacity: .9; } }
+
+  /* ===== コインショップ ===== */
+  #shopModal .modal { max-width: 420px; }
+  #shopModal h3 { color: #c2570a; }
+  .shopPack {
+    border: 2px solid #f0c98c; border-radius: 12px; padding: 14px; margin: 10px 0 8px; text-align: center;
+    background: linear-gradient(180deg, #fffaf0, #fff3dd);
+  }
+  .shopPack .packName { font-weight: bold; font-size: 16px; color: #7a4a00; }
+  .shopPack .packCoins { font-size: 34px; font-weight: 900; color: #c2570a; margin: 4px 0; display:flex; align-items:center; justify-content:center; gap:8px; }
+  .shopPack .packCoins .coinIcon { width: 30px; height: 30px; }
+  .shopPack .packCoins .coinIcon::after { font-size: 16px; }
+  .shopPack .packDesc { font-size: 12px; color: #8a6a3a; }
+  .shopPack .packPrice { font-size: 20px; font-weight: bold; color: #333; margin-top: 6px; }
+  #shopBuyBtn { background: #c2570a; flex: 1; font-size: 16px; }
+  #shopBuyBtn:hover { background: #d2630f; }
+  #shopCloseBtn { background: #888; flex: 1; }
+  #shopNotes { font-size: 11.5px; color: #6b5a3a; line-height: 1.6; margin-top: 10px; }
+  #shopNotes p { margin: 3px 0; }
+  #shopBalanceLine { font-size: 13px; color: #555; text-align: center; margin: 2px 0 0; }
+  #shopShort { color: #c62828; font-weight: bold; font-size: 13px; text-align: center; min-height: 0; }
+
+
+  /* ===== 戦績バー（カード登録者のみ表示） ===== */
+  #statsBar {
+    width: 92%; max-width: 640px; background: #eaf1fb; border: 1px solid #b6cdef;
+    border-radius: 10px; padding: 10px 14px; margin-bottom: 10px;
+    font-size: 13px; color: #15396b; line-height: 1.6;
+    display: none; flex-wrap: wrap; align-items: center; gap: 4px 18px;
+  }
+  #statsBar.show { display: flex; }
+  #statsBar .statsTitle { font-weight: bold; font-size: 13px; color: #15396b; width: 100%; }
+  #statsBar .statsTitle small { font-weight: normal; color: #5a76a8; font-size: 11.5px; margin-left: 6px; }
+  #statsBar .stat { display: inline-flex; align-items: baseline; gap: 4px; }
+  #statsBar .stat b { font-size: 19px; font-weight: bold; color: #1452b3; }
+  #statsBar #winRate { color: #0b8a3e; }
+
+  .rules {
+    width: 92%; max-width: 640px; background: #fff; border-radius: 10px;
+    padding: 16px 20px; margin-top: 10px; box-shadow: 0 1px 4px rgba(0,0,0,.12);
+    font-size: 14px; color: #333; line-height: 1.7;
+  }
+  .rules h2 { font-size: 17px; margin-top: 0; }
+  .rules .biz { background:#fff7ec; border-left:4px solid #b35900; padding:10px 14px; border-radius:6px; margin-top:10px; }
+
+  /* ===== 難易度バッジ（2手先＝標準／3手先＝上級） ===== */
+  #levelBar {
+    width: 92%; max-width: 640px; border-radius: 12px; padding: 10px 14px; margin: 0 0 10px;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font-size: 13px; line-height: 1.5;
+    margin-top: 22px;
+  }
+  #levelBar .levelStars { font-size: 20px; letter-spacing: 2px; }
+  #levelBar .levelName { font-size: 17px; font-weight: 900; }
+  #levelBar .levelTag { font-size: 12px; font-weight: bold; padding: 2px 10px; border-radius: 999px; }
+  #levelBar .levelDesc { width: 100%; }
+  #levelBar .levelSwitch { width: 100%; font-weight: bold; text-decoration: none; }
+  #levelBar .levelSwitch:hover { text-decoration: underline; }
+  body.level2 #levelBar { background: #e8f5e9; border: 2px solid #66bb6a; color: #1b5e20; }
+  body.level2 #levelBar .levelStars { color: #43a047; }
+  body.level2 #levelBar .levelTag { background: #43a047; color: #fff; }
+  body.level2 #levelBar .levelSwitch { color: #b71c1c; }
+  body.level3 #levelBar { background: linear-gradient(135deg, #2b0a0a, #5b1010); border: 2px solid #ff5252; color: #ffebee; box-shadow: 0 2px 10px rgba(183,28,28,.35); }
+  body.level3 #levelBar .levelStars { color: #ffd54a; text-shadow: 0 0 6px rgba(255,213,74,.8); }
+  body.level3 #levelBar .levelTag { background: #ff1744; color: #fff; animation: levelPulse 1.8s ease-in-out infinite; }
+  body.level3 #levelBar .levelSwitch { color: #ffcc80; }
+  @keyframes levelPulse { 0%,100%{box-shadow:0 0 0 0 rgba(255,23,68,.6)} 50%{box-shadow:0 0 0 6px rgba(255,23,68,0)} }
+  body.level3 h1 { color: #5b1010; }
+  body.level3 .board { border-color: #3a1212; box-shadow: 0 0 18px rgba(120,0,0,.45); }
+  body.level3 #thinking { color: #b71c1c; font-weight: bold; }
+</style>
+</head>
+<body class="level3">
+
+<h1 data-i18n="appTitle">Catacelo ― 3手先を読むAIとの対戦</h1>
+
+<!-- ===== 言語切り替えバー ===== -->
+<div id="langBar">
+  <span class="langLabel" data-i18n="langLabel">Language:</span>
+  <button data-lang="ja">日本語</button>
+  <button data-lang="en">English</button>
+  <button data-lang="zh">中文</button>
+  <button data-lang="ko">한국어</button>
+  <button data-lang="es">Español</button>
+  <button data-lang="fr">Français</button>
+</div>
+
+<!-- ===== コイン残高バー（対局中は円表示を出さず、ゲーム内通貨「コイン」だけを見せる） ===== -->
+<div id="creditBar">
+  <span class="creditMain">
+    <span class="coinIcon"></span>
+    <span id="creditBalance">0</span>
+    <span class="coinWord" data-i18n="creditUnit">コイン</span>
+    <span id="streakBadge" style="display:none;"></span>
+  </span>
+  <span class="creditActions">
+    <button id="registerBtn" data-i18n="registerBtn">初回登録</button>
+    <button id="topupBtn" data-i18n="topupBtn" style="display:none;">🪙 コインショップ</button>
+  </span>
+</div>
+<!-- ※価格・有効期限などの特商法・資金決済法上の表示は、円が実際に動く「コインショップ」画面（shopModal）に集約 -->
+
+<!-- トースト通知エリア -->
+<div id="toastArea"></div>
+
+<!-- ===== 逆転の一手の状況／MyMedipro(株) 収益バー（カード登録後は非表示） ===== -->
+<div id="revenueBar">
+  <span><span data-i18n="creditCard">クレジットカード</span>: <span id="cardStatus" class="ng" data-i18n="unregistered">未登録</span></span>
+  <span><span data-i18n="bonusRemainLabel">この対局の「逆転の一手」残り回数</span>: <b id="bonusRemain">0</b> <span data-i18n="times">回</span></span>
+  <span><span id="revenueWrap" style="display:none;"><span data-i18n="companyName">MyMedipro(株)</span> <span data-i18n="cardRevenue">カード決済収益</span>: <b id="revenueAmount">0</b> <span data-i18n="yen">円</span></span>（<span data-i18n="purchases">購入</span> <span id="purchaseCount">0</span> <span data-i18n="opportunities">機会</span>）</span>
+</div>
+
+<!-- ===== 戦績バー（クレジットカード登録者のみ表示） ===== -->
+<div id="statsBar">
+  <span class="statsTitle"><span data-i18n="statsTitle">あなたの戦績</span><small id="statsSince"></small></span>
+  <span class="stat"><b id="gamesPlayed">0</b> <span data-i18n="statsPlayed">対戦</span></span>
+  <span class="stat"><b id="gamesWon">0</b> <span data-i18n="statsWon">勝</span></span>
+  <span class="stat"><span data-i18n="statsWinRate">勝率</span> <b id="winRate">—</b></span>
+  <span class="stat">🔥 <b id="streakVal">0</b> <span data-i18n="statsStreak">連勝</span> (<span data-i18n="statsBest">最高</span> <span id="bestStreakVal">0</span>)</span>
+</div>
+
+<div id="status" data-i18n="yourTurn">あなた（白）の番です</div>
+<div id="modeLabel"></div>
+<div id="thinking"><span data-i18n="aiThinking">AIが考え中...</span><br><span id="deepMsg" data-i18n="deepMsg">お待たせしてすみません。現在、深く分析中ですので、もう少々お時間がかかります。そのままお待ちください。</span></div>
+
+<div class="board" id="board"></div>
+
+<div class="controls">
+  <div class="scoreBox"><span class="miniDisc b"></span><span><span data-i18n="black">黒</span>: <span id="blackScore">2</span></span></div>
+  <button class="modeBtn active" id="placeBtn" data-i18n="toPlace">配置へ</button>
+  <button class="modeBtn" id="moveBtn" data-i18n="toMove">移動へ</button>
+  <div class="scoreBox"><span class="miniDisc w"></span><span><span data-i18n="white">白</span>: <span id="whiteScore">2</span></span></div>
+  <button id="passBtn" data-i18n="passBtn">パスする</button>
+</div>
+
+<!-- 逆転の一手（パス状態のときだけ）／ヒント（自分の手番のとき）ボタン -->
+<div id="passBonusArea">
+  <button id="hintBtn" data-i18n="hintBtn">💡 ヒント（🪙1）</button>
+  <button id="passBonusUseBtn">✨ 逆転の一手を使う</button>
+  <button id="passBonusBuyBtn" data-i18n="bonusBuyBtn">✨ 逆転の一手（🪙3）</button>
+</div>
+
+<!-- コイン消費の確認パネル（逆転の一手／ヒント共用）。ここでは円は一切出さない -->
+<div id="purchasePanel">
+  <h3 id="purchaseTitle">✨ 逆転の一手を発動しますか？</h3>
+  <p id="purchasePayLine" class="payFromCredit"></p>
+  <div style="display:flex; gap:10px; justify-content:center; margin-top:10px;">
+    <button id="purchaseConfirmBtn">🪙3 で発動する</button>
+    <button id="purchaseCancelBtn" data-i18n="purchaseCancel">やめる</button>
+  </div>
+</div>
+
+<div id="aiInfo"></div>
+<div id="advantagePanel">
+  <div class="advantageTop">
+    <span><span data-i18n="advantage">形勢</span>: <span id="advantageLabel" data-i18n="even">互角</span></span>
+    <span id="advantageScore">評価 0</span>
+  </div>
+  <div class="advantageMeter"><div id="advantageMarker"></div></div>
+  <div id="advantageReason" data-i18n="advantageDefault">序盤は石数より、角と打てる手の多さが大切です。</div>
+</div>
+<button id="resetBtn" data-i18n="resetBtn">ゲームをリセット</button>
+
+<!-- クレジットカード登録モーダル -->
+<div id="cardModal" class="modal-overlay">
+  <div class="modal">
+    <h3 data-i18n="cardModalTitle">クレジットカード情報の登録</h3>
+    <div class="demo-note" data-i18n="cardModalNote">
+      ※これはデモ用の入力フォームです。入力された情報はどこにも送信・保存されません。
+      本番運用では、生のカード番号を直接扱わず、Stripe Elements 等でトークン化してください。
+    </div>
+    <!-- 【本番移行時】上のデモ用の断り書きは次の文言に差し替え：
+         「カード情報は決済代行事業者（Stripe）により暗号化・トークン化して処理され、当社サーバーには送信・保存されません。」 -->
+    <label data-i18n="cardNumber">カード番号</label>
+    <input id="ccNumber" inputmode="numeric" placeholder="4242 4242 4242 4242" maxlength="19" autocomplete="off">
+    <div class="row">
+      <div>
+        <label data-i18n="cardExpiry">有効期限 (MM/YY)</label>
+        <input id="ccExpiry" placeholder="12/28" maxlength="5" autocomplete="off">
+      </div>
+      <div>
+        <label data-i18n="cardCvc">セキュリティコード</label>
+        <input id="ccCvc" inputmode="numeric" placeholder="123" maxlength="4" autocomplete="off">
+      </div>
+    </div>
+    <label data-i18n="cardName">カード名義</label>
+    <input id="ccName" placeholder="TARO YAMADA" autocomplete="off">
+    <div id="cardError"></div>
+    <label style="display:flex;align-items:flex-start;gap:8px;margin:12px 0 4px;font-size:13px;line-height:1.6;cursor:pointer;">
+      <input type="checkbox" id="agreeTerms" style="margin-top:3px;">
+      <span id="agreeLabel"><a href="terms.html" target="_blank" rel="noopener">利用規約</a>および<a href="privacy.html" target="_blank" rel="noopener">プライバシーポリシー</a>に同意する</span>
+    </label>
+    <div class="modal-actions">
+      <button id="cardSaveBtn" data-i18n="cardSaveBtn">登録する</button>
+      <button id="cardCancelBtn" data-i18n="cardCancelBtn">キャンセル</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== コインショップ（円が実際に動く唯一の画面。特商法の最終確認画面に必要な表示をここに集約） ===== -->
+<div id="shopModal" class="modal-overlay">
+  <div class="modal">
+    <h3 data-i18n="shopTitle">🪙 コインショップ</h3>
+    <p id="shopBalanceLine"></p>
+    <div class="shopPack">
+      <div class="packName" data-i18n="shopPackName">コイン 50枚パック</div>
+      <div class="packCoins"><span class="coinIcon"></span><span id="shopPackCoins">50</span></div>
+      <div class="packDesc" data-i18n="shopPackDesc">逆転の一手 16回分 ＋ ヒント 2回分 に相当</div>
+      <div class="packPrice" data-i18n="shopPackPrice">1,000円（税込）</div>
+    </div>
+    <div id="shopShort"></div>
+    <div class="modal-actions">
+      <button id="shopBuyBtn" data-i18n="shopBuyBtn">1,000円で購入する</button>
+      <button id="shopCloseBtn" data-i18n="shopClose">閉じる</button>
+    </div>
+    <div id="shopNotes">
+      <p>※<span data-i18n="shopNote1"></span></p>
+      <p>※<span id="shopNote2"></span></p>
+      <p>※<span data-i18n="shopNote3"></span></p>
+      <p>※<span data-i18n="shopNote4"></span></p>
+      <p id="shopAgreeLine"></p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 難易度バッジ：このファイルは「3手先を読むAI」版 ===== -->
+<div id="levelBar">
+  <span class="levelStars" data-i18n="levelStars">★★★</span>
+  <span class="levelName" data-i18n="levelName">3手先を読むAI</span>
+  <span class="levelTag" data-i18n="levelTag">上級・手強い</span>
+  <span class="levelDesc" data-i18n="levelDesc">AIは必ず3手先まで読み切ってから着手します。2手先AIより格段に手強く、罠を仕掛けてきます。</span>
+  <a class="levelSwitch" href="catacelo-2pre.html" data-i18n="levelSwitch">◀ 「2手先を読むAI」（標準）に戻る</a>
+</div>
+
+<div class="rules">
+  <h2 data-i18n="rulesTitle">ゲームのルール</h2>
+  <ul>
+    <li data-i18n="rule1">基本ルールは通常のオセロと同じです。あなたは白、AIは黒です。</li>
+    <li data-i18n="rule2">通常モードでは、相手の駒を挟んで自分の色に変えられる場所に駒を置きます。</li>
+    <li data-i18n="rule3">移動モードでは、自分の持ち駒を一つ取り外して他の有効な場所に移動できます。</li>
+    <li data-i18n="rule4">「配置へ」「移動へ」ボタンで、駒を置くモードと駒を移動するモードを切り替えられます。</li>
+    <li data-i18n="rule5">移動モードでは、最初に移動したい自分の駒をクリックし、次に移動先の有効な場所をクリックします。</li>
+    <li data-i18n="rule6">有効な手がない場合、白い駒のスコア表示の右側に表示される「パスする」ボタンをクリックしてターンをスキップできます。</li>
+    <li data-i18n="rule7">AIは高度な戦術を使用し、数手先を読んで最適な手を選びます。</li>
+    <li data-i18n="rule8">AIが最後に置いた/移動した駒は少し明るい色で表示されます。</li>
+    <li data-i18n="rule9">両者がパスするか、盤面が埋まったらゲーム終了です。</li>
+  </ul>
+  <h2 style="font-size:16px;" data-i18n="bonusTitle">逆転の一手・ヒント（コイン機能）</h2>
+  <ul>
+    <li data-i18n="bonusRule1"></li>
+    <li data-i18n="bonusRule2"></li>
+    <li data-i18n="bonusRule3"></li>
+    <li data-i18n="bonusRule4"></li>
+    <li data-i18n="bonusRule5"></li>
+  </ul>
+</div>
+
+<script>
+"use strict";
+
+/* =========================================================
+   多言語（i18n）辞書
+   ========================================================= */
+const I18N = {
+  ja: {
+    homeBtn:'◀ トップへ戻る',
+    privacyLink:'プライバシーポリシー',
+    agreeLabel:'{terms}および{privacy}に同意する',
+    footerCopy:'© 2026 MyMedipro株式会社',
+    companyName:'MyMedipro(株)',
+    docTitle:'Catacelo｜3手先を読むAIとの対戦（上級）',
+    appTitle:'Catacelo ― 3手先を読むAIとの対戦',
+    langLabel:'言語:', banner:'バナー広告エリア',
+    gameInfo1:'通常のオセロに駒移動ルールを追加した新しいゲームです。',
+    gameInfo2:'あなたは白として、強化版AI（黒）と対戦します。AIが最後に置いた／移動した駒は少し明るい色で表示されます。', yen:'円', creditUnit:'コイン',
+    creditCard:'クレジットカード', unregistered:'未登録', registered:'登録済み（****{last4}）',
+    cardRegBtn:'クレジットカードを登録',
+    bonusRemainLabel:'この対局の「逆転の一手」残り回数', times:'回',
+    cardRevenue:'カード決済収益', purchases:'購入', opportunities:'機会',
+    yourTurn:'あなた（白）の番です', aiTurnStatus:'AIの番です',
+    aiThinking:'AIが3手先まで深く読んでいます...',
+    deepMsg:'お待たせしてすみません。現在、深く分析中ですので、もう少々お時間がかかります。そのままお待ちください。',
+    black:'黒', white:'白', toPlace:'配置へ', toMove:'移動へ', passBtn:'パスする',
+    bonusBuyBtn:'✨ 逆転の一手（🪙3）',
+    bonusUseBtn:'✨ 逆転の一手を使う（残り{n}回）',
+    purchaseTitle:'✨ 逆転の一手を発動しますか？',
+    purchaseConfirm:'🪙3 で発動する', purchaseCancel:'やめる', processing:'決済処理中...',
+    payFromCredit:'この対局で最大3回まで使えます。残高 🪙{bal} → 発動後 🪙{after}',
+    topupBtn:'🪙 コインショップ',
+    toppedUp:'🪙 {amt}コインを追加しました！残高: {bal}コイン',
+    needTopUp:'コインが足りません。コインショップで追加できます。',
+    resetBtn:'ゲームをリセット',
+    advantage:'形勢', even:'互角', evalLabel:'評価',
+    advantageDefault:'序盤は石数より、角と打てる手の多さが大切です。',
+    blackSlight:'黒やや有利', blackStrong:'黒かなり有利',
+    whiteSlight:'白やや有利', whiteStrong:'白かなり有利',
+    reasonCorner:'{who}が角を多く取っています', reasonMoves:'{who}の打てる場所が多いです',
+    reasonDiscs:'石数は{who}が多いです', reasonDefault:'角を渡さず、次の相手の手を減らす手が大切です',
+    cardModalTitle:'クレジットカード情報の登録',
+    cardModalNote:'※これはデモ用の入力フォームです。入力された情報はどこにも送信・保存されません。本番運用では、生のカード番号を直接扱わず、Stripe Elements 等でトークン化してください。',
+    cardNumber:'カード番号', cardExpiry:'有効期限 (MM/YY)', cardCvc:'セキュリティコード',
+    cardName:'カード名義', cardSaveBtn:'登録する', cardCancelBtn:'キャンセル', registeringBtn:'登録中...',
+    registerBtn:'初回登録', approvingBtn:'カードを承認中...',
+    cardApprovedMsg:'カードが承認されました。🎁 スターターボーナス {bal}コイン を獲得！',
+    cardNotApproved:'カードが承認されませんでした。情報をご確認ください。',
+    needRegister:'コインを使うには、先に「初回登録」でクレジットカードを登録してください。',
+    rulesTitle:'ゲームのルール',
+    rule1:'基本ルールは通常のオセロと同じです。あなたは白、AIは黒です。',
+    rule2:'通常モードでは、相手の駒を挟んで自分の色に変えられる場所に駒を置きます。',
+    rule3:'移動モードでは、自分の持ち駒を一つ取り外して他の有効な場所に移動できます。',
+    rule4:'「配置へ」「移動へ」ボタンで、駒を置くモードと移動するモードを切り替えられます。',
+    rule5:'移動モードでは、最初に動かしたい自分の駒をクリックし、次に移動先の有効な場所をクリックします。',
+    rule6:'有効な手がない場合、「パスする」ボタンでターンをスキップできます。',
+    rule7:'AIは高度な戦術を使用し、数手先を読んで最適な手を選びます。',
+    rule8:'AIが最後に置いた／移動した駒は少し明るい色で表示されます。',
+    rule9:'両者がパスするか、盤面が埋まったらゲーム終了です。',
+    bonusTitle:'逆転の一手・ヒント（コイン機能）',
+    bonusRule1:'白（あなた）が「パスする」状態になったときだけ、「✨ 逆転の一手」ボタンが現れます。',
+    bonusRule2:'逆転の一手は 🪙3 で発動し、その対局中に最大3回まで使えます（対局の終了・リセットで残り回数は失効します）。',
+    bonusRule3:'逆転の一手を使うと、挟めるか否かに関わらず、空いているマスのどこにでも白い駒を1個追加で置けます。',
+    bonusRule4:'💡 ヒント（🪙1）：AIが読んだ「あなたのおすすめの一手」を盤上で光らせます。',
+    bonusRule5:'コインが足りないときは「🪙 コインショップ」で追加できます（50コイン／1,000円）。',
+    modePlace:'駒を置く', modeMove:'駒を移動する', modeLabelFmt:'現在のモード: {mode}',
+    bonusPlacePrompt:'✨ 逆転の一手：空いているマスのどこにでも白を1個置けます（残り{n}回）',
+    bonusPlaced:'✨ 逆転の一手で白を配置しました！',
+    moveKindMove:'移動 ({from}→{to})', moveKindPlace:'配置 ({to})',
+    aiPassed:'AIは有効な手がないためパスしました',
+    aiMoveInfo:'AIの手: {kind} ／ 読み: 3手先を保証（今回は{depth}手先まで到達）／ 思考時間: {ms}ms',
+    purchasedCredit:'✨ 逆転の一手を発動！この対局で最大3回まで使えます（残高 🪙{bal}）',
+    payFailed:'決済に失敗しました。もう一度お試しください。',
+    cardRegFailed:'カードの登録に失敗しました。番号をご確認ください。',
+    fillAll:'すべての項目を入力してください。',
+    gameEndBlack:'ゲーム終了 — 黒（AI）の勝ち！ {nb} 対 {nw}',
+    gameEndWhite:'ゲーム終了 — 白（あなた）の勝ち！ {nw} 対 {nb}',
+    gameEndDraw:'ゲーム終了 — 引き分け {nb} 対 {nw}',
+    statsTitle:'あなたの戦績', statsSince:'（登録日 {date} から）',
+    statsPlayed:'対戦', statsWon:'勝', statsWinRate:'勝率',
+    whoBlack:'黒', whoWhite:'白',
+    cardApprovedAgain:'カードが承認されました。コインが使えるようになりました。',
+    hintBtn:'💡 ヒント（🪙1）',
+    hintTitle:'💡 AIのおすすめの一手を見ますか？',
+    hintConfirm:'🪙1 でヒントを見る',
+    hintLine:'残高 🪙{bal} → 使用後 🪙{after}',
+    hintShown:'💡 おすすめの一手：{pos}（光っているマス）',
+    hintShownMove:'💡 おすすめの一手：{from} の駒を {to} へ移動（光っているマス）',
+    shopTitle:'🪙 コインショップ',
+    shopBalance:'現在の残高：{bal}コイン',
+    shopPackName:'コイン 50枚パック',
+    shopPackPrice:'1,000円（税込）',
+    shopPackDesc:'逆転の一手 16回分 ＋ ヒント 2回分 に相当',
+    shopBuyBtn:'1,000円で購入する',
+    shopClose:'閉じる',
+    shopNote1:'価格：1,000円（税込）／ 内容：50コイン（1コイン＝20円相当）',
+    shopNote2:'お支払い時期：購入確定時に登録済みカード（****{last4}）へ決済／ 提供時期：決済完了後、直ちに残高へ反映',
+    shopNote3:'購入したコインの有効期限は購入日から150日間です。期限を過ぎたコインは失効し、払戻し・換金はできません。',
+    shopNote4:'デジタルコンテンツの性質上、購入後の返金・キャンセルはできません。',
+    shopAgree:'購入を確定すると、{terms}および{tokushoho}に同意したものとみなされます。',
+    termsLink:'利用規約',
+    tokushohoLink:'特定商取引法に基づく表記',
+    coinShort:'コインが足りません（あと🪙{need}）',
+    statsStreak:'連勝',
+    statsBest:'最高',
+    streakBadge:'🔥{n}連勝中',
+    demoReset:'デモ用データを初期化',
+    demoResetConfirm:'保存されたコイン・戦績をすべて消去して再読み込みします。よろしいですか？',
+    levelName:'3手先を読むAI',
+    levelTag:'上級・手強い',
+    levelStars:'★★★',
+    levelDesc:'AIは必ず3手先まで読み切ってから着手します。2手先AIより格段に手強く、罠を仕掛けてきます。',
+    levelSwitch:'◀ 「2手先を読むAI」（標準）に戻る'
+  },
+  en: {
+    homeBtn:'◀ Back to top',
+    privacyLink:'Privacy Policy',
+    agreeLabel:'I agree to the {terms} and the {privacy}',
+    footerCopy:'© 2026 MyMedipro Inc.',
+    companyName:'MyMedipro Inc.',
+    docTitle:'Catacelo | 3-Ply AI (Advanced)',
+    appTitle:'Catacelo — Play the 3-Ply AI',
+    langLabel:'Language:', banner:'Ad banner area',
+    gameInfo1:'A new game that adds a piece-moving rule to classic Othello (Reversi).',
+    gameInfo2:'You play White against an enhanced AI (Black). The AI\u2019s last placed/moved piece is shown in a slightly lighter color.', yen:'yen', creditUnit:'coins',
+    creditCard:'Credit card', unregistered:'Not registered', registered:'Registered (****{last4})',
+    cardRegBtn:'Register a credit card',
+    bonusRemainLabel:'Comeback Moves left this game', times:'',
+    cardRevenue:'card revenue', purchases:'purchases', opportunities:'opportunities',
+    yourTurn:'Your turn (White)', aiTurnStatus:'AI\u2019s turn',
+    aiThinking:'AI is reading 3 plies deep...',
+    deepMsg:'Sorry to keep you waiting. The AI is analyzing deeply, so it will take a little longer. Please wait.',
+    black:'Black', white:'White', toPlace:'Place mode', toMove:'Move mode', passBtn:'Pass',
+    bonusBuyBtn:'✨ Comeback Move (🪙3)',
+    bonusUseBtn:'✨ Use Comeback Move ({n} left)',
+    purchaseTitle:'✨ Activate a Comeback Move?',
+    purchaseConfirm:'Activate for 🪙3', purchaseCancel:'Cancel', processing:'Processing...',
+    payFromCredit:'Up to 3 uses this game. Balance 🪙{bal} → 🪙{after} after',
+    topupBtn:'🪙 Coin shop',
+    toppedUp:'🪙 Added {amt} coins! Balance: {bal} coins',
+    needTopUp:'Not enough coins. You can add more in the coin shop.',
+    resetBtn:'Reset game',
+    advantage:'Standing', even:'Even', evalLabel:'Eval',
+    advantageDefault:'Early on, corners and available moves matter more than disc count.',
+    blackSlight:'Black slightly ahead', blackStrong:'Black clearly ahead',
+    whiteSlight:'White slightly ahead', whiteStrong:'White clearly ahead',
+    reasonCorner:'{who} holds more corners', reasonMoves:'{who} has more available moves',
+    reasonDiscs:'{who} has more discs', reasonDefault:'Keep the corners and reduce the opponent\u2019s options',
+    cardModalTitle:'Register credit card',
+    cardModalNote:'This is a demo form. Nothing entered is sent or stored. In production, never handle raw card numbers directly; tokenize with Stripe Elements or similar.',
+    cardNumber:'Card number', cardExpiry:'Expiry (MM/YY)', cardCvc:'Security code',
+    cardName:'Cardholder name', cardSaveBtn:'Register', cardCancelBtn:'Cancel', registeringBtn:'Registering...',
+    registerBtn:'Register card', approvingBtn:'Approving card...',
+    cardApprovedMsg:'Your card was approved. 🎁 Starter bonus: {bal} coins!',
+    cardNotApproved:'The card was not approved. Please check your details.',
+    needRegister:'To use coins, register a credit card first via "Register card".',
+    rulesTitle:'How to play',
+    rule1:'The base rules match standard Othello. You are White; the AI is Black.',
+    rule2:'In place mode, place a piece where you flank and flip the opponent\u2019s discs.',
+    rule3:'In move mode, you may lift one of your discs and move it to another valid square.',
+    rule4:'Use the \u201cPlace mode\u201d / \u201cMove mode\u201d buttons to switch modes.',
+    rule5:'In move mode, click the disc you want to move, then click a valid destination.',
+    rule6:'If you have no valid move, use the \u201cPass\u201d button to skip your turn.',
+    rule7:'The AI uses advanced tactics and reads several moves ahead.',
+    rule8:'The AI\u2019s last placed/moved piece is shown in a slightly lighter color.',
+    rule9:'The game ends when both sides pass or the board is full.',
+    bonusTitle:'Comeback Move & Hints (coin features)',
+    bonusRule1:'The "✨ Comeback Move" button appears only when you (White) are in a pass state.',
+    bonusRule2:'A Comeback Move costs 🪙3 and can be used up to 3 times in that game (unused uses expire when the game ends or resets).',
+    bonusRule3:'A Comeback Move lets you add one White disc to any empty square, whether or not it flips anything.',
+    bonusRule4:'💡 Hint (🪙1): highlights the move the AI would recommend for you.',
+    bonusRule5:'If you run short of coins, add more in the coin shop (50 coins / 1,000 yen).',
+    modePlace:'place a piece', modeMove:'move a piece', modeLabelFmt:'Current mode: {mode}',
+    bonusPlacePrompt:'✨ Comeback Move: place one White disc on any empty square ({n} left)',
+    bonusPlaced:'✨ You placed a White disc with a Comeback Move!',
+    moveKindMove:'Move ({from}\u2192{to})', moveKindPlace:'Place ({to})',
+    aiPassed:'The AI had no valid move and passed',
+    aiMoveInfo:'AI move: {kind} / lookahead: 3 plies guaranteed (reached {depth} this time) / time: {ms}ms',
+    purchasedCredit:'✨ Comeback Move activated! Up to 3 uses this game (balance 🪙{bal})',
+    payFailed:'Payment failed. Please try again.',
+    cardRegFailed:'Card registration failed. Please check the number.',
+    fillAll:'Please fill in all fields.',
+    gameEndBlack:'Game over \u2014 Black (AI) wins! {nb} to {nw}',
+    gameEndWhite:'Game over \u2014 White (you) win! {nw} to {nb}',
+    gameEndDraw:'Game over \u2014 Draw, {nb} to {nw}',
+    statsTitle:'Your record', statsSince:'(since {date})',
+    statsPlayed:'games', statsWon:'wins', statsWinRate:'win rate',
+    whoBlack:'Black', whoWhite:'White',
+    cardApprovedAgain:'Your card was approved. You can now use coins.',
+    hintBtn:'💡 Hint (🪙1)',
+    hintTitle:'💡 See the AI’s recommended move?',
+    hintConfirm:'Show hint for 🪙1',
+    hintLine:'Balance 🪙{bal} → 🪙{after} after',
+    hintShown:'💡 Recommended move: {pos} (highlighted)',
+    hintShownMove:'💡 Recommended move: move the disc at {from} to {to} (highlighted)',
+    shopTitle:'🪙 Coin shop',
+    shopBalance:'Current balance: {bal} coins',
+    shopPackName:'50-coin pack',
+    shopPackPrice:'1,000 yen (tax incl.)',
+    shopPackDesc:'Enough for 16 Comeback Moves + 2 hints',
+    shopBuyBtn:'Buy for 1,000 yen',
+    shopClose:'Close',
+    shopNote1:'Price: 1,000 yen (tax incl.) / Contents: 50 coins (1 coin = 20 yen equivalent)',
+    shopNote2:'Payment: charged to your registered card (****{last4}) when you confirm / Delivery: added to your balance immediately after payment',
+    shopNote3:'Purchased coins expire 150 days after purchase. Expired coins are forfeited and cannot be refunded or exchanged for cash.',
+    shopNote4:'As digital content, purchases cannot be refunded or cancelled.',
+    shopAgree:'By confirming, you agree to the {terms} and the {tokushoho}.',
+    termsLink:'Terms of Service',
+    tokushohoLink:'Commercial Transactions Act notice',
+    coinShort:'Not enough coins (need 🪙{need} more)',
+    statsStreak:'streak',
+    statsBest:'best',
+    streakBadge:'🔥{n} win streak',
+    demoReset:'Reset demo data',
+    demoResetConfirm:'This will erase saved coins and records and reload. Continue?',
+    levelName:'3-ply lookahead AI',
+    levelTag:'Advanced · Tough',
+    levelStars:'★★★',
+    levelDesc:'The AI always reads at least 3 moves ahead before it plays. Far tougher than the 2-ply AI — it sets traps.',
+    levelSwitch:'◀ Back to the 2-ply AI (Standard)'
+  },
+  zh: {
+    homeBtn:'◀ 返回首页',
+    privacyLink:'隐私政策',
+    agreeLabel:'同意{terms}及{privacy}',
+    footerCopy:'© 2026 MyMedipro株式会社',
+    companyName:'MyMedipro(株)',
+    docTitle:'Catacelo｜预读3步的AI（高级）',
+    appTitle:'Catacelo ― 挑战预读3步的AI',
+    langLabel:'语言:', banner:'广告横幅区域',
+    gameInfo1:'在传统黑白棋（翻转棋）基础上增加了“移动棋子”规则的新游戏。',
+    gameInfo2:'您执白，与强化版 AI（黑）对战。AI 最后落子／移动的棋子会以略亮的颜色显示。', yen:'日元', creditUnit:'金币',
+    creditCard:'信用卡', unregistered:'未注册', registered:'已注册（****{last4}）',
+    cardRegBtn:'注册信用卡',
+    bonusRemainLabel:'本局剩余的“逆转一手”次数', times:'次',
+    cardRevenue:'刷卡收入', purchases:'购买', opportunities:'次机会',
+    yourTurn:'轮到您（白）', aiTurnStatus:'轮到 AI',
+    aiThinking:'AI 正在深入预读3步...',
+    deepMsg:'让您久等了。AI 正在深入分析，还需要一点时间，请稍候。',
+    black:'黑', white:'白', toPlace:'落子模式', toMove:'移动模式', passBtn:'过牌',
+    bonusBuyBtn:'✨ 逆转一手（🪙3）',
+    bonusUseBtn:'✨ 使用逆转一手（剩余{n}次）',
+    purchaseTitle:'✨ 是否发动逆转一手？',
+    purchaseConfirm:'用 🪙3 发动', purchaseCancel:'取消', processing:'结算处理中...',
+    payFromCredit:'本局最多可用3次。余额 🪙{bal} → 发动后 🪙{after}',
+    topupBtn:'🪙 金币商店',
+    toppedUp:'🪙 已添加 {amt} 金币！余额：{bal} 金币',
+    needTopUp:'金币不足，可在金币商店添加。',
+    resetBtn:'重新开始',
+    advantage:'局势', even:'均势', evalLabel:'评估',
+    advantageDefault:'开局阶段，角与可走步数比棋子数更重要。',
+    blackSlight:'黑略占优', blackStrong:'黑明显占优',
+    whiteSlight:'白略占优', whiteStrong:'白明显占优',
+    reasonCorner:'{who}占据了更多的角', reasonMoves:'{who}的可落子位置更多',
+    reasonDiscs:'{who}的棋子更多', reasonDefault:'守住角，并减少对手的可走步数',
+    cardModalTitle:'注册信用卡信息',
+    cardModalNote:'这是演示用表单，输入的信息不会被发送或保存。正式环境请勿直接处理原始卡号，应使用 Stripe Elements 等进行令牌化。',
+    cardNumber:'卡号', cardExpiry:'有效期 (MM/YY)', cardCvc:'安全码',
+    cardName:'持卡人姓名', cardSaveBtn:'注册', cardCancelBtn:'取消', registeringBtn:'注册中...',
+    registerBtn:'首次登记', approvingBtn:'正在审核卡片...',
+    cardApprovedMsg:'信用卡已通过审核。🎁 新手奖励 {bal} 金币！',
+    cardNotApproved:'卡片未通过审核，请检查信息。',
+    needRegister:'使用金币前，请先通过“首次注册”登记信用卡。',
+    rulesTitle:'游戏规则',
+    rule1:'基本规则与普通黑白棋相同。您执白，AI 执黑。',
+    rule2:'落子模式下，将棋子放在能夹住并翻转对方棋子的位置。',
+    rule3:'移动模式下，可拿起自己的一枚棋子，移动到另一个有效位置。',
+    rule4:'用“落子模式”“移动模式”按钮切换两种模式。',
+    rule5:'移动模式下，先点击要移动的己方棋子，再点击有效的目标位置。',
+    rule6:'没有有效着法时，可点击“过牌”按钮跳过本回合。',
+    rule7:'AI 采用高级战术，会预读数步以选择最佳着法。',
+    rule8:'AI 最后落子／移动的棋子会以略亮的颜色显示。',
+    rule9:'双方都过牌或棋盘填满时，游戏结束。',
+    bonusTitle:'逆转一手・提示（金币功能）',
+    bonusRule1:'只有当白方（您）处于“过牌”状态时，才会出现“✨ 逆转一手”按钮。',
+    bonusRule2:'逆转一手需 🪙3 发动，本局内最多可使用3次（对局结束或重置后剩余次数失效）。',
+    bonusRule3:'使用逆转一手后，无论能否翻转，都可在任意空格额外放置1枚白子。',
+    bonusRule4:'💡 提示（🪙1）：在棋盘上高亮显示 AI 为您推荐的一手。',
+    bonusRule5:'金币不足时可在金币商店添加（50金币／1,000日元）。',
+    modePlace:'落子', modeMove:'移动棋子', modeLabelFmt:'当前模式：{mode}',
+    bonusPlacePrompt:'✨ 逆转一手：可在任意空格放置1枚白子（剩余{n}次）',
+    bonusPlaced:'✨ 已用逆转一手放置白子！',
+    moveKindMove:'移动 ({from}\u2192{to})', moveKindPlace:'落子 ({to})',
+    aiPassed:'AI 无有效着法，已过牌',
+    aiMoveInfo:'AI 着法：{kind} / 预读：保证3步（本次达到{depth}步）/ 用时：{ms}ms',
+    purchasedCredit:'✨ 逆转一手已发动！本局最多可用3次（余额 🪙{bal}）',
+    payFailed:'结算失败，请重试。',
+    cardRegFailed:'卡片注册失败，请检查卡号。',
+    fillAll:'请填写所有项目。',
+    gameEndBlack:'游戏结束 — 黑（AI）获胜！ {nb} 比 {nw}',
+    gameEndWhite:'游戏结束 — 白（您）获胜！ {nw} 比 {nb}',
+    gameEndDraw:'游戏结束 — 平局 {nb} 比 {nw}',
+    statsTitle:'你的战绩', statsSince:'（自 {date} 起）',
+    statsPlayed:'对战', statsWon:'胜', statsWinRate:'胜率',
+    whoBlack:'黑', whoWhite:'白',
+    cardApprovedAgain:'信用卡已通过审核，现在可以使用金币了。',
+    hintBtn:'💡 提示（🪙1）',
+    hintTitle:'💡 查看 AI 推荐的一手？',
+    hintConfirm:'用 🪙1 查看提示',
+    hintLine:'余额 🪙{bal} → 使用后 🪙{after}',
+    hintShown:'💡 推荐落点：{pos}（高亮格）',
+    hintShownMove:'💡 推荐走法：将 {from} 的棋子移到 {to}（高亮格）',
+    shopTitle:'🪙 金币商店',
+    shopBalance:'当前余额：{bal} 金币',
+    shopPackName:'50 金币礼包',
+    shopPackPrice:'1,000日元（含税）',
+    shopPackDesc:'相当于 16 次逆转一手 + 2 次提示',
+    shopBuyBtn:'以 1,000 日元购买',
+    shopClose:'关闭',
+    shopNote1:'价格：1,000日元（含税）／ 内容：50金币（1金币＝20日元）',
+    shopNote2:'付款时间：确认购买时从已注册卡（****{last4}）扣款／ 提供时间：付款完成后立即计入余额',
+    shopNote3:'购买的金币自购买日起150天内有效。过期金币将失效，不可退款或兑换现金。',
+    shopNote4:'因数字内容性质，购买后不可退款或取消。',
+    shopAgree:'确认购买即表示您同意{terms}及{tokushoho}。',
+    termsLink:'使用条款',
+    tokushohoLink:'特定商业交易法标示',
+    coinShort:'金币不足（还差 🪙{need}）',
+    statsStreak:'连胜',
+    statsBest:'最高',
+    streakBadge:'🔥{n}连胜中',
+    demoReset:'初始化演示数据',
+    demoResetConfirm:'将清除已保存的金币和战绩并重新加载。确定吗？',
+    levelName:'预读3步的AI',
+    levelTag:'高级・强敌',
+    levelStars:'★★★',
+    levelDesc:'AI 每步都会先读完3步再落子。比预读2步的AI强得多，还会设下陷阱。',
+    levelSwitch:'◀ 返回“预读2步的AI”（标准）'
+  },
+  ko: {
+    homeBtn:'◀ 처음으로',
+    privacyLink:'개인정보 처리방침',
+    agreeLabel:'{terms} 및 {privacy}에 동의합니다',
+    footerCopy:'© 2026 MyMedipro Inc.',
+    companyName:'MyMedipro Inc.',
+    docTitle:'Catacelo｜3수 앞을 읽는 AI (상급)',
+    appTitle:'Catacelo ― 3수 앞을 읽는 AI와 대결',
+    langLabel:'언어:', banner:'배너 광고 영역',
+    gameInfo1:'일반 오델로(리버시)에 ‘말 이동’ 규칙을 더한 새로운 게임입니다.',
+    gameInfo2:'당신은 백으로 강화 AI(흑)와 대결합니다. AI가 마지막에 두거나 이동한 말은 약간 밝은 색으로 표시됩니다.', yen:'엔', creditUnit:'코인',
+    creditCard:'신용카드', unregistered:'미등록', registered:'등록됨 (****{last4})',
+    cardRegBtn:'신용카드 등록',
+    bonusRemainLabel:'이 대국의 ‘역전의 한 수’ 남은 횟수', times:'회',
+    cardRevenue:'카드 결제 수익', purchases:'구매', opportunities:'기회',
+    yourTurn:'당신(백)의 차례입니다', aiTurnStatus:'AI의 차례입니다',
+    aiThinking:'AI가 3수 앞까지 깊이 읽는 중...',
+    deepMsg:'기다리게 해서 죄송합니다. 현재 깊이 분석 중이라 조금 더 걸립니다. 잠시만 기다려 주세요.',
+    black:'흑', white:'백', toPlace:'놓기 모드', toMove:'이동 모드', passBtn:'패스',
+    bonusBuyBtn:'✨ 역전의 한 수 (🪙3)',
+    bonusUseBtn:'✨ 역전의 한 수 사용 (남은 {n}회)',
+    purchaseTitle:'✨ 역전의 한 수를 발동할까요?',
+    purchaseConfirm:'🪙3 로 발동', purchaseCancel:'취소', processing:'결제 처리 중...',
+    payFromCredit:'이 대국에서 최대 3회 사용 가능. 잔액 🪙{bal} → 발동 후 🪙{after}',
+    topupBtn:'🪙 코인 상점',
+    toppedUp:'🪙 {amt}코인을 추가했습니다! 잔액: {bal}코인',
+    needTopUp:'코인이 부족합니다. 코인 상점에서 추가할 수 있습니다.',
+    resetBtn:'게임 리셋',
+    advantage:'형세', even:'호각', evalLabel:'평가',
+    advantageDefault:'초반에는 돌 수보다 코너와 둘 수 있는 자리의 수가 중요합니다.',
+    blackSlight:'흑 약간 우세', blackStrong:'흑 크게 우세',
+    whiteSlight:'백 약간 우세', whiteStrong:'백 크게 우세',
+    reasonCorner:'{who}이(가) 코너를 더 많이 차지했습니다', reasonMoves:'{who}의 둘 수 있는 자리가 더 많습니다',
+    reasonDiscs:'돌 수는 {who}이(가) 많습니다', reasonDefault:'코너를 내주지 말고 상대의 수를 줄이는 것이 중요합니다',
+    cardModalTitle:'신용카드 정보 등록',
+    cardModalNote:'데모용 입력 양식입니다. 입력 정보는 어디에도 전송·저장되지 않습니다. 실제 운영에서는 원본 카드 번호를 직접 다루지 말고 Stripe Elements 등으로 토큰화하세요.',
+    cardNumber:'카드 번호', cardExpiry:'유효기간 (MM/YY)', cardCvc:'보안 코드',
+    cardName:'카드 명의', cardSaveBtn:'등록', cardCancelBtn:'취소', registeringBtn:'등록 중...',
+    registerBtn:'최초 등록', approvingBtn:'카드 승인 중...',
+    cardApprovedMsg:'카드가 승인되었습니다. 🎁 스타터 보너스 {bal}코인 획득!',
+    cardNotApproved:'카드가 승인되지 않았습니다. 정보를 확인해 주세요.',
+    needRegister:'코인을 사용하려면 먼저 ‘최초 등록’으로 신용카드를 등록해 주세요.',
+    rulesTitle:'게임 규칙',
+    rule1:'기본 규칙은 일반 오델로와 같습니다. 당신은 백, AI는 흑입니다.',
+    rule2:'놓기 모드에서는 상대 돌을 사이에 끼워 뒤집을 수 있는 자리에 돌을 놓습니다.',
+    rule3:'이동 모드에서는 자신의 돌 하나를 들어 다른 유효한 자리로 옮길 수 있습니다.',
+    rule4:'‘놓기 모드’ ‘이동 모드’ 버튼으로 모드를 전환합니다.',
+    rule5:'이동 모드에서는 옮길 자신의 돌을 클릭한 뒤, 유효한 목적지를 클릭합니다.',
+    rule6:'둘 수가 없으면 ‘패스’ 버튼으로 차례를 건너뜁니다.',
+    rule7:'AI는 고급 전술을 사용해 여러 수 앞을 읽고 최선의 수를 둡니다.',
+    rule8:'AI가 마지막에 두거나 이동한 말은 약간 밝은 색으로 표시됩니다.',
+    rule9:'양쪽이 모두 패스하거나 판이 가득 차면 게임이 끝납니다.',
+    bonusTitle:'역전의 한 수・힌트 (코인 기능)',
+    bonusRule1:'백(당신)이 ‘패스’ 상태일 때만 ‘✨ 역전의 한 수’ 버튼이 나타납니다.',
+    bonusRule2:'역전의 한 수는 🪙3 으로 발동하며, 그 대국에서 최대 3회까지 사용할 수 있습니다(대국 종료·리셋 시 남은 횟수는 소멸).',
+    bonusRule3:'역전의 한 수를 쓰면, 뒤집을 수 있는지와 관계없이 빈 칸 어디에나 백 돌을 1개 추가로 놓을 수 있습니다.',
+    bonusRule4:'💡 힌트 (🪙1): AI가 추천하는 당신의 다음 수를 보드에서 빛나게 표시합니다.',
+    bonusRule5:'코인이 부족하면 코인 상점에서 추가할 수 있습니다(50코인／1,000엔).',
+    modePlace:'돌 놓기', modeMove:'돌 이동', modeLabelFmt:'현재 모드: {mode}',
+    bonusPlacePrompt:'✨ 역전의 한 수: 빈 칸 어디에나 백을 1개 놓을 수 있습니다 (남은 {n}회)',
+    bonusPlaced:'✨ 역전의 한 수로 백을 놓았습니다!',
+    moveKindMove:'이동 ({from}\u2192{to})', moveKindPlace:'놓기 ({to})',
+    aiPassed:'AI는 유효한 수가 없어 패스했습니다',
+    aiMoveInfo:'AI의 수: {kind} / 읽기: 3수 보장 (이번엔 {depth}수 도달) / 사고 시간: {ms}ms',
+    purchasedCredit:'✨ 역전의 한 수 발동! 이 대국에서 최대 3회 사용 가능 (잔액 🪙{bal})',
+    payFailed:'결제에 실패했습니다. 다시 시도해 주세요.',
+    cardRegFailed:'카드 등록에 실패했습니다. 번호를 확인해 주세요.',
+    fillAll:'모든 항목을 입력해 주세요.',
+    gameEndBlack:'게임 종료 — 흑(AI)의 승리! {nb} 대 {nw}',
+    gameEndWhite:'게임 종료 — 백(당신)의 승리! {nw} 대 {nb}',
+    gameEndDraw:'게임 종료 — 무승부 {nb} 대 {nw}',
+    statsTitle:'당신의 전적', statsSince:'(등록일 {date}부터)',
+    statsPlayed:'대국', statsWon:'승', statsWinRate:'승률',
+    whoBlack:'흑', whoWhite:'백',
+    cardApprovedAgain:'카드가 승인되었습니다. 이제 코인을 사용할 수 있습니다.',
+    hintBtn:'💡 힌트 (🪙1)',
+    hintTitle:'💡 AI 추천 수를 볼까요?',
+    hintConfirm:'🪙1 로 힌트 보기',
+    hintLine:'잔액 🪙{bal} → 사용 후 🪙{after}',
+    hintShown:'💡 추천 수: {pos} (빛나는 칸)',
+    hintShownMove:'💡 추천 수: {from}의 돌을 {to}로 이동 (빛나는 칸)',
+    shopTitle:'🪙 코인 상점',
+    shopBalance:'현재 잔액: {bal}코인',
+    shopPackName:'코인 50개 팩',
+    shopPackPrice:'1,000엔 (세금 포함)',
+    shopPackDesc:'역전의 한 수 16회 + 힌트 2회 분량',
+    shopBuyBtn:'1,000엔으로 구매',
+    shopClose:'닫기',
+    shopNote1:'가격: 1,000엔(세금 포함) ／ 내용: 50코인 (1코인＝20엔 상당)',
+    shopNote2:'결제 시기: 구매 확정 시 등록 카드(****{last4})로 결제 ／ 제공 시기: 결제 완료 후 즉시 잔액에 반영',
+    shopNote3:'구매한 코인의 유효기간은 구매일로부터 150일입니다. 기간이 지난 코인은 소멸되며 환불·환금할 수 없습니다.',
+    shopNote4:'디지털 콘텐츠 특성상 구매 후 환불·취소는 불가합니다.',
+    shopAgree:'구매를 확정하면 {terms} 및 {tokushoho}에 동의한 것으로 간주됩니다.',
+    termsLink:'이용약관',
+    tokushohoLink:'특정상거래법에 따른 표기',
+    coinShort:'코인이 부족합니다 (🪙{need} 더 필요)',
+    statsStreak:'연승',
+    statsBest:'최고',
+    streakBadge:'🔥{n}연승 중',
+    demoReset:'데모 데이터 초기화',
+    demoResetConfirm:'저장된 코인·전적을 모두 삭제하고 다시 불러옵니다. 계속할까요?',
+    levelName:'3수 앞을 읽는 AI',
+    levelTag:'상급・강적',
+    levelStars:'★★★',
+    levelDesc:'AI는 반드시 3수 앞까지 읽은 뒤 착수합니다. 2수 AI보다 훨씬 강하며 함정을 놓습니다.',
+    levelSwitch:'◀ ‘2수 앞을 읽는 AI’(표준)로 돌아가기'
+  },
+  es: {
+    homeBtn:'◀ Volver al inicio',
+    privacyLink:'Política de privacidad',
+    agreeLabel:'Acepto los {terms} y la {privacy}',
+    footerCopy:'© 2026 MyMedipro Inc.',
+    companyName:'MyMedipro Inc.',
+    docTitle:'Catacelo | IA de 3 jugadas (Avanzado)',
+    appTitle:'Catacelo — Contra la IA de 3 jugadas',
+    langLabel:'Idioma:', banner:'Zona de banner publicitario',
+    gameInfo1:'Un juego nuevo que añade una regla de mover fichas al Othello (Reversi) clásico.',
+    gameInfo2:'Juegas con blancas contra una IA mejorada (negras). La última ficha colocada/movida por la IA se muestra en un color algo más claro.', yen:'yen', creditUnit:'monedas',
+    creditCard:'Tarjeta de crédito', unregistered:'No registrada', registered:'Registrada (****{last4})',
+    cardRegBtn:'Registrar tarjeta',
+    bonusRemainLabel:'Jugadas de remontada restantes en esta partida', times:'',
+    cardRevenue:'ingresos por tarjeta', purchases:'compras', opportunities:'oportunidades',
+    yourTurn:'Tu turno (blancas)', aiTurnStatus:'Turno de la IA',
+    aiThinking:'La IA lee 3 jugadas en profundidad...',
+    deepMsg:'Perdón por la espera. La IA está analizando a fondo, así que tardará un poco más. Espera, por favor.',
+    black:'Negras', white:'Blancas', toPlace:'Modo colocar', toMove:'Modo mover', passBtn:'Pasar',
+    bonusBuyBtn:'✨ Jugada de remontada (🪙3)',
+    bonusUseBtn:'✨ Usar jugada de remontada ({n} restantes)',
+    purchaseTitle:'✨ ¿Activar una jugada de remontada?',
+    purchaseConfirm:'Activar por 🪙3', purchaseCancel:'Cancelar', processing:'Procesando...',
+    payFromCredit:'Hasta 3 usos en esta partida. Saldo 🪙{bal} → 🪙{after} después',
+    topupBtn:'🪙 Tienda de monedas',
+    toppedUp:'🪙 ¡Se añadieron {amt} monedas! Saldo: {bal} monedas',
+    needTopUp:'No tienes suficientes monedas. Puedes añadir más en la tienda de monedas.',
+    resetBtn:'Reiniciar juego',
+    advantage:'Situación', even:'Igualado', evalLabel:'Eval.',
+    advantageDefault:'Al principio, las esquinas y los movimientos disponibles importan más que el número de fichas.',
+    blackSlight:'Negras algo mejor', blackStrong:'Negras claramente mejor',
+    whiteSlight:'Blancas algo mejor', whiteStrong:'Blancas claramente mejor',
+    reasonCorner:'{who} tiene más esquinas', reasonMoves:'{who} tiene más movimientos disponibles',
+    reasonDiscs:'{who} tiene más fichas', reasonDefault:'Conserva las esquinas y reduce las opciones del rival',
+    cardModalTitle:'Registrar tarjeta de crédito',
+    cardModalNote:'Este es un formulario de demostración. Nada de lo introducido se envía ni se guarda. En producción, no manejes números de tarjeta en bruto; tokeniza con Stripe Elements u otro.',
+    cardNumber:'Número de tarjeta', cardExpiry:'Caducidad (MM/AA)', cardCvc:'Código de seguridad',
+    cardName:'Titular', cardSaveBtn:'Registrar', cardCancelBtn:'Cancelar', registeringBtn:'Registrando...',
+    registerBtn:'Registro inicial', approvingBtn:'Aprobando tarjeta...',
+    cardApprovedMsg:'Tu tarjeta fue aprobada. 🎁 Bono de inicio: ¡{bal} monedas!',
+    cardNotApproved:'La tarjeta no fue aprobada. Revisa tus datos.',
+    needRegister:'Para usar monedas, primero registra una tarjeta con "Registrar tarjeta".',
+    rulesTitle:'Cómo jugar',
+    rule1:'Las reglas básicas son las del Othello estándar. Tú eres blancas; la IA, negras.',
+    rule2:'En modo colocar, pon una ficha donde flanquees y voltees fichas del rival.',
+    rule3:'En modo mover, puedes levantar una de tus fichas y llevarla a otra casilla válida.',
+    rule4:'Usa los botones \u201cModo colocar\u201d / \u201cModo mover\u201d para cambiar de modo.',
+    rule5:'En modo mover, haz clic en tu ficha y luego en un destino válido.',
+    rule6:'Si no tienes jugada válida, usa el botón \u201cPasar\u201d para saltar tu turno.',
+    rule7:'La IA usa tácticas avanzadas y calcula varias jugadas por delante.',
+    rule8:'La última ficha colocada/movida por la IA se muestra en un color algo más claro.',
+    rule9:'La partida termina cuando ambos pasan o el tablero se llena.',
+    bonusTitle:'Jugada de remontada y pistas (funciones con monedas)',
+    bonusRule1:'El botón "✨ Jugada de remontada" aparece solo cuando tú (blancas) estás en estado de paso.',
+    bonusRule2:'Una jugada de remontada cuesta 🪙3 y puede usarse hasta 3 veces en esa partida (los usos no gastados caducan al terminar o reiniciar).',
+    bonusRule3:'La jugada de remontada te permite añadir un disco blanco en cualquier casilla vacía, voltee o no.',
+    bonusRule4:'💡 Pista (🪙1): resalta la jugada que la IA te recomendaría.',
+    bonusRule5:'Si te faltan monedas, añade más en la tienda (50 monedas / 1.000 yen).',
+    modePlace:'colocar ficha', modeMove:'mover ficha', modeLabelFmt:'Modo actual: {mode}',
+    bonusPlacePrompt:'✨ Jugada de remontada: coloca un disco blanco en cualquier casilla vacía ({n} restantes)',
+    bonusPlaced:'✨ ¡Colocaste un disco blanco con una jugada de remontada!',
+    moveKindMove:'Mover ({from}\u2192{to})', moveKindPlace:'Colocar ({to})',
+    aiPassed:'La IA no tenía jugada válida y pasó',
+    aiMoveInfo:'Jugada de la IA: {kind} / lectura: 3 jugadas garantizadas (esta vez {depth}) / tiempo: {ms}ms',
+    purchasedCredit:'✨ ¡Jugada de remontada activada! Hasta 3 usos en esta partida (saldo 🪙{bal})',
+    payFailed:'El pago falló. Inténtalo de nuevo.',
+    cardRegFailed:'Falló el registro de la tarjeta. Revisa el número.',
+    fillAll:'Rellena todos los campos.',
+    gameEndBlack:'Fin del juego — ¡ganan las negras (IA)! {nb} a {nw}',
+    gameEndWhite:'Fin del juego — ¡ganas tú (blancas)! {nw} a {nb}',
+    gameEndDraw:'Fin del juego — empate {nb} a {nw}',
+    statsTitle:'Tu historial', statsSince:'(desde {date})',
+    statsPlayed:'partidas', statsWon:'victorias', statsWinRate:'tasa de victorias',
+    whoBlack:'las negras', whoWhite:'las blancas',
+    cardApprovedAgain:'Tu tarjeta fue aprobada. Ya puedes usar monedas.',
+    hintBtn:'💡 Pista (🪙1)',
+    hintTitle:'💡 ¿Ver la jugada recomendada por la IA?',
+    hintConfirm:'Ver pista por 🪙1',
+    hintLine:'Saldo 🪙{bal} → 🪙{after} después',
+    hintShown:'💡 Jugada recomendada: {pos} (casilla resaltada)',
+    hintShownMove:'💡 Jugada recomendada: mover el disco de {from} a {to} (casillas resaltadas)',
+    shopTitle:'🪙 Tienda de monedas',
+    shopBalance:'Saldo actual: {bal} monedas',
+    shopPackName:'Pack de 50 monedas',
+    shopPackPrice:'1.000 yen (imp. incl.)',
+    shopPackDesc:'Equivale a 16 jugadas de remontada + 2 pistas',
+    shopBuyBtn:'Comprar por 1.000 yen',
+    shopClose:'Cerrar',
+    shopNote1:'Precio: 1.000 yen (imp. incl.) / Contenido: 50 monedas (1 moneda = 20 yen)',
+    shopNote2:'Pago: se cobra a tu tarjeta registrada (****{last4}) al confirmar / Entrega: se añade al saldo inmediatamente tras el pago',
+    shopNote3:'Las monedas compradas caducan a los 150 días de la compra. Las monedas caducadas se pierden y no se reembolsan ni se canjean por dinero.',
+    shopNote4:'Por tratarse de contenido digital, no se admiten reembolsos ni cancelaciones.',
+    shopAgree:'Al confirmar, aceptas los {terms} y el {tokushoho}.',
+    termsLink:'Términos de uso',
+    tokushohoLink:'aviso legal de transacciones comerciales',
+    coinShort:'No tienes suficientes monedas (faltan 🪙{need})',
+    statsStreak:'racha',
+    statsBest:'mejor',
+    streakBadge:'🔥 racha de {n}',
+    demoReset:'Restablecer datos de demo',
+    demoResetConfirm:'Se borrarán monedas e historial guardados y se recargará la página. ¿Continuar?',
+    levelName:'IA que lee 3 jugadas',
+    levelTag:'Avanzado · Difícil',
+    levelStars:'★★★',
+    levelDesc:'La IA siempre lee al menos 3 jugadas por delante. Mucho más dura que la de 2 jugadas: tiende trampas.',
+    levelSwitch:'◀ Volver a la IA de 2 jugadas (Estándar)'
+  },
+  fr: {
+    homeBtn:'◀ Retour à l’accueil',
+    privacyLink:'Politique de confidentialité',
+    agreeLabel:'J’accepte les {terms} et la {privacy}',
+    footerCopy:'© 2026 MyMedipro Inc.',
+    companyName:'MyMedipro Inc.',
+    docTitle:'Catacelo | IA à 3 coups (Avancé)',
+    appTitle:'Catacelo — Affrontez l’IA à 3 coups',
+    langLabel:'Langue :', banner:'Zone de bannière publicitaire',
+    gameInfo1:'Un nouveau jeu qui ajoute une règle de déplacement des pions à l\u2019Othello (Reversi) classique.',
+    gameInfo2:'Vous jouez les blancs contre une IA renforcée (noirs). Le dernier pion posé/déplacé par l\u2019IA s\u2019affiche dans une couleur un peu plus claire.', yen:'yens', creditUnit:'pièces',
+    creditCard:'Carte bancaire', unregistered:'Non enregistrée', registered:'Enregistrée (****{last4})',
+    cardRegBtn:'Enregistrer une carte',
+    bonusRemainLabel:'Coups de la remontée restants dans cette partie', times:'',
+    cardRevenue:'revenus carte', purchases:'achats', opportunities:'occasions',
+    yourTurn:'À vous (blancs)', aiTurnStatus:'Tour de l\u2019IA',
+    aiThinking:'L’IA lit 3 coups en profondeur...',
+    deepMsg:'Désolé pour l\u2019attente. L\u2019IA analyse en profondeur, cela prendra un peu plus de temps. Veuillez patienter.',
+    black:'Noirs', white:'Blancs', toPlace:'Mode poser', toMove:'Mode déplacer', passBtn:'Passer',
+    bonusBuyBtn:'✨ Coup de la remontée (🪙3)',
+    bonusUseBtn:'✨ Utiliser le coup de la remontée ({n} restants)',
+    purchaseTitle:'✨ Activer un coup de la remontée ?',
+    purchaseConfirm:'Activer pour 🪙3', purchaseCancel:'Annuler', processing:'Traitement...',
+    payFromCredit:'Jusqu’à 3 utilisations dans cette partie. Solde 🪙{bal} → 🪙{after} après',
+    topupBtn:'🪙 Boutique de pièces',
+    toppedUp:'🪙 {amt} pièces ajoutées ! Solde : {bal} pièces',
+    needTopUp:'Pièces insuffisantes. Vous pouvez en ajouter dans la boutique.',
+    resetBtn:'Réinitialiser',
+    advantage:'Position', even:'Égalité', evalLabel:'Éval.',
+    advantageDefault:'En début de partie, les coins et les coups disponibles comptent plus que le nombre de pions.',
+    blackSlight:'Noirs légèrement devant', blackStrong:'Noirs nettement devant',
+    whiteSlight:'Blancs légèrement devant', whiteStrong:'Blancs nettement devant',
+    reasonCorner:'{who} tiennent plus de coins', reasonMoves:'{who} ont plus de coups disponibles',
+    reasonDiscs:'{who} ont plus de pions', reasonDefault:'Gardez les coins et réduisez les options de l\u2019adversaire',
+    cardModalTitle:'Enregistrer une carte bancaire',
+    cardModalNote:'Ceci est un formulaire de démonstration. Rien de ce qui est saisi n\u2019est envoyé ni stocké. En production, ne manipulez jamais les numéros de carte bruts ; tokenisez avec Stripe Elements ou équivalent.',
+    cardNumber:'Numéro de carte', cardExpiry:'Expiration (MM/AA)', cardCvc:'Code de sécurité',
+    cardName:'Titulaire', cardSaveBtn:'Enregistrer', cardCancelBtn:'Annuler', registeringBtn:'Enregistrement...',
+    registerBtn:'Inscription initiale', approvingBtn:'Validation de la carte...',
+    cardApprovedMsg:'Votre carte a été approuvée. 🎁 Bonus de départ : {bal} pièces !',
+    cardNotApproved:'La carte n\u2019a pas été approuvée. Vérifiez vos informations.',
+    needRegister:'Pour utiliser des pièces, enregistrez d’abord une carte via « Enregistrer la carte ».',
+    rulesTitle:'Comment jouer',
+    rule1:'Les règles de base sont celles de l\u2019Othello standard. Vous êtes les blancs ; l\u2019IA, les noirs.',
+    rule2:'En mode poser, placez un pion là où vous encadrez et retournez les pions adverses.',
+    rule3:'En mode déplacer, vous pouvez lever un de vos pions et le déplacer sur une autre case valide.',
+    rule4:'Utilisez les boutons \u201cMode poser\u201d / \u201cMode déplacer\u201d pour changer de mode.',
+    rule5:'En mode déplacer, cliquez sur votre pion puis sur une destination valide.',
+    rule6:'Sans coup valide, utilisez le bouton \u201cPasser\u201d pour passer votre tour.',
+    rule7:'L\u2019IA utilise des tactiques avancées et calcule plusieurs coups à l\u2019avance.',
+    rule8:'Le dernier pion posé/déplacé par l\u2019IA s\u2019affiche dans une couleur un peu plus claire.',
+    rule9:'La partie se termine quand les deux passent ou que le plateau est plein.',
+    bonusTitle:'Coup de la remontée et indices (fonctions à pièces)',
+    bonusRule1:'Le bouton « ✨ Coup de la remontée » n’apparaît que lorsque vous (blancs) êtes en situation de passe.',
+    bonusRule2:'Un coup de la remontée coûte 🪙3 et peut être utilisé jusqu’à 3 fois dans la partie (les utilisations restantes expirent à la fin ou à la réinitialisation).',
+    bonusRule3:'Il permet d’ajouter un disque blanc sur n’importe quelle case vide, qu’il retourne des disques ou non.',
+    bonusRule4:'💡 Indice (🪙1) : met en évidence le coup que l’IA vous recommanderait.',
+    bonusRule5:'S’il vous manque des pièces, ajoutez-en dans la boutique (50 pièces / 1 000 yens).',
+    modePlace:'poser un pion', modeMove:'déplacer un pion', modeLabelFmt:'Mode actuel : {mode}',
+    bonusPlacePrompt:'✨ Coup de la remontée : placez un disque blanc sur n’importe quelle case vide ({n} restants)',
+    bonusPlaced:'✨ Disque blanc placé grâce au coup de la remontée !',
+    moveKindMove:'Déplacer ({from}\u2192{to})', moveKindPlace:'Poser ({to})',
+    aiPassed:'L\u2019IA n\u2019avait aucun coup valide et a passé',
+    aiMoveInfo:'Coup de l’IA : {kind} / lecture : 3 coups garantis (cette fois {depth}) / temps : {ms}ms',
+    purchasedCredit:'✨ Coup de la remontée activé ! Jusqu’à 3 utilisations dans cette partie (solde 🪙{bal})',
+    payFailed:'Le paiement a échoué. Réessayez.',
+    cardRegFailed:'Échec de l\u2019enregistrement de la carte. Vérifiez le numéro.',
+    fillAll:'Veuillez remplir tous les champs.',
+    gameEndBlack:'Fin de partie — les noirs (IA) gagnent ! {nb} à {nw}',
+    gameEndWhite:'Fin de partie — vous (blancs) gagnez ! {nw} à {nb}',
+    gameEndDraw:'Fin de partie — égalité {nb} à {nw}',
+    statsTitle:'Votre bilan', statsSince:'(depuis {date})',
+    statsPlayed:'parties', statsWon:'victoires', statsWinRate:'taux de victoire',
+    whoBlack:'les noirs', whoWhite:'les blancs',
+    cardApprovedAgain:'Votre carte a été approuvée. Vous pouvez maintenant utiliser des pièces.',
+    hintBtn:'💡 Indice (🪙1)',
+    hintTitle:'💡 Voir le coup recommandé par l’IA ?',
+    hintConfirm:'Voir l’indice pour 🪙1',
+    hintLine:'Solde 🪙{bal} → 🪙{after} après',
+    hintShown:'💡 Coup recommandé : {pos} (case en surbrillance)',
+    hintShownMove:'💡 Coup recommandé : déplacer le disque de {from} vers {to} (cases en surbrillance)',
+    shopTitle:'🪙 Boutique de pièces',
+    shopBalance:'Solde actuel : {bal} pièces',
+    shopPackName:'Pack de 50 pièces',
+    shopPackPrice:'1 000 yens (TTC)',
+    shopPackDesc:'Équivaut à 16 coups de la remontée + 2 indices',
+    shopBuyBtn:'Acheter pour 1 000 yens',
+    shopClose:'Fermer',
+    shopNote1:'Prix : 1 000 yens (TTC) / Contenu : 50 pièces (1 pièce = 20 yens)',
+    shopNote2:'Paiement : débité de votre carte enregistrée (****{last4}) à la confirmation / Livraison : crédité immédiatement après le paiement',
+    shopNote3:'Les pièces achetées expirent 150 jours après l’achat. Les pièces expirées sont perdues et ne sont ni remboursées ni échangeables.',
+    shopNote4:'S’agissant de contenu numérique, aucun remboursement ni annulation n’est possible après l’achat.',
+    shopAgree:'En confirmant, vous acceptez les {terms} et la {tokushoho}.',
+    termsLink:'Conditions d’utilisation',
+    tokushohoLink:'mention légale sur les transactions commerciales',
+    coinShort:'Pièces insuffisantes (il manque 🪙{need})',
+    statsStreak:'série',
+    statsBest:'record',
+    streakBadge:'🔥 série de {n}',
+    demoReset:'Réinitialiser les données de démo',
+    demoResetConfirm:'Les pièces et résultats enregistrés seront effacés et la page rechargée. Continuer ?',
+    levelName:'IA qui lit 3 coups',
+    levelTag:'Avancé · Redoutable',
+    levelStars:'★★★',
+    levelDesc:'L’IA lit toujours au moins 3 coups à l’avance. Bien plus coriace que l’IA à 2 coups : elle tend des pièges.',
+    levelSwitch:'◀ Revenir à l’IA à 2 coups (Standard)'
+  }
+};
+
+let lang = 'ja';
+function t(key, vars){
+  let s = (I18N[lang] && I18N[lang][key]);
+  if (s == null) s = (I18N.ja[key] != null ? I18N.ja[key] : key);
+  if (vars){ for (const k in vars) s = s.split('{'+k+'}').join(vars[k]); }
+  return s;
+}
+
+/* =========================================================
+   Catacelo  3手先読みAI（置換表つき）+ コイン経済（ゲーム内通貨）版 (ais4-L3)
+   - 反復深化 + アルファベータ枝刈りによる先読み探索
+   - 円が動くのは「コインショップ」（1,000円＝50コイン）だけ。
+     対局中の消費はすべてゲーム内通貨「コイン」で表現し、円換算は画面に出さない。
+   - コインの使い道：
+       ✨ 逆転の一手（🪙3）… 白がパス状態のときだけ。対局中に最大3回、空きマスに白を自由配置
+       💡 ヒント（🪙1）… AIが読んだ白のおすすめの一手を盤上で光らせる
+   - コインはコインショップでの購入（および初回登録時のスタータボーナス）でのみ増える
+   ========================================================= */
+
+const SIZE = 8, EMPTY = 0, BLACK = 1, WHITE = 2;
+const HUMAN = WHITE, AI = BLACK;
+const HUMAN_FIRST = true;            // 既存版に合わせて白（人間）から開始
+const TIME_BUDGET_MS = 1200;         // AIの思考時間の上限（迅速さを保証）
+const MIN_DEPTH = 3;                 // 必ず読み切る最低深さ（=三手先を完全保証）
+const MAX_DEPTH = 12;                // 時間が余れば最大ここまで深読み
+const INNER_BEAM = 22;               // 内部ノードでの候補手の絞り込み数（高速化）
+
+/* ===== コイン経済の設定（1コイン = 20円相当。円換算はショップ画面以外に表示しない） ===== */
+const CREDIT_UNIT_YEN = 20;          // 1コインあたりの円換算額（帳簿・ショップ表示用）
+
+/* コインの使い道 */
+const PASS_BONUS_PRICE = 3;          // ✨ 逆転の一手：1回の発動に必要なコイン（＝旧「1機会60円」）
+const PASS_BONUS_USES  = 3;          // 1回の発動で得られる最大使用回数（対局内）
+const HINT_COST        = 1;          // 💡 ヒント：1回に必要なコイン
+const HINT_TIME_MS     = 500;        // ヒント探索の思考時間上限
+
+/* コインの入手方法（コインショップでの購入のみ） */
+const SUPPORT_CREDIT = 50;           // 初回登録時に1回だけ付与するスタータボーナス（不要なら 0 に）
+const CREDIT_TOPUP_YEN = 1000;       // 1パックのカード決済額（円）
+const CREDIT_TOPUP   = 50;           // 1パックで付与されるコイン数（1,000円 ÷ 20円）
+
+const DIRS = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+
+/* 位置の重み表（隅が最重要、X/Cマスは危険） */
+const POSW = [
+  120,-25, 15,  8,  8, 15,-25,120,
+  -25,-45, -5,  1,  1, -5,-45,-25,
+   15, -5,  4,  2,  2,  4, -5, 15,
+    8,  1,  2,  1,  1,  2,  1,  8,
+    8,  1,  2,  1,  1,  2,  1,  8,
+   15, -5,  4,  2,  2,  4, -5, 15,
+  -25,-45, -5,  1,  1, -5,-45,-25,
+  120,-25, 15,  8,  8, 15,-25,120
+];
+const CORNERS = [0,7,56,63];
+/* 各隅に隣接するX/Cマス。隅を自分が取っていれば、その隣の減点は打ち消す */
+const CORNER_NEIGHBORS = { 0:[1,8,9], 7:[6,14,15], 56:[48,49,57], 63:[54,55,62] };
+
+function opp(c){ return c === BLACK ? WHITE : BLACK; }
+function idx(r,c){ return r*8 + c; }
+
+/* ---------- 着手生成 ---------- */
+function flipsAt(b, pos, color){
+  if (b[pos] !== EMPTY) return null;
+  const r0 = (pos>>3), c0 = pos & 7;
+  let flips = null;
+  for (let d = 0; d < 8; d++){
+    const dr = DIRS[d][0], dc = DIRS[d][1];
+    let r = r0+dr, c = c0+dc, line = null;
+    while (r>=0 && r<8 && c>=0 && c<8){
+      const p = idx(r,c), v = b[p];
+      if (v === EMPTY) { line = null; break; }
+      if (v === color) break;
+      (line || (line = [])).push(p);
+      r += dr; c += dc;
+    }
+    if (line && r>=0 && r<8 && c>=0 && c<8 && b[idx(r,c)] === color){
+      (flips || (flips = [])).push(...line);
+    }
+  }
+  return flips; // null = 置けない
+}
+
+function genPlacements(b, color, out){
+  for (let p = 0; p < 64; p++){
+    if (b[p] !== EMPTY) continue;
+    const f = flipsAt(b, p, color);
+    if (f) out.push({ type:'place', to:p, flips:f });
+  }
+}
+
+function genMoveMoves(b, color, out){
+  for (let s = 0; s < 64; s++){
+    if (b[s] !== color) continue;
+    b[s] = EMPTY;                       // 一時的に取り外す
+    for (let p = 0; p < 64; p++){
+      if (p === s || b[p] !== EMPTY) continue;
+      const f = flipsAt(b, p, color);
+      if (f) out.push({ type:'move', from:s, to:p, flips:f });
+    }
+    b[s] = color;                       // 戻す
+  }
+}
+
+function genAllMoves(b, color){
+  const out = [];
+  genPlacements(b, color, out);
+  genMoveMoves(b, color, out);
+  return out;
+}
+
+function applyMove(b, mv, color){
+  const nb = b.slice();
+  if (mv.type === 'move') nb[mv.from] = EMPTY;
+  nb[mv.to] = color;
+  const f = mv.flips;
+  for (let i = 0; i < f.length; i++) nb[f[i]] = color;
+  return nb;
+}
+
+/* ---------- 評価関数（黒視点） ---------- */
+function countDiscs(b){
+  let nb = 0, nw = 0, ne = 0;
+  for (let p = 0; p < 64; p++){
+    if (b[p] === BLACK) nb++;
+    else if (b[p] === WHITE) nw++;
+    else ne++;
+  }
+  return [nb, nw, ne];
+}
+
+function placementMobility(b, color){
+  let m = 0;
+  for (let p = 0; p < 64; p++){
+    if (b[p] !== EMPTY) continue;
+    if (flipsAt(b, p, color)) m++;
+  }
+  return m;
+}
+
+function frontierCount(b, color){
+  let f = 0;
+  for (let p = 0; p < 64; p++){
+    if (b[p] !== color) continue;
+    const r0 = p>>3, c0 = p&7;
+    for (let d = 0; d < 8; d++){
+      const r = r0 + DIRS[d][0], c = c0 + DIRS[d][1];
+      if (r>=0 && r<8 && c>=0 && c<8 && b[idx(r,c)] === EMPTY){ f++; break; }
+    }
+  }
+  return f;
+}
+
+function evaluate(b){
+  const [nb, nw, ne] = countDiscs(b);
+  if (nb === 0) return -100000;
+  if (nw === 0) return  100000;
+
+  /* 位置点（隅を取っていれば隣接マスの減点を打ち消す） */
+  let pos = 0;
+  for (let p = 0; p < 64; p++){
+    if (b[p] === BLACK) pos += POSW[p];
+    else if (b[p] === WHITE) pos -= POSW[p];
+  }
+  for (let i = 0; i < 4; i++){
+    const cn = CORNERS[i], owner = b[cn];
+    if (owner === EMPTY) continue;
+    const nbs = CORNER_NEIGHBORS[cn];
+    for (let j = 0; j < nbs.length; j++){
+      const q = nbs[j];
+      if (b[q] === owner){
+        const w = POSW[q];
+        pos += (owner === BLACK ? (-w + 12) : (w - 12)); // 減点取消＋安定ボーナス
+      }
+    }
+  }
+
+  const mob = placementMobility(b, BLACK) - placementMobility(b, WHITE);
+  const fro = frontierCount(b, BLACK) - frontierCount(b, WHITE);
+  const disc = nb - nw;
+
+  /* 局面フェーズで石差の重みを変える（序盤は少なめが有利、終盤は多さ重視） */
+  let discW;
+  if (ne > 40) discW = -3;
+  else if (ne > 14) discW = 0;
+  else discW = 12;
+
+  return pos + 9*mob - 6*fro + discW*disc;
+}
+
+function updateAdvantage(){
+  if (!board) return;
+
+  const [nb, nw] = countDiscs(board);
+  const raw = evaluate(board);              // プラスなら黒AI、マイナスなら白が有利
+  const score = Math.max(-240, Math.min(240, raw));
+  const markerPct = 50 + (score / 240) * 48;
+  const abs = Math.abs(raw);
+  const blackMoves = placementMobility(board, BLACK);
+  const whiteMoves = placementMobility(board, WHITE);
+  const blackCorners = CORNERS.filter(p => board[p] === BLACK).length;
+  const whiteCorners = CORNERS.filter(p => board[p] === WHITE).length;
+
+  let labelKey, className;
+  if (abs < 18){
+    labelKey = 'even';
+    className = 'evenAdv';
+  } else if (raw > 0){
+    labelKey = abs > 95 ? 'blackStrong' : 'blackSlight';
+    className = 'blackAdv';
+  } else {
+    labelKey = abs > 95 ? 'whiteStrong' : 'whiteSlight';
+    className = 'whiteAdv';
+  }
+
+  const whoStr = (isWhite) => t(isWhite ? 'whoWhite' : 'whoBlack');
+  const reasons = [];
+  if (whiteCorners !== blackCorners){
+    reasons.push(t('reasonCorner', { who: whoStr(whiteCorners > blackCorners) }));
+  }
+  if (whiteMoves !== blackMoves){
+    reasons.push(t('reasonMoves', { who: whoStr(whiteMoves > blackMoves) }));
+  }
+  if (Math.abs(nw - nb) >= 8){
+    reasons.push(t('reasonDiscs', { who: whoStr(nw > nb) }));
+  }
+  if (reasons.length === 0){
+    reasons.push(t('reasonDefault'));
+  }
+
+  const cjk = (lang === 'ja' || lang === 'zh');
+  const sep = cjk ? '。' : '. ';
+  const tail = cjk ? '。' : '.';
+
+  advantageLabelEl.textContent = t(labelKey);
+  advantageLabelEl.className = className;
+  advantageScoreEl.textContent = t('evalLabel') + ' ' + Math.round(raw);
+  advantageMarkerEl.style.left = 'calc(' + markerPct.toFixed(1) + '% - 2px)';
+  advantageReasonEl.textContent = reasons.slice(0, 2).join(sep) + tail;
+}
+
+/* ---------- 探索（ミニマックス + αβ + 反復深化 + 置換表） ---------- */
+let nodeCount = 0, searchDeadline = 0;
+const TimeUp = {};
+
+/* Zobristハッシュ：局面を1つの数値に符号化し、置換表のキーにする */
+const ZOBRIST = (() => {
+  let seed = 0x9e3779b9 >>> 0;
+  function rnd(){ // 決定的な擬似乱数（xorshift）
+    seed ^= seed << 13; seed >>>= 0;
+    seed ^= seed >> 17;
+    seed ^= seed << 5;  seed >>>= 0;
+    return seed;
+  }
+  const t = { black: new Array(64), white: new Array(64), side: rnd() };
+  for (let p = 0; p < 64; p++){ t.black[p] = rnd(); t.white[p] = rnd(); }
+  return t;
+})();
+
+function hashBoard(b, color){
+  let h = (color === BLACK) ? ZOBRIST.side : 0;
+  for (let p = 0; p < 64; p++){
+    if (b[p] === BLACK) h ^= ZOBRIST.black[p];
+    else if (b[p] === WHITE) h ^= ZOBRIST.white[p];
+  }
+  return h >>> 0;
+}
+
+/* 置換表：一度探索した局面の結果を再利用して同一局面の再探索を省く */
+const TT_EXACT = 0, TT_LOWER = 1, TT_UPPER = 2;
+let TT = new Map();
+const TT_MAX = 400000;
+
+/* 履歴ヒューリスティック：過去に枝刈りを起こした「良い着地点」を優先して並べる */
+let HIST = [new Float64Array(64), new Float64Array(64)]; // [BLACK-1], [WHITE-1]
+
+function resetSearchTables(){
+  if (TT.size > TT_MAX) TT = new Map();
+  HIST[0].fill(0); HIST[1].fill(0);
+}
+
+function orderMoves(b, moves, color, ttBestKey){
+  const hist = HIST[color - 1];
+  for (let i = 0; i < moves.length; i++){
+    const m = moves[i];
+    let s = POSW[m.to] + m.flips.length * 2 + hist[m.to];
+    if (m.to===0 || m.to===7 || m.to===56 || m.to===63) s += 900;
+    if (m.type === 'move'){
+      s -= Math.max(0, POSW[m.from]) * 0.5; // 良い場所から動かすのは少し減点
+      s -= 1;
+    }
+    /* 置換表に記録された「前回の最善手」は最優先で調べる（枝刈り効率が跳ね上がる） */
+    if (ttBestKey !== undefined && (m.type + m.to + '_' + (m.from ?? '')) === ttBestKey) s += 100000;
+    m._o = s;
+  }
+  moves.sort((a,bm) => bm._o - a._o);
+  return moves;
+}
+
+function moveKey(m){ return m.type + m.to + '_' + (m.from ?? ''); }
+
+function alphabeta(b, depth, alpha, beta, color, passedBefore, useDeadline){
+  if (useDeadline && (++nodeCount & 255) === 0 && performance.now() > searchDeadline) throw TimeUp;
+
+  if (depth === 0) return evaluate(b);
+
+  /* --- 置換表の照会（パス直後の特殊局面は除外して安全側に） --- */
+  let hash = 0, entry = null;
+  if (!passedBefore && depth >= 2){
+    hash = hashBoard(b, color);
+    entry = TT.get(hash);
+    if (entry && entry.depth >= depth){
+      if (entry.flag === TT_EXACT) return entry.value;
+      if (entry.flag === TT_LOWER && entry.value >= beta)  return entry.value;
+      if (entry.flag === TT_UPPER && entry.value <= alpha) return entry.value;
+    }
+  }
+
+  let moves = genAllMoves(b, color);
+  if (moves.length === 0){
+    if (passedBefore){
+      const [nb, nw] = countDiscs(b);
+      const d = nb - nw;
+      return d > 0 ? 60000 + d : d < 0 ? -60000 + d : 0;  // 終局
+    }
+    return alphabeta(b, depth - 1, alpha, beta, opp(color), true, useDeadline);
+  }
+
+  orderMoves(b, moves, color, entry ? entry.best : undefined);
+  if (moves.length > INNER_BEAM) moves = moves.slice(0, INNER_BEAM);
+
+  const alpha0 = alpha, beta0 = beta;
+  let best, bestMv = null;
+
+  if (color === BLACK){
+    best = -Infinity;
+    for (let i = 0; i < moves.length; i++){
+      const v = alphabeta(applyMove(b, moves[i], BLACK), depth - 1, alpha, beta, WHITE, false, useDeadline);
+      if (v > best){ best = v; bestMv = moves[i]; }
+      if (best > alpha) alpha = best;
+      if (alpha >= beta){ HIST[BLACK-1][moves[i].to] += depth * depth; break; } // 枝刈り→履歴に加点
+    }
+  } else {
+    best = Infinity;
+    for (let i = 0; i < moves.length; i++){
+      const v = alphabeta(applyMove(b, moves[i], WHITE), depth - 1, alpha, beta, BLACK, false, useDeadline);
+      if (v < best){ best = v; bestMv = moves[i]; }
+      if (best < beta) beta = best;
+      if (alpha >= beta){ HIST[WHITE-1][moves[i].to] += depth * depth; break; } // 枝刈り→履歴に加点
+    }
+  }
+
+  /* --- 置換表への保存（深さ優先で上書き） --- */
+  if (!passedBefore && depth >= 2){
+    const flag = (best <= alpha0) ? TT_UPPER : (best >= beta0) ? TT_LOWER : TT_EXACT;
+    const old = TT.get(hash);
+    if (!old || old.depth <= depth){
+      TT.set(hash, { depth: depth, value: best, flag: flag, best: bestMv ? moveKey(bestMv) : undefined });
+    }
+  }
+  return best;
+}
+
+function searchRoot(b, depth, useDeadline, pvKey){
+  const moves = orderMoves(b, genAllMoves(b, AI), AI, pvKey);
+  if (moves.length === 0) return null;
+  let bestMove = moves[0], bestVal = -Infinity;
+  let alpha = -Infinity;
+  for (let i = 0; i < moves.length; i++){
+    const v = alphabeta(applyMove(b, moves[i], AI), depth - 1, alpha, Infinity, HUMAN, false, useDeadline);
+    if (v > bestVal){ bestVal = v; bestMove = moves[i]; }
+    if (v > alpha) alpha = v;
+  }
+  return { move: bestMove, value: bestVal };
+}
+
+function aiChooseMove(b, budgetMs){
+  const t0 = performance.now();
+  searchDeadline = t0 + (budgetMs || TIME_BUDGET_MS);
+  nodeCount = 0;
+  resetSearchTables();
+
+  /* 残り空きが少ない終盤はさらに深く読み切りを狙う */
+  const empties = countDiscs(b)[2];
+  const maxD = empties <= 12 ? Math.max(MAX_DEPTH, 14) : MAX_DEPTH;
+
+  /* 深さ3（三手先）は時間制限なしで必ず読み切る（最低保証） */
+  let result = searchRoot(b, MIN_DEPTH, false);
+  if (!result) return { move: null, depth: 0, ms: performance.now() - t0 };
+  let achieved = MIN_DEPTH;
+
+  /* 反復深化：前の深さの最善手（PV）を次の深さで最初に調べ、枝刈り効率を最大化 */
+  for (let d = MIN_DEPTH + 1; d <= maxD; d++){
+    if (performance.now() > searchDeadline) break;
+    try {
+      const r = searchRoot(b, d, true, result.move ? moveKey(result.move) : undefined);
+      if (r){ result = r; achieved = d; }
+    } catch (e) {
+      if (e !== TimeUp) throw e;
+      break;
+    }
+  }
+  return { move: result.move, depth: achieved, ms: performance.now() - t0, nodes: nodeCount };
+}
+
+
+/* =========================================================================
+   ★★★ 決済システム連携ポイント（プログラマー作業領域）★★★
+   -------------------------------------------------------------------------
+   本番運用では、下記2つの async 関数の中身だけを実装してください。
+   この2関数以外のゲームロジックは変更不要です（両関数とも Promise を返します）。
+
+     ① registerCreditCard(form) … カード登録（トークン化／保存）
+     ② chargePassBonus(amountYen) … コインショップでの有償コイン購入のカード決済（1,000円＝50コイン）
+
+   重要: フロントエンドで生のカード番号を直接扱わないでください。
+         Stripe Elements 等でトークン化し、決済確定はサーバー側で行います。
+   ========================================================================= */
+
+/* 【連携ポイント①】クレジットカードの登録
+   戻り値: Promise<{ success:boolean, last4?:string, customerId?:string }> */
+async function registerCreditCard(form){
+  /* ===== ▼▼▼ ここに本番のカード登録処理を実装 ▼▼▼ =====================
+  // 例（Stripe）:
+  //   const stripe = Stripe('pk_live_xxxxx');
+  //   const { setupIntent, error } = await stripe.confirmCardSetup(
+  //     clientSecret,
+  //     { payment_method: { card: cardElement, billing_details: { name: form.name } } }
+  //   );
+  //   if (error) return { success: false };
+  //   const res  = await fetch('/api/save-card', {
+  //     method: 'POST',
+  //     headers: { 'Content-Type': 'application/json' },
+  //     body: JSON.stringify({ paymentMethodId: setupIntent.payment_method })
+  //   });
+  //   const data = await res.json();   // { last4, customerId } を返す想定
+  //   return { success: true, last4: data.last4, customerId: data.customerId };
+  ===== ▲▲▲ ここまで（本番実装）▲▲▲ ===================================== */
+
+  /* ↓↓↓ デモ用ダミー実装（本番では上を実装し、ここから下は削除してください）↓↓↓ */
+  await new Promise(r => setTimeout(r, 500));
+  const digits = (form.number || '').replace(/\D/g, '');
+  if (digits.length < 12) return { success: false };
+  return { success: true, last4: digits.slice(-4) };
+  /* ↑↑↑ デモ用ダミー実装ここまで ↑↑↑ */
+}
+
+/* 【連携ポイント②】コインショップの決済（CREDIT_TOPUP_YEN 円 → CREDIT_TOPUP 有償コイン付与）
+   売上は MyMedipro(株) の決済アカウントに計上されます。
+   戻り値: Promise<{ success:boolean, transactionId?:string }> */
+async function chargePassBonus(amountYen){
+  /* ===== ▼▼▼ ここに本番の決済処理を実装 ▼▼▼ =============================
+  // 例（Stripe）: サーバー側で PaymentIntent を作成・確定し、
+  //              登録済み PaymentMethod へ amountYen 円を課金する。
+  //   const res = await fetch('/api/charge-pass-bonus', {
+  //     method: 'POST',
+  //     headers: { 'Content-Type': 'application/json' },
+  //     body: JSON.stringify({ amount: amountYen, currency: 'jpy' })
+  //   });
+  //   if (!res.ok) return { success: false };
+  //   const data = await res.json();   // { id: 'pi_xxx' } など
+  //   return { success: true, transactionId: data.id };
+  ===== ▲▲▲ ここまで（本番実装）▲▲▲ ===================================== */
+
+  /* ↓↓↓ デモ用ダミー実装（本番では上を実装し、ここから下は削除してください）↓↓↓ */
+  await new Promise(r => setTimeout(r, 600));
+  return { success: true, transactionId: 'demo_' + Date.now() };
+  /* ↑↑↑ デモ用ダミー実装ここまで ↑↑↑ */
+}
+/* ===================== 決済システム連携ポイントここまで ===================== */
+
+
+/* =========================================================
+   UI / ゲーム進行
+   ========================================================= */
+let board, current, mode, selectedSrc, lastAiPos, consecutivePasses, gameOver, busy;
+
+/* --- コイン／課金まわりの状態 --- */
+/* セッション全体で維持（リセットしても引き継ぐ） */
+let cardRegistered = false;     // クレジットカード登録済みか
+let cardApproved = false;       // カードが正式に承認されたか（承認されるまでコイン使用不可）
+let cardLast4 = '';             // 登録カード末尾4桁
+let myMediproRevenue = 0;       // MyMedipro(株) のカード決済による累計収益（円）
+let purchaseCount = 0;          // 累計の購入機会数
+/* コイン残高 */
+let coinBalance = 0;            // 現在のコイン残高（コインショップでの購入・スタータボーナスでのみ増える）
+let starterGranted = false;     // スタータボーナスを付与済みか（1回のみ）
+let winStreak = 0, bestStreak = 0;
+/* 対局内の一時状態 */
+let wildStones = new Set();     // 逆転の一手で置いた白の位置（光らせる）
+let hintMove = null;            // 表示中のヒント { type, from, to }
+let prevBoard = null;           // 直前描画時の盤面（駒アニメーション用）
+let confirmMode = 'bonus';      // 確認パネルの用途 'bonus' | 'hint'
+/* 動的メッセージの現在キー（言語切替時に再描画するため保持） */
+let statusKey = 'yourTurn', statusVars = null;
+let aiInfoKey = null, aiInfoVars = null;
+/* 各対局ごとにリセット */
+let bonusUsesRemaining = 0;     // この対局で残っている逆転の一手の使用回数
+let awaitingBonusPlacement = false; // 自由配置（白を空きマスに置く）待ちか
+let resultRecorded = false;     // この対局の勝敗を戦績に反映済みか（二重カウント防止）
+
+/* --- 戦績（カード登録者のみ・登録日から集計） --- */
+let registeredDate = '';        // カード登録日（YYYY-MM-DD）。未登録なら空
+let gamesPlayed = 0;            // 登録日以降に終局した対戦数
+let gamesWon = 0;              // そのうち白（あなた）が勝った数
+const STATS_STORAGE_KEY = 'catacelo_stats_v2';
+
+const boardEl = document.getElementById('board');
+const statusEl = document.getElementById('status');
+const modeLabelEl = document.getElementById('modeLabel');
+const thinkingEl = document.getElementById('thinking');
+const deepMsgEl = document.getElementById('deepMsg');
+const aiInfoEl = document.getElementById('aiInfo');
+const passBtn = document.getElementById('passBtn');
+const placeBtn = document.getElementById('placeBtn');
+const moveBtn = document.getElementById('moveBtn');
+/* コイン・逆転の一手・ヒント関連DOM */
+const cardStatusEl = document.getElementById('cardStatus');
+const revenueBarEl = document.getElementById('revenueBar');
+const bonusRemainEl = document.getElementById('bonusRemain');
+const revenueAmountEl = document.getElementById('revenueAmount');
+const purchaseCountEl = document.getElementById('purchaseCount');
+const passBonusUseBtn = document.getElementById('passBonusUseBtn');
+const passBonusBuyBtn = document.getElementById('passBonusBuyBtn');
+const purchasePanel = document.getElementById('purchasePanel');
+const purchaseConfirmBtn = document.getElementById('purchaseConfirmBtn');
+const purchaseCancelBtn = document.getElementById('purchaseCancelBtn');
+const purchasePayLine = document.getElementById('purchasePayLine');
+const creditBalanceEl = document.getElementById('creditBalance');
+const streakBadgeEl = document.getElementById('streakBadge');
+const hintBtn = document.getElementById('hintBtn');
+const purchaseTitleEl = document.getElementById('purchaseTitle');
+const shopModal = document.getElementById('shopModal');
+const shopBuyBtn = document.getElementById('shopBuyBtn');
+const shopCloseBtn = document.getElementById('shopCloseBtn');
+const shopBalanceLine = document.getElementById('shopBalanceLine');
+const shopShortEl = document.getElementById('shopShort');
+const shopNote2El = document.getElementById('shopNote2');
+const shopAgreeLine = document.getElementById('shopAgreeLine');
+const toastArea = document.getElementById('toastArea');
+const registerBtn = document.getElementById('registerBtn');
+const topupBtn = document.getElementById('topupBtn');
+const advantageLabelEl = document.getElementById('advantageLabel');
+const advantageScoreEl = document.getElementById('advantageScore');
+const advantageMarkerEl = document.getElementById('advantageMarker');
+const advantageReasonEl = document.getElementById('advantageReason');
+const cardModal = document.getElementById('cardModal');
+const cardSaveBtn = document.getElementById('cardSaveBtn');
+const cardCancelBtn = document.getElementById('cardCancelBtn');
+const cardErrorEl = document.getElementById('cardError');
+const statsBar = document.getElementById('statsBar');
+const statsSinceEl = document.getElementById('statsSince');
+const gamesPlayedEl = document.getElementById('gamesPlayed');
+const gamesWonEl = document.getElementById('gamesWon');
+const winRateEl = document.getElementById('winRate');
+let deepTimer = null;
+
+/* ---------- i18n 適用ヘルパー ---------- */
+function fmt(n){ return Number(n).toLocaleString(); }
+
+function setStatus(key, vars){
+  statusKey = key; statusVars = vars || null;
+  statusEl.textContent = t(key, statusVars);
+}
+function setAiInfo(key, vars){
+  aiInfoKey = key; aiInfoVars = vars || null;
+  aiInfoEl.textContent = key ? t(key, aiInfoVars) : '';
+}
+function updateModeLabel(){
+  modeLabelEl.textContent = t('modeLabelFmt', { mode: t(mode === 'place' ? 'modePlace' : 'modeMove') });
+}
+
+/* ---------- 戦績（カード登録者のみ・登録日から集計） ---------- */
+function todayStr(){
+  const d = new Date();
+  const z = n => String(n).padStart(2, '0');
+  return d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate());
+}
+/* 端末に保存（次回以降も登録日からの累計を引き継ぐ）。保存不可環境ではセッション内のみ集計 */
+function loadStats(){
+  try {
+    const raw = localStorage.getItem(STATS_STORAGE_KEY);
+    if (!raw) return;
+    const s = JSON.parse(raw);
+    if (!s) return;
+    /* 戦績・コインは引き継ぐ。ただしカードの登録・承認状態は毎セッション持ち越さない。
+       → 起動時は必ず「初回登録」からスタートし、ボタンと入力画面が表示される（デモ仕様）。 */
+    registeredDate = s.registeredDate || '';
+    gamesPlayed = s.gamesPlayed | 0;
+    gamesWon = s.gamesWon | 0;
+    cardLast4 = s.cardLast4 || '****';
+    coinBalance = s.coinBalance | 0;
+    starterGranted = !!s.starterGranted;
+    winStreak = s.winStreak | 0;
+    bestStreak = s.bestStreak | 0;
+    cardRegistered = false;
+    cardApproved = false;
+  } catch(e){ /* localStorage 不可環境では無視 */ }
+}
+function saveStats(){
+  try {
+    localStorage.setItem(STATS_STORAGE_KEY, JSON.stringify({
+      registeredDate: registeredDate, gamesPlayed: gamesPlayed,
+      gamesWon: gamesWon, cardLast4: cardLast4,
+      coinBalance: coinBalance, starterGranted: starterGranted,
+      winStreak: winStreak, bestStreak: bestStreak
+    }));
+  } catch(e){ /* 無視 */ }
+}
+/* 戦績バーの表示更新（クレジットカード登録者のみ表示） */
+function updateStatsUI(){
+  if (cardRegistered && registeredDate){
+    statsBar.classList.add('show');
+    statsSinceEl.textContent = ' ' + t('statsSince', { date: registeredDate });
+    gamesPlayedEl.textContent = gamesPlayed;
+    gamesWonEl.textContent = gamesWon;
+    winRateEl.textContent = gamesPlayed > 0
+      ? Math.round(gamesWon / gamesPlayed * 100) + '%'
+      : '—';
+    document.getElementById('streakVal').textContent = winStreak;
+    document.getElementById('bestStreakVal').textContent = bestStreak;
+  } else {
+    statsBar.classList.remove('show');
+  }
+  /* 連勝バッジ（コインバー内） */
+  if (winStreak >= 2){
+    streakBadgeEl.style.display = 'inline-block';
+    streakBadgeEl.textContent = t('streakBadge', { n: winStreak });
+  } else {
+    streakBadgeEl.style.display = 'none';
+  }
+}
+
+/* 終局時に勝敗を1回だけ戦績へ反映（登録者のみ・登録日以降を集計） */
+function recordGameResult(humanWon){
+  if (!cardRegistered || !registeredDate) return;  // 登録者のみ集計
+  if (resultRecorded) return;                        // 二重カウント防止
+  resultRecorded = true;
+  gamesPlayed += 1;
+  if (humanWon) gamesWon += 1;
+  saveStats();
+  updateStatsUI();
+}
+
+/* data-i18n を持つ静的要素をすべて現在言語で更新 */
+function applyStaticI18n(){
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.getAttribute('data-i18n');
+    const s = t(k);
+    if (s != null) el.textContent = s;
+  });
+}
+
+/* =========================================================
+   ページ間の言語連携
+   index.html で選んだ言語を localStorage（catacelo_lang）と
+   サイト内リンクの ?lang= の両方で全ページに引き継ぐ
+   ========================================================= */
+const CATACELO_LANG_KEY = 'catacelo_lang';
+const CATACELO_LANGS = ['ja','en','zh','ko','es','fr'];
+function catSharedLang(){
+  try { const u = new URLSearchParams(location.search).get('lang'); if (u && CATACELO_LANGS.indexOf(u) >= 0) return u; } catch(e){}
+  try { const s = localStorage.getItem(CATACELO_LANG_KEY); if (s && CATACELO_LANGS.indexOf(s) >= 0) return s; } catch(e){}
+  return null;
+}
+function catDecorateLinks(l){
+  document.querySelectorAll('a[href]').forEach(a => {
+    const h = a.getAttribute('href');
+    if (!h || !/^(index|catacelo[\w-]*|terms|privacy|tokushoho)\.html(\?.*)?$/.test(h)) return;   // サイト内のゲーム／トップページのみ
+    a.setAttribute('href', h.split('?')[0] + '?lang=' + l);
+  });
+}
+function catSyncLang(l){
+  try { localStorage.setItem(CATACELO_LANG_KEY, l); } catch(e){}
+  catDecorateLinks(l);
+  document.title = t('docTitle');
+  const home = document.getElementById('catacelo-home-btn');
+  if (home) home.textContent = t('homeBtn');
+  const agree = document.getElementById('agreeLabel');
+  if (agree) agree.innerHTML = t('agreeLabel', {
+    terms: '<a href="terms.html" target="_blank" rel="noopener">' + t('termsLink') + '</a>',
+    privacy: '<a href="privacy.html" target="_blank" rel="noopener">' + t('privacyLink') + '</a>'
+  });
+  /* フッター等、メインスクリプトより後ろにある data-i18n 要素も更新 */
+  document.querySelectorAll('.site-footer [data-i18n]').forEach(el => { el.textContent = t(el.getAttribute('data-i18n')); });
+}
+
+/* 言語を切り替えて全UIを再描画 */
+function setLanguage(l){
+  if (!I18N[l]) return;
+  lang = l;
+  try { document.documentElement.lang = l; } catch(e){}
+  applyStaticI18n();
+  document.querySelectorAll('#langBar button[data-lang]').forEach(b => {
+    b.classList.toggle('activeLang', b.getAttribute('data-lang') === l);
+  });
+  updateModeLabel();
+  setStatus(statusKey, statusVars);   // 動的ステータスを現在言語で再表示
+  if (aiInfoKey) setAiInfo(aiInfoKey, aiInfoVars);
+  updateStatsUI();                    // 戦績バー（登録日表記など）を現在言語で再表示
+  updateShopText();
+  catSyncLang(l);                     // 選択言語を保存し、リンク・フッター・トップへ戻るボタンに反映
+  if (board) render();                // 形勢・スコア・ボーナスUIを再描画
+}
+
+/* =========================================================
+   コイン経済（ゲーム内通貨）
+   ========================================================= */
+function coins(){ return coinBalance; }
+/* コインが使える状態か（カード承認が必要） */
+function coinsUsable(){ return cardApproved; }
+
+/* 残高から amount コインを消費。足りれば true */
+function spendCoins(amount){
+  if (coinBalance < amount) return false;
+  coinBalance -= amount;
+  saveStats();
+  bumpBalance();
+  updateBonusUI();
+  return true;
+}
+/* コインを残高に加算（トースト＋コインが飛ぶ演出付き）。コインショップ購入とスタータボーナスからのみ呼ばれる */
+function grantCoins(n, msgKey, vars){
+  if (n <= 0) return;
+  coinBalance += n;
+  saveStats();
+  const v = Object.assign({ n: n }, vars || {});
+  toast(t(msgKey, v), 'gold');
+  flyCoins(Math.min(n, 8));
+  setTimeout(() => { bumpBalance(); updateBonusUI(); }, 700);
+}
+
+/* ---------- トースト／演出 ---------- */
+function toast(msg, cls){
+  const el = document.createElement('div');
+  el.className = 'toast' + (cls ? ' ' + cls : '');
+  el.textContent = msg;
+  toastArea.appendChild(el);
+  setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 320); }, 2600);
+}
+function bumpBalance(){
+  creditBalanceEl.textContent = fmt(coins());
+  creditBalanceEl.classList.remove('bump');
+  void creditBalanceEl.offsetWidth;
+  creditBalanceEl.classList.add('bump');
+}
+/* 盤面の中央から残高表示へコインが飛んでいく */
+function flyCoins(n){
+  const from = boardEl.getBoundingClientRect();
+  const to = creditBalanceEl.getBoundingClientRect();
+  const sx = from.left + from.width / 2, sy = from.top + from.height / 2;
+  const tx = to.left + to.width / 2, ty = to.top + to.height / 2;
+  for (let i = 0; i < n; i++){
+    const c = document.createElement('div');
+    c.className = 'flyCoin';
+    const jx = (Math.random() - .5) * 80, jy = (Math.random() - .5) * 60;
+    c.style.left = (sx - 10 + jx) + 'px';
+    c.style.top = (sy - 10 + jy) + 'px';
+    c.style.transitionDelay = (i * 60) + 'ms';
+    document.body.appendChild(c);
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      c.style.transform = 'translate(' + (tx - sx - jx) + 'px,' + (ty - sy - jy) + 'px) scale(.6)';
+    }));
+    setTimeout(() => c.remove(), 900 + i * 60);
+  }
+}
+function confetti(){
+  const colors = ['#ffd54a','#e91e63','#42a5f5','#66bb6a','#ff7043','#ab47bc'];
+  for (let i = 0; i < 60; i++){
+    const p = document.createElement('div');
+    p.className = 'confetti';
+    p.style.left = (Math.random() * 100) + 'vw';
+    p.style.background = colors[i % colors.length];
+    p.style.animationDuration = (1.8 + Math.random() * 1.6) + 's';
+    p.style.animationDelay = (Math.random() * .6) + 's';
+    p.style.transform = 'rotate(' + (Math.random() * 360) + 'deg)';
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 4000);
+  }
+}
+
+/* 「初回登録」押下：まだ承認されていなければカード入力画面を出す（承認はカード保存時に行う） */
+function onRegisterClick(){
+  if (cardApproved) return;        // すでに承認済みなら何もしない（ボタンは非表示）
+  openCardModal();
+}
+
+/* ---------- コインショップ（円が動く唯一の画面） ---------- */
+function updateShopText(){
+  shopBalanceLine.textContent = t('shopBalance', { bal: fmt(coins()) });
+  shopNote2El.textContent = t('shopNote2', { last4: cardLast4 || '****' });
+  shopAgreeLine.innerHTML = t('shopAgree', {
+    terms: '<a href="terms.html" target="_blank" rel="noopener">' + t('termsLink') + '</a>',
+    tokushoho: '<a href="tokushoho.html" target="_blank" rel="noopener">' + t('tokushohoLink') + '</a>'
+  });
+  document.getElementById('shopPackCoins').textContent = CREDIT_TOPUP;
+}
+function openShop(shortBy){
+  if (!cardApproved){ openCardModal(); return; }   // 購入にはカード承認が必要
+  updateShopText();
+  shopShortEl.textContent = shortBy > 0 ? t('coinShort', { need: shortBy }) : '';
+  shopModal.classList.add('open');
+}
+function closeShop(){ shopModal.classList.remove('open'); }
+shopCloseBtn.addEventListener('click', closeShop);
+topupBtn.addEventListener('click', () => openShop(0));
+
+/* 「1,000円で購入する」：承認済みカードから決済して有償コインを付与 */
+shopBuyBtn.addEventListener('click', async () => {
+  if (!cardApproved) return;
+  shopBuyBtn.disabled = true;
+  shopBuyBtn.textContent = t('processing');
+  /* 【連携ポイント②】承認済みカードへ CREDIT_TOPUP_YEN 円を決済し、CREDIT_TOPUP 有償コインを付与 */
+  let result;
+  try { result = await chargePassBonus(CREDIT_TOPUP_YEN); } catch(e){ result = { success:false }; }
+  shopBuyBtn.disabled = false;
+  shopBuyBtn.textContent = t('shopBuyBtn');
+  if (!result || !result.success){ setAiInfo('payFailed'); toast(t('payFailed')); return; }
+  myMediproRevenue += CREDIT_TOPUP_YEN;
+  closeShop();
+  grantCoins(CREDIT_TOPUP, 'toppedUp', { amt: fmt(CREDIT_TOPUP), bal: fmt(coins() + CREDIT_TOPUP) });
+  setAiInfo('toppedUp', { amt: fmt(CREDIT_TOPUP), bal: fmt(coins()) });
+});
+
+/* ---------- ヒント（白のおすすめの一手）：色を反転した盤面でAI探索を流用 ---------- */
+function computeHint(){
+  const swapped = board.map(v => v === BLACK ? WHITE : (v === WHITE ? BLACK : EMPTY));
+  const res = aiChooseMove(swapped, HINT_TIME_MS);
+  return res.move ? { type: res.move.type, from: res.move.from, to: res.move.to } : null;
+}
+function showHint(){
+  const mv = computeHint();
+  if (!mv) return;
+  hintMove = mv;
+  if (mv.type === 'move'){
+    setMode('move');
+    selectedSrc = mv.from;
+    setStatus('hintShownMove', { from: posName(mv.from), to: posName(mv.to) });
+  } else {
+    setMode('place');
+    setStatus('hintShown', { pos: posName(mv.to) });
+  }
+  render();
+}
+
+function initGame(){
+  board = new Uint8Array(64);
+  board[idx(3,3)] = WHITE; board[idx(4,4)] = WHITE;
+  board[idx(3,4)] = BLACK; board[idx(4,3)] = BLACK;
+  current = HUMAN_FIRST ? HUMAN : AI;
+  mode = 'place';
+  selectedSrc = null;
+  lastAiPos = -1;
+  consecutivePasses = 0;
+  gameOver = false;
+  busy = false;
+  /* 対局ごとのパスボーナス状態をリセット（収益・カード登録は維持） */
+  bonusUsesRemaining = 0;
+  awaitingBonusPlacement = false;
+  resultRecorded = false;        // この対局の勝敗はまだ未記録
+  wildStones = new Set();
+  hintMove = null;
+  prevBoard = null;
+  purchasePanel.style.display = 'none';
+  setAiInfo(null);
+  setStatus(current === AI ? 'aiTurnStatus' : 'yourTurn');
+  setMode('place');
+  render();
+  if (current === AI) setTimeout(aiTurn, 400);
+}
+
+function setMode(m){
+  mode = m; selectedSrc = null;
+  placeBtn.classList.toggle('active', m === 'place');
+  moveBtn.classList.toggle('active', m === 'move');
+  updateModeLabel();
+  render();
+}
+
+function humanMovesAvailable(){
+  return genAllMoves(board, HUMAN).length > 0;
+}
+
+/* 白が「パスする」状態か（パスボーナスを提示できる状態か） */
+function isHumanPassState(){
+  return !gameOver && current === HUMAN && !busy && !humanMovesAvailable();
+}
+
+function render(){
+  boardEl.innerHTML = '';
+  let hintSet = null;
+  if (!gameOver && current === HUMAN && !busy && !awaitingBonusPlacement){
+    hintSet = new Set();
+    if (mode === 'place'){
+      for (let p = 0; p < 64; p++)
+        if (board[p] === EMPTY && flipsAt(board, p, HUMAN)) hintSet.add(p);
+    } else if (selectedSrc !== null){
+      board[selectedSrc] = EMPTY;
+      for (let p = 0; p < 64; p++)
+        if (p !== selectedSrc && board[p] === EMPTY && flipsAt(board, p, HUMAN)) hintSet.add(p);
+      board[selectedSrc] = HUMAN;
+    }
+  }
+
+  let flipIdx = 0;
+  for (let p = 0; p < 64; p++){
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    cell.dataset.pos = p;
+    const v = board[p];
+    if (v !== EMPTY){
+      const d = document.createElement('div');
+      d.className = 'disc ' + (v === BLACK ? 'black' : 'white');
+      if (p === lastAiPos && v === BLACK) d.classList.add('last-ai');
+      if (v === WHITE && wildStones.has(p)) d.classList.add('wild');
+      /* 直前の盤面と比べて、新しく置かれた駒は「ポン」、色が変わった駒は「くるっ」と回す */
+      if (prevBoard){
+        if (prevBoard[p] === EMPTY) d.classList.add('pop');
+        else if (prevBoard[p] !== v){ d.classList.add('flip'); d.style.animationDelay = (flipIdx++ * 35) + 'ms'; }
+      }
+      cell.appendChild(d);
+    } else if (awaitingBonusPlacement){
+      /* 逆転の一手：空きマスすべてを配置候補としてハイライト */
+      cell.classList.add('bonusHint');
+    } else if (hintSet && hintSet.has(p)){
+      cell.classList.add('hint');
+    }
+    if (hintMove && current === HUMAN && !busy && !gameOver){
+      if (p === hintMove.to) cell.classList.add('hintBest');
+      if (hintMove.type === 'move' && p === hintMove.from) cell.classList.add('hintFrom');
+    }
+    if (selectedSrc === p) cell.classList.add('selected');
+    cell.addEventListener('click', () => onCellClick(p));
+    boardEl.appendChild(cell);
+  }
+  prevBoard = board.slice();
+
+  const [nb, nw] = countDiscs(board);
+  document.getElementById('blackScore').textContent = nb;
+  document.getElementById('whiteScore').textContent = nw;
+
+  /* 通常の「パスする」ボタン：パス状態かつ自由配置待ちでないときだけ表示 */
+  passBtn.style.display = (isHumanPassState() && !awaitingBonusPlacement) ? 'inline-block' : 'none';
+
+  updateAdvantage();
+  updateBonusUI();
+}
+
+/* コイン・逆転の一手・ヒント関連UIの表示更新 */
+function updateBonusUI(){
+  /* クレジットカード登録後は、このバー（未登録案内・残り回数・購入機会）を丸ごと隠す */
+  revenueBarEl.style.display = cardRegistered ? 'none' : '';
+
+  /* カード状態・残数・収益・コインの表示 */
+  cardStatusEl.textContent = cardRegistered ? t('registered', { last4: cardLast4 }) : t('unregistered');
+  cardStatusEl.className = cardRegistered ? 'ok' : 'ng';
+  bonusRemainEl.textContent = bonusUsesRemaining;
+  revenueAmountEl.textContent = fmt(myMediproRevenue);
+  purchaseCountEl.textContent = purchaseCount;
+  creditBalanceEl.textContent = fmt(coins());
+
+  /* ボタンの出し分け
+     ・未承認 → 「初回登録」（押すとカード入力画面 → 承認）
+     ・承認済み → 「🪙 コインショップ」（残高にかかわらず常に開ける） */
+  registerBtn.style.display = cardApproved ? 'none' : 'inline-block';
+  topupBtn.style.display = cardApproved ? 'inline-block' : 'none';
+
+  /* 各ボタンをいったん隠す */
+  passBonusUseBtn.style.display = 'none';
+  passBonusBuyBtn.style.display = 'none';
+  hintBtn.style.display = 'none';
+
+  if (awaitingBonusPlacement){
+    /* 配置待ち中はパス系ボタンを隠す（盤面クリックで配置） */
+    return;
+  }
+
+  if (isHumanPassState()){
+    if (bonusUsesRemaining > 0){
+      passBonusUseBtn.style.display = 'inline-block';
+      passBonusUseBtn.textContent = t('bonusUseBtn', { n: bonusUsesRemaining });
+    } else {
+      passBonusBuyBtn.style.display = 'inline-block';
+    }
+  } else {
+    /* パス状態でなければ確認パネルも閉じる */
+    if (confirmMode === 'bonus') purchasePanel.style.display = 'none';
+    /* 自分の手番で打てる手があり、まだヒントを表示していなければ「ヒント」ボタン */
+    if (!gameOver && current === HUMAN && !busy && !hintMove && humanMovesAvailable()){
+      hintBtn.style.display = 'inline-block';
+    }
+  }
+}
+
+/* コイン消費の確認パネル（逆転の一手／ヒント共用） */
+function openConfirm(kind){
+  confirmMode = kind;
+  const cost = kind === 'hint' ? HINT_COST : PASS_BONUS_PRICE;
+  purchaseTitleEl.textContent = t(kind === 'hint' ? 'hintTitle' : 'purchaseTitle');
+  purchasePayLine.textContent = t(kind === 'hint' ? 'hintLine' : 'payFromCredit', { bal: fmt(coins()), after: fmt(coins() - cost) });
+  purchaseConfirmBtn.textContent = t(kind === 'hint' ? 'hintConfirm' : 'purchaseConfirm');
+  purchasePanel.style.display = 'block';
+}
+/* コインを使う前のチェック：未承認ならカード登録へ、不足ならショップへ。使えるなら true */
+function ensureCoins(cost){
+  if (!coinsUsable()){
+    setAiInfo('needRegister');
+    toast(t('needRegister'));
+    openCardModal();
+    return false;
+  }
+  if (coins() < cost){
+    const need = cost - coins();
+    setAiInfo('needTopUp');
+    toast(t('coinShort', { need: need }));
+    openShop(need);
+    return false;
+  }
+  return true;
+}
+
+function onCellClick(p){
+  if (gameOver || busy || current !== HUMAN) return;
+
+  /* --- パスボーナスによる自由配置 --- */
+  if (awaitingBonusPlacement){
+    if (board[p] !== EMPTY) return;            // 空きマスのみ
+    board = board.slice();                     // Uint8Array をコピーして変更
+    board[p] = HUMAN;                          // 挟めるか否かに関わらず白を1個置く
+    wildStones.add(p);                         // 逆転の一手で置いた駒は光らせる
+    awaitingBonusPlacement = false;
+    setStatus('bonusPlaced');
+    endHumanTurn();
+    return;
+  }
+
+  if (mode === 'place'){
+    const f = flipsAt(board, p, HUMAN);
+    if (!f) return;
+    board = applyMove(board, { type:'place', to:p, flips:f }, HUMAN);
+    endHumanTurn();
+  } else {
+    if (selectedSrc === null){
+      if (board[p] === HUMAN){ selectedSrc = p; render(); }
+      return;
+    }
+    if (p === selectedSrc){ selectedSrc = null; render(); return; }
+    if (board[p] === HUMAN){ selectedSrc = p; render(); return; }
+    board[selectedSrc] = EMPTY;
+    const f = flipsAt(board, p, HUMAN);
+    if (!f){ board[selectedSrc] = HUMAN; return; }
+    board[selectedSrc] = HUMAN;
+    board = applyMove(board, { type:'move', from:selectedSrc, to:p, flips:f }, HUMAN);
+    wildStones.delete(selectedSrc);
+    selectedSrc = null;
+    endHumanTurn();
+  }
+}
+
+function endHumanTurn(){
+  consecutivePasses = 0;
+  lastAiPos = -1;
+  hintMove = null;               // ヒントは1手限り
+  current = AI;
+  render();
+  if (!checkGameEnd()) setTimeout(aiTurn, 120);
+}
+
+/* パスボーナスを1回使う（残り回数を消費して自由配置モードに入る） */
+function useBonusPlacement(){
+  if (bonusUsesRemaining <= 0 || !isHumanPassState()) return;
+  bonusUsesRemaining--;
+  awaitingBonusPlacement = true;
+  setStatus('bonusPlacePrompt', { n: bonusUsesRemaining });
+  render();
+}
+
+passBtn.addEventListener('click', () => {
+  if (gameOver || busy || current !== HUMAN || humanMovesAvailable() || awaitingBonusPlacement) return;
+  consecutivePasses++;
+  current = AI;
+  if (!checkGameEnd()) setTimeout(aiTurn, 120);
+  render();
+});
+
+/* 「パスボーナスを使う」ボタン */
+passBonusUseBtn.addEventListener('click', useBonusPlacement);
+
+/* 「✨ 逆転の一手（🪙3）」ボタン → コイン確認パネルを開く */
+passBonusBuyBtn.addEventListener('click', () => {
+  if (!isHumanPassState()) return;
+  if (!ensureCoins(PASS_BONUS_PRICE)) return;
+  openConfirm('bonus');
+});
+
+/* 「💡 ヒント（🪙1）」ボタン → コイン確認パネルを開く */
+hintBtn.addEventListener('click', () => {
+  if (gameOver || busy || current !== HUMAN || awaitingBonusPlacement || !humanMovesAvailable()) return;
+  if (!ensureCoins(HINT_COST)) return;
+  openConfirm('hint');
+});
+
+/* 「やめる」 */
+purchaseCancelBtn.addEventListener('click', () => {
+  purchasePanel.style.display = 'none';
+});
+
+/* 確定 → コイン残高から消費して、逆転の一手を発動／ヒントを表示 */
+purchaseConfirmBtn.addEventListener('click', () => {
+  purchasePanel.style.display = 'none';
+  if (confirmMode === 'hint'){
+    if (!ensureCoins(HINT_COST)) return;
+    if (!spendCoins(HINT_COST)) return;
+    showHint();
+    return;
+  }
+  if (!isHumanPassState()) return;
+  if (!ensureCoins(PASS_BONUS_PRICE)) return;
+  if (!spendCoins(PASS_BONUS_PRICE)) return;
+  purchaseCount++;
+  bonusUsesRemaining = PASS_BONUS_USES;   // 1回の発動で最大3回ぶんを付与
+  toast(t('purchasedCredit', { bal: fmt(coins()) }), 'gold');
+  setAiInfo('purchasedCredit', { bal: fmt(coins()) });
+  useBonusPlacement();                     // 続けて1回目を使用（自由配置モードへ）
+});
+
+placeBtn.addEventListener('click', () => setMode('place'));
+moveBtn.addEventListener('click', () => setMode('move'));
+document.getElementById('resetBtn').addEventListener('click', initGame);
+
+/* 言語切り替えボタン */
+document.querySelectorAll('#langBar button[data-lang]').forEach(btn => {
+  btn.addEventListener('click', () => setLanguage(btn.getAttribute('data-lang')));
+});
+
+/* 初回登録（カード入力→承認→スタータボーナス付与）。コインショップのボタンは上で登録済み */
+registerBtn.addEventListener('click', onRegisterClick);
+
+
+/* 起動時の言語を決定（ブラウザ言語を尊重。既定は日本語） */
+function detectInitialLang(){
+  const shared = catSharedLang(); if (shared) return shared;   // index.html で選んだ言語を最優先
+  const n = (navigator.language || 'ja').toLowerCase();
+  if (n.startsWith('ja')) return 'ja';
+  if (n.startsWith('zh')) return 'zh';
+  if (n.startsWith('ko')) return 'ko';
+  if (n.startsWith('es')) return 'es';
+  if (n.startsWith('fr')) return 'fr';
+  if (n.startsWith('en')) return 'en';
+  return 'ja';
+}
+
+/* ---------- クレジットカード登録モーダル ---------- */
+function openCardModal(){
+  cardErrorEl.textContent = '';
+  cardModal.classList.add('open');
+}
+function closeCardModal(){
+  cardModal.classList.remove('open');
+}
+cardCancelBtn.addEventListener('click', closeCardModal);
+
+cardSaveBtn.addEventListener('click', async () => {
+  cardErrorEl.textContent = '';
+  const form = {
+    number: document.getElementById('ccNumber').value,
+    expiry: document.getElementById('ccExpiry').value,
+    cvc:    document.getElementById('ccCvc').value,
+    name:   document.getElementById('ccName').value
+  };
+  if (!form.number || !form.expiry || !form.cvc || !form.name){
+    cardErrorEl.textContent = t('fillAll');
+    return;
+  }
+  cardSaveBtn.disabled = true;
+  cardSaveBtn.textContent = t('approvingBtn');
+
+  /* 【連携ポイント①】カードの登録・承認（本番ではオーソリ等で正式に承認） */
+  let result;
+  try {
+    result = await registerCreditCard(form);
+  } catch (e) {
+    result = { success: false };
+  }
+
+  cardSaveBtn.disabled = false;
+  cardSaveBtn.textContent = t('cardSaveBtn');
+
+  /* 正式に承認されなければ登録扱いにしない（パスボーナスは使えないまま） */
+  if (!result || !result.success){
+    cardApproved = false;
+    cardErrorEl.textContent = t('cardNotApproved');
+    return;
+  }
+
+  /* 承認成功 */
+  cardRegistered = true;
+  cardApproved = true;
+  cardLast4 = result.last4 || '****';
+  /* 登録日を記録（初回登録時のみ）。以降この日からの戦績を集計する */
+  if (!registeredDate) registeredDate = todayStr();
+  closeCardModal();
+  /* 初回登録の特典としてスタータボーナス（無償コイン）を1回だけ付与（不要なら SUPPORT_CREDIT を 0 に） */
+  if (!starterGranted && SUPPORT_CREDIT > 0){
+    starterGranted = true;
+    saveStats();
+    grantCoins(SUPPORT_CREDIT, 'cardApprovedMsg', { bal: fmt(SUPPORT_CREDIT) });
+    setAiInfo('cardApprovedMsg', { bal: fmt(SUPPORT_CREDIT) });
+  } else {
+    saveStats();
+    toast(t('cardApprovedAgain'));
+    setAiInfo('cardApprovedAgain');
+  }
+  updateStatsUI();
+  updateBonusUI();
+});
+
+function aiTurn(){
+  if (gameOver) return;
+  busy = true;
+  setStatus('aiTurnStatus');
+  thinkingEl.style.display = 'block';
+  deepMsgEl.style.display = 'none';
+  deepTimer = setTimeout(() => { deepMsgEl.style.display = 'inline'; }, 2500);
+  render();
+
+  setTimeout(() => {
+    const res = aiChooseMove(board);
+    clearTimeout(deepTimer);
+    thinkingEl.style.display = 'none';
+    busy = false;
+
+    if (!res.move){
+      consecutivePasses++;
+      setAiInfo('aiPassed');
+      current = HUMAN;
+      if (!checkGameEnd()){ setStatus('yourTurn'); render(); }
+      return;
+    }
+
+    consecutivePasses = 0;
+    board = applyMove(board, res.move, AI);
+    lastAiPos = res.move.to;
+    const kind = res.move.type === 'move'
+      ? t('moveKindMove', { from: posName(res.move.from), to: posName(res.move.to) })
+      : t('moveKindPlace', { to: posName(res.move.to) });
+    setAiInfo('aiMoveInfo', { kind: kind, depth: res.depth, ms: Math.round(res.ms) });
+
+    current = HUMAN;
+    if (!checkGameEnd()){ setStatus('yourTurn'); render(); }
+  }, 60);
+}
+
+function posName(p){
+  return String.fromCharCode(97 + (p & 7)) + ((p >> 3) + 1);
+}
+
+function checkGameEnd(){
+  const [nb, nw, ne] = countDiscs(board);
+  const noB = genAllMoves(board, BLACK).length === 0;
+  const noW = genAllMoves(board, WHITE).length === 0;
+  if (ne === 0 || consecutivePasses >= 2 || (noB && noW) || nb === 0 || nw === 0){
+    gameOver = true;
+    hintMove = null;
+    if (nb > nw){
+      setStatus('gameEndBlack', { nb: nb, nw: nw });
+      recordGameResult(false);
+      winStreak = 0; saveStats(); updateStatsUI();
+    } else if (nw > nb){
+      setStatus('gameEndWhite', { nw: nw, nb: nb });
+      recordGameResult(true);
+      confetti();
+      winStreak++; if (winStreak > bestStreak) bestStreak = winStreak;
+      saveStats(); updateStatsUI();
+    } else {
+      setStatus('gameEndDraw', { nb: nb, nw: nw });
+      recordGameResult(false);
+      saveStats(); updateStatsUI();
+    }
+    thinkingEl.style.display = 'none';
+    render();
+    return true;
+  }
+  return false;
+}
+
+loadStats();                        // 端末に保存された登録日・戦績・コインを復元（あれば）
+setLanguage(detectInitialLang());
+initGame();
+</script>
+
+<style>
+  .site-footer{
+    margin-top:48px;border-top:1px solid #dde4df;background:#ffffff;
+    padding:28px 20px;text-align:center;font-size:13px;color:#5a6b63;
+    width:100%;
+  }
+  .site-footer nav{margin-bottom:10px}
+  .site-footer nav a{color:#1e6f50;text-decoration:underline;text-underline-offset:3px;margin:0 12px;font-weight:600}
+  .site-footer nav a:hover{text-decoration:underline;color:#1e6f50}
+</style>
+
+<footer class="site-footer">
+  <nav>
+    <a href="terms.html" target="_blank" rel="noopener" data-i18n="termsLink">利用規約</a>
+    <a href="privacy.html" target="_blank" rel="noopener" data-i18n="privacyLink">プライバシーポリシー</a>
+    <a href="tokushoho.html" target="_blank" rel="noopener" data-i18n="tokushohoLink">特定商取引法に基づく表記</a>
+    <a href="#" id="demoResetLink" data-i18n="demoReset" style="color:#999;font-weight:normal;">デモ用データを初期化</a>
+  </nav>
+  <p data-i18n="footerCopy">&copy; 2026 MyMedipro株式会社</p>
+</footer>
+
+<script>
+/* 同意チェックが入るまで「登録する」ボタンを無効化（setup-guide 4） */
+(function(){
+  var agree = document.getElementById('agreeTerms');
+  var save  = document.getElementById('cardSaveBtn');
+  var reg   = document.getElementById('registerBtn');
+  if(!agree || !save) return;
+  function sync(){ save.disabled = !agree.checked; }
+  agree.addEventListener('change', sync);
+  if(reg){ reg.addEventListener('click', function(){ setTimeout(sync, 0); }); }
+  sync();
+})();
+/* デモ用データの初期化（フッターのリンク） */
+(function(){
+  var a = document.getElementById('demoResetLink');
+  if(!a) return;
+  a.addEventListener('click', function(e){
+    e.preventDefault();
+    if (!confirm(t('demoResetConfirm'))) return;
+    try { localStorage.removeItem(STATS_STORAGE_KEY); } catch(err){}
+    location.reload();
+  });
+})();
+</script>
+
+<!-- Back to landing page -->
+<a href="index.html" id="catacelo-home-btn" style="position:fixed;top:12px;left:12px;z-index:99999;display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#0E3B22;color:#F6F1E3;font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;font-size:13px;font-weight:700;letter-spacing:.05em;text-decoration:none;border-radius:999px;box-shadow:0 3px 8px rgba(0,0,0,.35);opacity:.92;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.92">&#9664; トップへ戻る</a>
+<script>catSyncLang(lang);</script>
+<script src="static-site-seo.js"></script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+14:  .banner {
+108:  あなたは白として、強化版AI（黒）と対戦します。AIが最後に置いた/移動した駒は少し明るい色で表示されます。
+113:<div id="thinking"><span data-i18n="aiThinking">AIが考え中...</span><br><span id="deepMsg" data-i18n="deepMsg">お待たせしてすみません。現在、深く分析中ですので、もう少々お時間がかかります。そのままお待ちください。</span></div>
+130:    <li data-i18n="rule1">基本ルールは通常のオセロと同じです。あなたは白、AIは黒です。</li>
+136:    <li data-i18n="rule7">AIは高度な戦術を使用し、数手先を読んで最適な手を選びます。</li>
+137:    <li data-i18n="rule8">AIが最後に置いた/移動した駒は少し明るい色で表示されます。</li>
+145:const I18N = {
+149:    gameInfo:'通常のオセロに駒移動ルールを追加した新しいゲームです。<br>あなたは白として、強化版AI（黒）と対戦します。AIが最後に置いた/移動した駒は少し明るい色で表示されます。',
+151:    aiTurnStatus:'AIの番です',
+154:    aiThinking:'AIが考え中...',
+160:    rule1:'基本ルールは通常のオセロと同じです。あなたは白、AIは黒です。',
+166:    rule7:'AIは高度な戦術を使用し、数手先を読んで最適な手を選びます。',
+167:    rule8:'AIが最後に置いた/移動した駒は少し明るい色で表示されます。',
+169:    aiPassed:'AIは有効な手がないためパスしました',
+171:    aiInfoMove:'AIの手: {kind} ／ 読みの深さ: {depth}手先 ／ 思考時間: {ms}ms',
+172:    resultWinAI:'ゲーム終了 — 黒（AI）の勝ち！ {b} 対 {w}',
+179:    gameInfo:'A new game that adds piece-movement rules to standard Othello.<br>You play as White against the Enhanced AI (Black). The AI’s most recently placed/moved piece is shown in a slightly lighter color.',
+181:    aiTurnStatus:'AI’s turn',
+184:    aiThinking:'AI is thinking...',
+190:    rule1:'The basic rules are the same as standard Othello. You are White; the AI is Black.',
+196:    rule7:'The AI uses advanced tactics, reading several moves ahead to choose the best move.',
+197:    rule8:'The AI’s most recently placed/moved piece is shown in a slightly lighter color.',
+199:    aiPassed:'The AI had no valid move and passed.',
+201:    aiInfoMove:'AI move: {kind} / Search depth: {depth} plies / Think time: {ms}ms',
+202:    resultWinAI:'Game over — Black (AI) wins! {b} to {w}',
+209:    gameInfo:'在标准黑白棋的基础上加入了棋子移动规则的新游戏。<br>您执白，与强化版AI（黑）对战。AI最近落子/移动的棋子会以稍亮的颜色显示。',
+211:    aiTurnStatus:'轮到AI',
+214:    aiThinking:'AI思考中...',
+220:    rule1:'基本规则与标准黑白棋相同。您执白，AI执黑。',
+226:    rule7:'AI使用高级战术，提前预读数步以选择最佳着法。',
+227:    rule8:'AI最近落子/移动的棋子会以稍亮的颜色显示。',
+229:    aiPassed:'AI没有有效着法，已跳过。',
+231:    aiInfoMove:'AI的着法：{kind} ／ 搜索深度：{depth}步 ／ 思考时间：{ms}ms',
+232:    resultWinAI:'游戏结束 — 黑（AI）获胜！ {b} 比 {w}',
+239:    gameInfo:'일반 오셀로에 말 이동 규칙을 추가한 새로운 게임입니다.<br>당신은 백으로서 강화판 AI(흑)와 대결합니다. AI가 마지막으로 놓거나 이동한 말은 약간 밝은 색으로 표시됩니다.',
+241:    aiTurnStatus:'AI의 차례입니다',
+244:    aiThinking:'AI가 생각 중...',
+250:    rule1:'기본 규칙은 일반 오셀로와 같습니다. 당신은 백, AI는 흑입니다.',
+256:    rule7:'AI는 고급 전술을 사용하여 여러 수 앞을 읽고 최적의 수를 선택합니다.',
+257:    rule8:'AI가 마지막으로 놓거나 이동한 말은 약간 밝은 색으로 표시됩니다.',
+259:    aiPassed:'AI는 유효한 수가 없어 패스했습니다.',
+261:    aiInfoMove:'AI의 수: {kind} ／ 탐색 깊이: {depth}수 ／ 사고 시간: {ms}ms',
+262:    resultWinAI:'게임 종료 — 흑(AI) 승리! {b} 대 {w}',
+292:    resultWinAI:'Fin de la partida — ¡Ganan las negras (IA)! {b} a {w}',
+322:    resultWinAI:'Partie terminée — Les Noirs (IA) gagnent ! {b} à {w}',
+336:   Catacelo  強化版AI (ais2)
+340:   - 配置だけでなく「駒移動」も AI 自身が探索に含める
+344:const HUMAN = WHITE, AI = BLACK;
+346:const TIME_BUDGET_MS = 900;          // AIの思考時間の上限（迅速さを保証）
+372:function flipsAt(b, pos, color){
+393:function genPlacements(b, color, out){
+401:function genMoveMoves(b, color, out){
+414:function genAllMoves(b, color){
+421:function applyMove(b, mv, color){
+463:function evaluate(b){
+522:  if (depth === 0) return evaluate(b);
+559:  const moves = orderMoves(b, genAllMoves(b, AI), AI);
+564:    const v = alphabeta(applyMove(b, moves[i], AI), depth - 1, alpha, Infinity, HUMAN, false, useDeadline);
+573:  searchDeadline = t0 + TIME_BUDGET_MS;
+677:  current = HUMAN_FIRST ? HUMAN : AI;
+687:  if (current === AI) setTimeout(aiTurn, 400);
+772:  current = AI;
+780:  current = AI;
+813:    board = applyMove(board, res.move, AI);
+840:    if (nb > nw) setStatus('resultWinAI', { b: nb, w: nw });
