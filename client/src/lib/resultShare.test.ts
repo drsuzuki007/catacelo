@@ -3,7 +3,7 @@ import { buildResultShareUrl, buildXShareUrl } from "./resultShare";
 
 describe("result sharing links", () => {
   it("creates a language-linked battle URL without exposing a room code", () => {
-    expect(buildResultShareUrl("https://example.test", "fr")).toBe("https://example.test/catacelo-battle.html?lang=fr");
+    expect(buildResultShareUrl("https://example.test/catacelo/catacelo-battle.html?room=ABC123", "fr")).toBe("https://example.test/catacelo/catacelo-battle.html?lang=fr");
   });
 
   it("encodes result text and the destination URL for an X share intent", () => {

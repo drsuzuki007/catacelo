@@ -2,6 +2,12 @@
 
 Catacelo は、通常のオセロに**駒移動**を加えた2人対戦ゲームです。このリモート対人戦版は、AI思考処理を除去し、Supabase の匿名認証、Realtime、PostgreSQL RPCで2人の着手を同期します。
 
+## GitHub Pagesでの独立公開
+
+GitHubの `drsuzuki007/catacelo` リポジトリには、GitHub Pages公開用のワークフローを含めています。`main` ブランチへ反映すると、静的成果物を生成して独立URL **`https://drsuzuki007.github.io/catacelo/`** へ公開します。初回のみリポジトリの **Settings → Pages** で **Source: GitHub Actions** を選択してください。
+
+GitHub Pages版の対戦ページは `https://drsuzuki007.github.io/catacelo/catacelo-battle.html` です。Supabaseによるルームコード対戦・Realtime同期は利用できます。一方、Manus OAuthを利用する `/admin` の国別言語設定は、サーバー機能を持つManus公開版で利用してください。
+
 ## データ配置とアクセス制御
 
 ゲーム用データは共用Supabaseプロジェクト内の専用スキーマ **`catacelo`** にだけ作成します。アプリケーションはすべて `supabase.schema('catacelo')` 経由で `games`・`moves`・RPCを参照し、Realtime購読も `schema: 'catacelo'` を指定します。これにより、同一プロジェクトの他アプリの `public` テーブルと混在しません。

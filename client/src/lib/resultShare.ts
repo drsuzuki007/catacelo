@@ -121,8 +121,8 @@ export function createResultShareImage(card: ResultShareCard): File {
   return new File([dataUrlToBlob(canvas.toDataURL("image/png"))], "catacelo-battle-result.png", { type: "image/png" });
 }
 
-export function buildResultShareUrl(origin: string, language: Language): string {
-  const url = new URL("/catacelo-battle.html", origin);
+export function buildResultShareUrl(currentPageUrl: string, language: Language): string {
+  const url = new URL("catacelo-battle.html", currentPageUrl);
   url.searchParams.set("lang", language);
   return url.toString();
 }

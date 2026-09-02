@@ -151,8 +151,10 @@ function vitePluginManusDebugCollector(): Plugin {
 }
 
 const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector()];
+const githubPagesBase = process.env.GITHUB_PAGES === "true" ? "/catacelo/" : "/";
 
 export default defineConfig({
+  base: githubPagesBase,
   plugins,
   resolve: {
     alias: {

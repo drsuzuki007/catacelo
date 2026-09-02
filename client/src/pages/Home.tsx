@@ -392,7 +392,7 @@ export default function Home({ siteVariant = "workshop" }: HomeProps) {
 
   /** 参加者名・ルームコードを含めず、公開用の勝敗カードと対戦入口を共有する。 */
   function buildResultShare(): { file: File; text: string; url: string } {
-    const url = buildResultShareUrl(window.location.origin, language);
+    const url = buildResultShareUrl(window.location.href, language);
     const scoreText = t("shareScore", { black: blackScore, white: whiteScore });
     const text = `${t("shareHeadline")}\n${resultText}\n${scoreText}`;
     const file = createResultShareImage({
