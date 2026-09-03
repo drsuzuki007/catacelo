@@ -603,7 +603,7 @@ const I18N = {
     shopBuyBtn:'1,000円で購入する',
     shopClose:'閉じる',
     shopNote1:'価格：1,000円（税込）／ 内容：50コイン（1コイン＝20円相当）',
-    shopNote2:'お支払い時期：購入確定時に登録済みカード（****{last4}）へ決済／ 提供時期：決済完了後、直ちに残高へ反映',
+    shopNote2:'お支払い時期：購入確定後、Stripeの決済画面でのお支払い完了時／ 提供時期：決済完了後、直ちに残高へ反映',
     shopNote3:'購入したコインの有効期限は購入日から150日間です。期限を過ぎたコインは失効し、払戻し・換金はできません。',
     shopNote4:'デジタルコンテンツの性質上、購入後の返金・キャンセルはできません。',
     shopAgree:'購入を確定すると、{terms}および{tokushoho}に同意したものとみなされます。',
@@ -710,7 +710,7 @@ const I18N = {
     shopBuyBtn:'Buy for 1,000 yen',
     shopClose:'Close',
     shopNote1:'Price: 1,000 yen (tax incl.) / Contents: 50 coins (1 coin = 20 yen equivalent)',
-    shopNote2:'Payment: charged to your registered card (****{last4}) when you confirm / Delivery: added to your balance immediately after payment',
+    shopNote2:'Payment: completed on Stripe\u2019s secure checkout page after you confirm / Delivery: added to your balance immediately after payment',
     shopNote3:'Purchased coins expire 150 days after purchase. Expired coins are forfeited and cannot be refunded or exchanged for cash.',
     shopNote4:'As digital content, purchases cannot be refunded or cancelled.',
     shopAgree:'By confirming, you agree to the {terms} and the {tokushoho}.',
@@ -817,7 +817,7 @@ const I18N = {
     shopBuyBtn:'以 1,000 日元购买',
     shopClose:'关闭',
     shopNote1:'价格：1,000日元（含税）／ 内容：50金币（1金币＝20日元）',
-    shopNote2:'付款时间：确认购买时从已注册卡（****{last4}）扣款／ 提供时间：付款完成后立即计入余额',
+    shopNote2:'付款时间：确认购买后在Stripe结算页面完成付款时／ 提供时间：付款完成后立即计入余额',
     shopNote3:'购买的金币自购买日起150天内有效。过期金币将失效，不可退款或兑换现金。',
     shopNote4:'因数字内容性质，购买后不可退款或取消。',
     shopAgree:'确认购买即表示您同意{terms}及{tokushoho}。',
@@ -924,7 +924,7 @@ const I18N = {
     shopBuyBtn:'1,000엔으로 구매',
     shopClose:'닫기',
     shopNote1:'가격: 1,000엔(세금 포함) ／ 내용: 50코인 (1코인＝20엔 상당)',
-    shopNote2:'결제 시기: 구매 확정 시 등록 카드(****{last4})로 결제 ／ 제공 시기: 결제 완료 후 즉시 잔액에 반영',
+    shopNote2:'결제 시기: 구매 확정 후 Stripe 결제 페이지에서 결제 완료 시 ／ 제공 시기: 결제 완료 후 즉시 잔액에 반영',
     shopNote3:'구매한 코인의 유효기간은 구매일로부터 150일입니다. 기간이 지난 코인은 소멸되며 환불·환금할 수 없습니다.',
     shopNote4:'디지털 콘텐츠 특성상 구매 후 환불·취소는 불가합니다.',
     shopAgree:'구매를 확정하면 {terms} 및 {tokushoho}에 동의한 것으로 간주됩니다.',
@@ -1031,7 +1031,7 @@ const I18N = {
     shopBuyBtn:'Comprar por 1.000 yen',
     shopClose:'Cerrar',
     shopNote1:'Precio: 1.000 yen (imp. incl.) / Contenido: 50 monedas (1 moneda = 20 yen)',
-    shopNote2:'Pago: se cobra a tu tarjeta registrada (****{last4}) al confirmar / Entrega: se añade al saldo inmediatamente tras el pago',
+    shopNote2:'Pago: se completa en la página segura de Stripe tras confirmar / Entrega: se añade al saldo inmediatamente tras el pago',
     shopNote3:'Las monedas compradas caducan a los 150 días de la compra. Las monedas caducadas se pierden y no se reembolsan ni se canjean por dinero.',
     shopNote4:'Por tratarse de contenido digital, no se admiten reembolsos ni cancelaciones.',
     shopAgree:'Al confirmar, aceptas los {terms} y el {tokushoho}.',
@@ -1138,7 +1138,7 @@ const I18N = {
     shopBuyBtn:'Acheter pour 1 000 yens',
     shopClose:'Fermer',
     shopNote1:'Prix : 1 000 yens (TTC) / Contenu : 50 pièces (1 pièce = 20 yens)',
-    shopNote2:'Paiement : débité de votre carte enregistrée (****{last4}) à la confirmation / Livraison : crédité immédiatement après le paiement',
+    shopNote2:'Paiement : effectué sur la page sécurisée de Stripe après confirmation / Livraison : crédité immédiatement après le paiement',
     shopNote3:'Les pièces achetées expirent 150 jours après l’achat. Les pièces expirées sont perdues et ne sont ni remboursées ni échangeables.',
     shopNote4:'S’agissant de contenu numérique, aucun remboursement ni annulation n’est possible après l’achat.',
     shopAgree:'En confirmant, vous acceptez les {terms} et la {tokushoho}.',
@@ -1683,7 +1683,7 @@ function loadStats(){
     gamesPlayed = s.gamesPlayed | 0;
     gamesWon = s.gamesWon | 0;
     cardLast4 = s.cardLast4 || '****';
-    coinBalance = s.coinBalance | 0;
+    /* コイン残高はサーバー（Supabase）が正。ローカル値は復元しない。 */
     starterGranted = !!s.starterGranted;
     winStreak = s.winStreak | 0;
     bestStreak = s.bestStreak | 0;
@@ -1801,13 +1801,60 @@ function setLanguage(l){
    コイン経済（ゲーム内通貨）
    ========================================================= */
 function coins(){ return coinBalance; }
-/* コインが使える状態か（カード承認が必要） */
-function coinsUsable(){ return cardApproved; }
+/* コインが使える状態か（サーバーのウォレットが用意できていること） */
+function coinsUsable(){ return !!wallet; }
 
-/* 残高から amount コインを消費。足りれば true */
-function spendCoins(amount){
-  if (coinBalance < amount) return false;
-  coinBalance -= amount;
+/* =========================================================
+   サーバー残高（Supabase）＋ Stripe 決済
+   残高の正はサーバー。localStorage の値は表示用のキャッシュに過ぎない。
+   ========================================================= */
+let wallet = null;
+
+async function initWallet(){
+  try {
+    const mod = await import('./coin-wallet.js');
+    wallet = await mod.CataceloWallet.init();
+  } catch (e) {
+    console.error('wallet init failed', e);
+    return;                     // 残高0のまま。購入・消費はできないが対局は続けられる。
+  }
+
+  /* サーバー側で残高が変わったら画面に反映する */
+  wallet.onChange(function(b){
+    coinBalance = b;
+    bumpBalance();
+    updateBonusUI();
+  });
+
+  /* カード情報の入力は Stripe の決済ページで行うため、
+     アプリ側の「カード登録」ステップは不要になった。 */
+  cardRegistered = true;
+  cardApproved   = true;
+
+  coinBalance = wallet.balance;
+
+  /* スターターボーナスはサーバー側で1ユーザー1回だけ付与される */
+  if (SUPPORT_CREDIT > 0){
+    try { coinBalance = await wallet.claimStarterBonus(SUPPORT_CREDIT); } catch (e){}
+  }
+
+  bumpBalance();
+  updateBonusUI();
+}
+initWallet();
+
+/* 残高から amount コインを消費する。サーバーが残高を検証する。
+   reason は 'comeback_move'（逆転の一手）または 'hint'。 */
+async function spendCoins(amount, reason){
+  if (!wallet) return false;
+  try {
+    coinBalance = await wallet.spend(amount, reason);
+  } catch (e) {
+    /* 残高不足・通信失敗。サーバーが拒否したので消費は成立していない。 */
+    toast(t('coinShort', { need: Math.max(1, amount - coinBalance) }));
+    openShop(Math.max(1, amount - coinBalance));
+    return false;
+  }
   saveStats();
   bumpBalance();
   updateBonusUI();
@@ -1890,7 +1937,7 @@ function updateShopText(){
   document.getElementById('shopPackCoins').textContent = CREDIT_TOPUP;
 }
 function openShop(shortBy){
-  if (!cardApproved){ openCardModal(); return; }   // 購入にはカード承認が必要
+  if (!wallet) return;                             // ウォレット準備前は開かない
   updateShopText();
   shopShortEl.textContent = shortBy > 0 ? t('coinShort', { need: shortBy }) : '';
   shopModal.classList.add('open');
@@ -1901,19 +1948,19 @@ topupBtn.addEventListener('click', () => openShop(0));
 
 /* 「1,000円で購入する」：承認済みカードから決済して有償コインを付与 */
 shopBuyBtn.addEventListener('click', async () => {
-  if (!cardApproved) return;
+  if (!wallet) return;
   shopBuyBtn.disabled = true;
   shopBuyBtn.textContent = t('processing');
-  /* 【連携ポイント②】承認済みカードへ CREDIT_TOPUP_YEN 円を決済し、CREDIT_TOPUP 有償コインを付与 */
-  let result;
-  try { result = await chargePassBonus(CREDIT_TOPUP_YEN); } catch(e){ result = { success:false }; }
-  shopBuyBtn.disabled = false;
-  shopBuyBtn.textContent = t('shopBuyBtn');
-  if (!result || !result.success){ setAiInfo('payFailed'); toast(t('payFailed')); return; }
-  myMediproRevenue += CREDIT_TOPUP_YEN;
-  closeShop();
-  grantCoins(CREDIT_TOPUP, 'toppedUp', { amt: fmt(CREDIT_TOPUP), bal: fmt(coins() + CREDIT_TOPUP) });
-  setAiInfo('toppedUp', { amt: fmt(CREDIT_TOPUP), bal: fmt(coins()) });
+  /* Stripe Checkout へ遷移する。カード情報はこのページを通らない。
+     決済完了後は success_url でこのページに戻り、Webhook 経由で残高が増える。 */
+  try {
+    await wallet.startCheckout();
+  } catch (e) {
+    shopBuyBtn.disabled = false;
+    shopBuyBtn.textContent = t('shopBuyBtn');
+    setAiInfo('payFailed');
+    toast(t('payFailed'));
+  }
 });
 
 /* ---------- ヒント（白のおすすめの一手）：色を反転した盤面でAI探索を流用 ---------- */
@@ -2200,17 +2247,17 @@ purchaseCancelBtn.addEventListener('click', () => {
 });
 
 /* 確定 → コイン残高から消費して、逆転の一手を発動／ヒントを表示 */
-purchaseConfirmBtn.addEventListener('click', () => {
+purchaseConfirmBtn.addEventListener('click', async () => {
   purchasePanel.style.display = 'none';
   if (confirmMode === 'hint'){
     if (!ensureCoins(HINT_COST)) return;
-    if (!spendCoins(HINT_COST)) return;
+    if (!(await spendCoins(HINT_COST, 'hint'))) return;
     showHint();
     return;
   }
   if (!isHumanPassState()) return;
   if (!ensureCoins(PASS_BONUS_PRICE)) return;
-  if (!spendCoins(PASS_BONUS_PRICE)) return;
+  if (!(await spendCoins(PASS_BONUS_PRICE, 'comeback_move'))) return;
   purchaseCount++;
   bonusUsesRemaining = PASS_BONUS_USES;   // 1回の発動で最大3回ぶんを付与
   toast(t('purchasedCredit', { bal: fmt(coins()) }), 'gold');
@@ -2432,6 +2479,7 @@ initGame();
 <!-- Back to landing page -->
 <a href="index.html" id="catacelo-home-btn" style="position:fixed;top:12px;left:12px;z-index:99999;display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#0E3B22;color:#F6F1E3;font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;font-size:13px;font-weight:700;letter-spacing:.05em;text-decoration:none;border-radius:999px;box-shadow:0 3px 8px rgba(0,0,0,.35);opacity:.92;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.92">&#9664; トップへ戻る</a>
 <script>catSyncLang(lang);</script>
+<link rel="modulepreload" href="coin-wallet.js">
 <script src="static-site-seo.js"></script>
 </body>
 </html>
