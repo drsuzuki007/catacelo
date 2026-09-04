@@ -101,3 +101,4 @@ body.catacelo-battle-body {
   .battle-site .lobby-panel { padding: 23px 18px; }
   .battle-site .game-stage { width: calc(100% - 16px); }
 }
+.battle-site .score-card strong { color: var(--ivory); }
