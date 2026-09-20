@@ -149,6 +149,14 @@
     text-align:center;padding:26px 20px;font-size:.8rem;color:rgba(246,241,227,.55);
     letter-spacing:.06em;
   }
+  .legal-links{
+    display:flex;flex-wrap:wrap;justify-content:center;gap:6px 24px;
+    margin-bottom:14px;font-size:.76rem;letter-spacing:.04em;
+  }
+  .legal-links a{
+    color:rgba(246,241,227,.6);text-decoration:none;
+  }
+  .legal-links a:hover{color:var(--gold);text-decoration:underline}
 
   @media (max-width:560px){
     .steps::before{left:calc(24px + 26px)}
@@ -248,7 +256,14 @@
   いつでもこのページに戻って、次のステップへ進めます。
 </p>
 
-<footer data-i18n="footer">© Catacelo — Invented &amp; Patented Othello Variant</footer>
+<footer>
+  <nav class="legal-links" aria-label="Legal">
+    <a href="terms.html" data-i18n="linkTerms">利用規約</a>
+    <a href="privacy.html" data-i18n="linkPrivacy">プライバシーポリシー</a>
+    <a href="tokushoho.html" data-i18n="linkTokushoho">特定商取引法に基づく表記</a>
+  </nav>
+  <div data-i18n="footer">© Catacelo — Invented &amp; Patented Othello Variant</div>
+</footer>
 
 <script>
 "use strict";
@@ -271,6 +286,7 @@ const I18N = {
     desc4:'「逆転の一手」による逆転チャンスはそのままに、AIが3手先まで読んで打ってくる最強モード。2手先より格段に手強い、腕自慢のための頂上決戦です。',
     btn1:'Catacelo Start で遊ぶ', btn2:'Catacelo Battle で遊ぶ', btn3:'Catacelo 2手先 で遊ぶ', btn4:'Catacelo 3手先 で遊ぶ',
     note:'各ゲームの画面には「トップへ戻る」ボタンがあります。<br>いつでもこのページに戻って、次のステップへ進めます。',
+    linkTerms:'利用規約', linkPrivacy:'プライバシーポリシー', linkTokushoho:'特定商取引法に基づく表記',
     footer:'© Catacelo — Invented & Patented Othello Variant'
   },
   en: {
@@ -287,6 +303,7 @@ const I18N = {
     desc4:'Same comeback chances via the \u201cComeback Move\u201d, but the AI reads 3 moves ahead \u2014 our strongest mode. Far tougher than 2-Ply: the summit for confident players.',
     btn1:'Play Catacelo Start', btn2:'Play Catacelo Battle', btn3:'Play Catacelo 2-Ply', btn4:'Play Catacelo 3-Ply',
     note:'Every game screen has a \u201cBack to top\u201d button.<br>Return here any time to move on to the next step.',
+    linkTerms:'Terms of Service', linkPrivacy:'Privacy Policy', linkTokushoho:'Commercial Transactions Act Notice',
     footer:'© Catacelo — Invented & Patented Othello Variant'
   },
   zh: {
@@ -303,6 +320,7 @@ const I18N = {
     desc4:'保留“逆转一手”带来的逆转机会，同时 AI 会预读3步再落子——最强模式。比预读2步强得多，是高手的巅峰对决。',
     btn1:'玩 Catacelo Start', btn2:'玩 Catacelo Battle', btn3:'玩 Catacelo 预读2步', btn4:'玩 Catacelo 预读3步',
     note:'每个游戏画面都有“返回首页”按钮。<br>随时可以回到本页，进入下一步。',
+    linkTerms:'使用条款', linkPrivacy:'隐私政策', linkTokushoho:'特定商业交易法标示',
     footer:'© Catacelo — Invented & Patented Othello Variant'
   },
   ko: {
@@ -319,6 +337,7 @@ const I18N = {
     desc4:'‘역전의 한 수’로 얻는 역전 기회는 그대로, AI가 3수 앞까지 읽고 두는 최강 모드. 2수 앞보다 훨씬 강한, 실력자를 위한 정상 결전입니다.',
     btn1:'Catacelo Start 플레이', btn2:'Catacelo Battle 플레이', btn3:'Catacelo 2수 앞 플레이', btn4:'Catacelo 3수 앞 플레이',
     note:'모든 게임 화면에는 ‘처음으로’ 버튼이 있습니다.<br>언제든 이 페이지로 돌아와 다음 단계로 진행할 수 있습니다.',
+    linkTerms:'이용약관', linkPrivacy:'개인정보 처리방침', linkTokushoho:'특정상거래법에 따른 표기',
     footer:'© Catacelo — Invented & Patented Othello Variant'
   },
   es: {
@@ -335,6 +354,7 @@ const I18N = {
     desc4:'Las mismas oportunidades de remontada con la «Jugada de remontada», pero la IA lee 3 jugadas por delante: nuestro modo más fuerte. Mucho más duro que el de 2 jugadas, la cumbre para jugadores expertos.',
     btn1:'Jugar a Catacelo Start', btn2:'Jugar a Catacelo Battle', btn3:'Jugar a Catacelo 2 jugadas', btn4:'Jugar a Catacelo 3 jugadas',
     note:'Todas las pantallas de juego tienen un botón «Volver al inicio».<br>Vuelve aquí cuando quieras para pasar al siguiente paso.',
+    linkTerms:'Términos de uso', linkPrivacy:'Política de privacidad', linkTokushoho:'Aviso legal (Ley de Transacciones Comerciales Específicas)',
     footer:'© Catacelo — Invented & Patented Othello Variant'
   },
   fr: {
@@ -351,6 +371,7 @@ const I18N = {
     desc4:'Les mêmes chances de remontée grâce au « Coup de la remontée », mais l\u2019IA lit 3 coups à l\u2019avance : notre mode le plus fort. Bien plus coriace que 2 coups, le sommet réservé aux joueurs confirmés.',
     btn1:'Jouer à Catacelo Start', btn2:'Jouer à Catacelo Battle', btn3:'Jouer à Catacelo 2 coups', btn4:'Jouer à Catacelo 3 coups',
     note:'Chaque écran de jeu comporte un bouton « Retour à l\u2019accueil ».<br>Revenez ici à tout moment pour passer à l\u2019étape suivante.',
+    linkTerms:'Conditions d\u2019utilisation', linkPrivacy:'Politique de confidentialité', linkTokushoho:'Mentions légales (loi sur les transactions commerciales)',
     footer:'© Catacelo — Invented & Patented Othello Variant'
   }
 };
