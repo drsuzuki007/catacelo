@@ -83,6 +83,8 @@
     th{border-bottom:none;padding-bottom:4px}
     td{padding-top:4px}
   }
+
+  .demo-notice { background: #ffebee; border: 2px solid #c62828; color: #b71c1c; border-radius: 8px; padding: 12px 14px; font-weight: bold; line-height: 1.7; margin: 14px 0; }
 </style>
 </head>
 <body>
@@ -101,7 +103,8 @@
 
 <main>
   <h1 data-i18n="h1">特定商取引法に基づく表記</h1>
-  <p class="updated" data-i18n="updated">制定日：2026年7月10日</p>
+  <p class="updated" data-i18n="updated">制定日：2026年7月10日／最終改定日：2026年11月15日</p>
+  <p class="demo-notice" data-i18n="demoNote">【現在はデモ版です】現在、コインの販売および決済は行っておらず、料金は一切発生しません。デモ用の購入画面で付与されるコインは無償です。以下は、当社がコインの販売を正式に開始した際の取引条件です。</p>
   <p class="lang-note" data-i18n="langNote"></p>
   <table>
     <tr><th data-i18n="r0_h">販売事業者</th><td data-i18n-html="r0_d">MyMedipro株式会社</td></tr>
@@ -110,14 +113,14 @@
     <tr><th data-i18n="r3_h">電話番号</th><td data-i18n-html="r3_d">03-3234-8908<br><small>受付時間：平日10:00〜17:00（土日祝を除く）<br>※お問い合わせは原則として下記メールアドレスにて承ります。</small></td></tr>
     <tr><th data-i18n="r4_h">メールアドレス</th><td data-i18n-html="r4_d">tc@mymedipro.com</td></tr>
     <tr><th data-i18n="r5_h">販売URL</th><td data-i18n-html="r5_d">https://catacelo.com</td></tr>
-    <tr><th data-i18n="r6_h">販売価格</th><td data-i18n-html="r6_d">・コイン 50枚パック：1,000円（税込）（1コイン＝20円相当）<br>・コインの使い道：逆転の一手 1回の発動につき3コイン／ヒント 1回につき1コイン</td></tr>
+    <tr><th data-i18n="r6_h">販売価格</th><td data-i18n-html="r6_d">・コイン 50枚パック：1,000円（税込）（1コイン＝20円相当）<br>・コインの使い道：逆転の一手 1回の使用につき1コイン（1つの対局につき3回まで）／ヒント 1回につき1コイン</td></tr>
     <tr><th data-i18n="r7_h">商品代金以外に必要な料金</th><td data-i18n-html="r7_d">インターネット接続に係る通信料等はお客様のご負担となります。</td></tr>
     <tr><th data-i18n="r8_h">お支払い方法</th><td data-i18n-html="r8_d">クレジットカード決済（Stripe社の決済システムを利用）<br><small>※カード情報は決済代行事業者によりトークン化して処理され、当社サーバーには保存されません。</small></td></tr>
     <tr><th data-i18n="r9_h">お支払い時期</th><td data-i18n-html="r9_d">コインの購入手続の完了時に即時決済されます。逆転の一手・ヒントの対価はコイン残高から消費され、カードに都度請求されることはありません。</td></tr>
     <tr><th data-i18n="r10_h">商品の提供時期</th><td data-i18n-html="r10_d">決済完了後、直ちにコイン残高に反映され、ご利用いただけます。</td></tr>
     <tr><th data-i18n="r11_h">返品・キャンセルについて</th><td data-i18n-html="r11_d">デジタルコンテンツという商品の性質上、購入手続完了後の返品・キャンセル・返金はお受けできません。ただし、当社の責めに帰すべき事由によりサービスが提供されなかった場合はこの限りではありません。</td></tr>
     <tr><th data-i18n="r12_h">コインの有効期限</th><td data-i18n-html="r12_d">購入日から150日間。有効期限を経過したコインは失効し、払戻しはいたしません。</td></tr>
-    <tr><th data-i18n="r13_h">逆転の一手の有効範囲</th><td data-i18n-html="r13_d">発動した対局中のみ有効（1回の発動につき最大3回まで使用可能）。対局の終了・リセットにより未使用分は失効します。</td></tr>
+    <tr><th data-i18n="r13_h">逆転の一手の使用条件</th><td data-i18n-html="r13_d">1回の使用につき1コインを消費し、1つの対局につき3回まで使用できます。コインは使用を確定した時点で消費され、対局の終了・リセット後も返還されません。</td></tr>
     <tr><th data-i18n="r14_h">動作環境</th><td data-i18n-html="r14_d">最新版のGoogle Chrome、Safari、Microsoft Edge、Firefoxを推奨します。</td></tr>
   </table>
   <div class="note" data-i18n="note">本表記に関するお問い合わせは、上記メールアドレスまでお願いいたします。</div>
@@ -145,7 +148,8 @@ const I18N = {
   "navTokushoho": "特定商取引法に基づく表記",
   "back": "◀ トップページへ戻る",
   "copy": "© 2026 MyMedipro株式会社",
-  "updated": "制定日：2026年7月10日",
+  "updated": "制定日：2026年7月10日／最終改定日：2026年11月15日",
+  "demoNote": "【現在はデモ版です】現在、コインの販売および決済は行っておらず、料金は一切発生しません。デモ用の購入画面で付与されるコインは無償です。以下は、当社がコインの販売を正式に開始した際の取引条件です。",
   "langNote": "",
   "h1": "特定商取引法に基づく表記",
   "note": "本表記に関するお問い合わせは、上記メールアドレスまでお願いいたします。",
@@ -162,7 +166,7 @@ const I18N = {
   "r5_h": "販売URL",
   "r5_d": "https://catacelo.com",
   "r6_h": "販売価格",
-  "r6_d": "・コイン 50枚パック：1,000円（税込）（1コイン＝20円相当）<br>・コインの使い道：逆転の一手 1回の発動につき3コイン／ヒント 1回につき1コイン",
+  "r6_d": "・コイン 50枚パック：1,000円（税込）（1コイン＝20円相当）<br>・コインの使い道：逆転の一手 1回の使用につき1コイン（1つの対局につき3回まで）／ヒント 1回につき1コイン",
   "r7_h": "商品代金以外に必要な料金",
   "r7_d": "インターネット接続に係る通信料等はお客様のご負担となります。",
   "r8_h": "お支払い方法",
@@ -175,8 +179,8 @@ const I18N = {
   "r11_d": "デジタルコンテンツという商品の性質上、購入手続完了後の返品・キャンセル・返金はお受けできません。ただし、当社の責めに帰すべき事由によりサービスが提供されなかった場合はこの限りではありません。",
   "r12_h": "コインの有効期限",
   "r12_d": "購入日から150日間。有効期限を経過したコインは失効し、払戻しはいたしません。",
-  "r13_h": "逆転の一手の有効範囲",
-  "r13_d": "発動した対局中のみ有効（1回の発動につき最大3回まで使用可能）。対局の終了・リセットにより未使用分は失効します。",
+  "r13_h": "逆転の一手の使用条件",
+  "r13_d": "1回の使用につき1コインを消費し、1つの対局につき3回まで使用できます。コインは使用を確定した時点で消費され、対局の終了・リセット後も返還されません。",
   "r14_h": "動作環境",
   "r14_d": "最新版のGoogle Chrome、Safari、Microsoft Edge、Firefoxを推奨します。"
  },
@@ -190,7 +194,8 @@ const I18N = {
   "navTokushoho": "Commercial Transactions Act Notice",
   "back": "◀ Back to top page",
   "copy": "© 2026 MyMedipro Inc.",
-  "updated": "Established: July 10, 2026",
+  "updated": "Established: July 10, 2026 / Last revised: November 15, 2026",
+  "demoNote": "[Currently a demo] Coins are not currently sold and no payments are processed; you will not be charged. Coins granted on the demo purchase screen are free of charge. The following are the terms of sale that will apply when the Company officially begins selling Coins.",
   "langNote": "The Japanese version of this document is the authoritative text. Translations are provided for reference only; in case of any discrepancy, the Japanese version prevails.",
   "h1": "Notice under the Act on Specified Commercial Transactions",
   "note": "Please direct any inquiries about this notice to the e-mail address above.",
@@ -207,7 +212,7 @@ const I18N = {
   "r5_h": "Sales URL",
   "r5_d": "https://catacelo.com",
   "r6_h": "Prices",
-  "r6_d": "• 50-Coin pack: 1,000 yen (tax included) (1 Coin = 20 yen equivalent)<br>• Use of Coins: Comeback Move — 3 Coins per activation / Hint — 1 Coin per use",
+  "r6_d": "• 50-Coin pack: 1,000 yen (tax included) (1 Coin = 20 yen equivalent)<br>• Use of Coins: Comeback Move — 1 Coin per use (up to 3 uses per game) / Hint — 1 Coin per use",
   "r7_h": "Charges other than the price",
   "r7_d": "Telecommunication charges for Internet access are borne by the customer.",
   "r8_h": "Payment method",
@@ -220,8 +225,8 @@ const I18N = {
   "r11_d": "Owing to the nature of digital content, returns, cancellations and refunds are not accepted after the purchase procedure is completed, except where the service was not provided for reasons attributable to the Company.",
   "r12_h": "Expiry of Coins",
   "r12_d": "150 days from the date of purchase. Expired Coins are forfeited and are not refunded.",
-  "r13_h": "Validity of Comeback Moves",
-  "r13_d": "Valid only during the game in which activated (each activation may be used up to 3 times). Unused uses are forfeited when the game ends or is reset.",
+  "r13_h": "Conditions of use of the Comeback Move",
+  "r13_d": "Each use consumes 1 Coin, up to 3 uses per game. The Coin is consumed when the use is confirmed and is not returned after the game ends or is reset.",
   "r14_h": "System requirements",
   "r14_d": "The latest versions of Google Chrome, Safari, Microsoft Edge or Firefox are recommended."
  },
@@ -235,7 +240,8 @@ const I18N = {
   "navTokushoho": "特定商业交易法标示",
   "back": "◀ 返回首页",
   "copy": "© 2026 MyMedipro株式会社",
-  "updated": "制定日：2026年7月10日",
+  "updated": "制定日：2026年7月10日／最后修订日：2026年11月15日",
+  "demoNote": "【目前为演示版】目前不销售金币，也不进行任何结算，不会产生任何费用。通过演示购买画面获得的金币为无偿赠送。以下为本公司正式开始销售金币时的交易条件。",
   "langNote": "本文件以日文版为正式文本。译文仅供参考，如有歧义，以日文版为准。",
   "h1": "基于特定商业交易法的标示",
   "note": "有关本标示的咨询，请发送至上述电子邮件地址。",
@@ -252,7 +258,7 @@ const I18N = {
   "r5_h": "销售网址",
   "r5_d": "https://catacelo.com",
   "r6_h": "销售价格",
-  "r6_d": "・50金币礼包：1,000日元（含税）（1金币＝20日元）<br>・金币用途：逆转一手 每次发动3金币／提示 每次1金币",
+  "r6_d": "・50金币礼包：1,000日元（含税）（1金币＝20日元）<br>・金币用途：逆转一手 每次使用1金币（每局最多3次）／提示 每次1金币",
   "r7_h": "商品价格以外的费用",
   "r7_d": "互联网连接的通信费等由客户承担。",
   "r8_h": "支付方式",
@@ -265,8 +271,8 @@ const I18N = {
   "r11_d": "鉴于数字内容的商品性质，购买手续完成后不接受退货、取消或退款。但因本公司应负责的事由未能提供服务的情形除外。",
   "r12_h": "金币有效期",
   "r12_d": "自购买日起150天。超过有效期的金币失效，不予退款。",
-  "r13_h": "逆转一手的有效范围",
-  "r13_d": "仅在发动的该局对局中有效（每次发动最多可使用3次）。对局结束或重置后未使用部分失效。",
+  "r13_h": "逆转一手的使用条件",
+  "r13_d": "每次使用消耗1金币，每局最多可使用3次。金币在确认使用时即被消耗，对局结束或重置后不予退还。",
   "r14_h": "运行环境",
   "r14_d": "推荐使用最新版Google Chrome、Safari、Microsoft Edge、Firefox。"
  },
@@ -280,7 +286,8 @@ const I18N = {
   "navTokushoho": "특정상거래법에 따른 표기",
   "back": "◀ 첫 페이지로 돌아가기",
   "copy": "© 2026 MyMedipro Inc.",
-  "updated": "제정일: 2026년 7월 10일",
+  "updated": "제정일: 2026년 7월 10일 / 최종 개정일: 2026년 11월 15일",
+  "demoNote": "【현재는 데모판입니다】현재 코인의 판매 및 결제는 이루어지지 않으며, 요금이 전혀 발생하지 않습니다. 데모용 구매 화면에서 지급되는 코인은 무상입니다. 아래는 당사가 코인 판매를 정식으로 개시할 때의 거래 조건입니다.",
   "langNote": "이 문서의 정본은 일본어판입니다. 번역본은 참고용이며, 해석에 차이가 있을 경우 일본어판이 우선합니다.",
   "h1": "특정상거래법에 따른 표기",
   "note": "본 표기에 관한 문의는 위 이메일 주소로 부탁드립니다.",
@@ -297,7 +304,7 @@ const I18N = {
   "r5_h": "판매 URL",
   "r5_d": "https://catacelo.com",
   "r6_h": "판매 가격",
-  "r6_d": "・코인 50개 팩: 1,000엔(세금 포함) (1코인＝20엔 상당)<br>・코인 사용처: 역전의 한 수 1회 발동당 3코인 / 힌트 1회당 1코인",
+  "r6_d": "・코인 50개 팩: 1,000엔(세금 포함) (1코인＝20엔 상당)<br>・코인 사용처: 역전의 한 수 1회 사용당 1코인(한 대국당 3회까지) / 힌트 1회당 1코인",
   "r7_h": "상품 대금 이외의 필요 요금",
   "r7_d": "인터넷 접속에 따른 통신료 등은 고객 부담입니다.",
   "r8_h": "결제 방법",
@@ -310,8 +317,8 @@ const I18N = {
   "r11_d": "디지털 콘텐츠 상품의 특성상 구매 절차 완료 후 반품·취소·환불은 불가합니다. 다만 당사의 귀책사유로 서비스가 제공되지 않은 경우에는 그러하지 않습니다.",
   "r12_h": "코인 유효기간",
   "r12_d": "구매일로부터 150일. 유효기간이 지난 코인은 소멸하며 환불되지 않습니다.",
-  "r13_h": "역전의 한 수의 유효 범위",
-  "r13_d": "발동한 대국 중에만 유효(1회 발동당 최대 3회 사용 가능). 대국 종료·리셋 시 미사용분은 소멸합니다.",
+  "r13_h": "역전의 한 수 사용 조건",
+  "r13_d": "1회 사용당 1코인을 소비하며, 한 대국당 3회까지 사용할 수 있습니다. 코인은 사용을 확정한 시점에 소비되며, 대국 종료·리셋 후에도 반환되지 않습니다.",
   "r14_h": "동작 환경",
   "r14_d": "최신 버전의 Google Chrome, Safari, Microsoft Edge, Firefox를 권장합니다."
  },
@@ -325,7 +332,8 @@ const I18N = {
   "navTokushoho": "Aviso conforme a la Ley de Transacciones Comerciales Específicas",
   "back": "◀ Volver a la página principal",
   "copy": "© 2026 MyMedipro Inc.",
-  "updated": "Establecido: 10 de julio de 2026",
+  "updated": "Establecido: 10 de julio de 2026 / Última revisión: 15 de noviembre de 2026",
+  "demoNote": "[Actualmente es una versión de demostración] Actualmente no se venden monedas ni se procesa ningún pago; no se le cobrará nada. Las monedas concedidas en la pantalla de compra de demostración son gratuitas. A continuación figuran las condiciones de venta que se aplicarán cuando la Empresa comience oficialmente a vender monedas.",
   "langNote": "La versión japonesa de este documento es el texto auténtico. Las traducciones se ofrecen solo a título informativo; en caso de discrepancia prevalece la versión japonesa.",
   "h1": "Aviso conforme a la Ley de Transacciones Comerciales Específicas",
   "note": "Dirija cualquier consulta sobre este aviso a la dirección de correo electrónico indicada arriba.",
@@ -342,7 +350,7 @@ const I18N = {
   "r5_h": "URL de venta",
   "r5_d": "https://catacelo.com",
   "r6_h": "Precios",
-  "r6_d": "• Pack de 50 monedas: 1.000 yenes (impuestos incluidos) (1 moneda = 20 yenes)<br>• Uso de las monedas: Jugada de remontada, 3 monedas por activación / Pista, 1 moneda por uso",
+  "r6_d": "• Pack de 50 monedas: 1.000 yenes (impuestos incluidos) (1 moneda = 20 yenes)<br>• Uso de las monedas: Jugada de remontada, 1 moneda por uso (hasta 3 usos por partida) / Pista, 1 moneda por uso",
   "r7_h": "Gastos adicionales al precio",
   "r7_d": "Los gastos de telecomunicación derivados de la conexión a Internet corren a cargo del cliente.",
   "r8_h": "Forma de pago",
@@ -355,8 +363,8 @@ const I18N = {
   "r11_d": "Dada la naturaleza del contenido digital, no se aceptan devoluciones, cancelaciones ni reembolsos una vez completado el procedimiento de compra, salvo que el servicio no se haya prestado por causas imputables a la Empresa.",
   "r12_h": "Caducidad de las monedas",
   "r12_d": "150 días desde la fecha de compra. Las monedas caducadas se pierden y no se reembolsan.",
-  "r13_h": "Validez de la jugada de remontada",
-  "r13_d": "Válida solo durante la partida en la que se activó (cada activación puede usarse hasta 3 veces). Los usos no consumidos se pierden al finalizar o reiniciar la partida.",
+  "r13_h": "Condiciones de uso de la jugada de remontada",
+  "r13_d": "Cada uso consume 1 moneda, hasta 3 usos por partida. La moneda se consume al confirmar el uso y no se devuelve tras finalizar o reiniciar la partida.",
   "r14_h": "Requisitos del sistema",
   "r14_d": "Se recomiendan las últimas versiones de Google Chrome, Safari, Microsoft Edge o Firefox."
  },
@@ -370,7 +378,8 @@ const I18N = {
   "navTokushoho": "Mentions légales (loi sur les transactions commerciales)",
   "back": "◀ Retour à la page d’accueil",
   "copy": "© 2026 MyMedipro Inc.",
-  "updated": "Établi le : 10 juillet 2026",
+  "updated": "Établi le : 10 juillet 2026 / Dernière révision : 15 novembre 2026",
+  "demoNote": "[Version de démonstration actuellement] Aucune pièce n’est actuellement vendue et aucun paiement n’est traité ; rien ne vous sera facturé. Les pièces attribuées sur l’écran d’achat de démonstration sont gratuites. Les conditions ci-dessous sont celles qui s’appliqueront lorsque la Société lancera officiellement la vente de pièces.",
   "langNote": "La version japonaise de ce document fait foi. Les traductions sont fournies à titre indicatif ; en cas de divergence, la version japonaise prévaut.",
   "h1": "Mentions légales au titre de la loi sur les transactions commerciales spécifiées",
   "note": "Pour toute question relative aux présentes mentions, veuillez écrire à l’adresse e-mail ci-dessus.",
@@ -387,7 +396,7 @@ const I18N = {
   "r5_h": "URL de vente",
   "r5_d": "https://catacelo.com",
   "r6_h": "Prix",
-  "r6_d": "• Pack de 50 pièces : 1 000 yens (TTC) (1 pièce = 20 yens)<br>• Utilisation des pièces : Coup de la remontée, 3 pièces par activation / Indice, 1 pièce par utilisation",
+  "r6_d": "• Pack de 50 pièces : 1 000 yens (TTC) (1 pièce = 20 yens)<br>• Utilisation des pièces : Coup de la remontée, 1 pièce par utilisation (jusqu’à 3 utilisations par partie) / Indice, 1 pièce par utilisation",
   "r7_h": "Frais autres que le prix",
   "r7_d": "Les frais de télécommunication liés à la connexion Internet sont à la charge du client.",
   "r8_h": "Mode de paiement",
@@ -400,8 +409,8 @@ const I18N = {
   "r11_d": "En raison de la nature des contenus numériques, aucun retour, annulation ou remboursement n’est accepté après la finalisation de l’achat, sauf si le service n’a pas été fourni pour des raisons imputables à la Société.",
   "r12_h": "Validité des pièces",
   "r12_d": "150 jours à compter de la date d’achat. Les pièces expirées sont perdues et ne sont pas remboursées.",
-  "r13_h": "Validité du coup de la remontée",
-  "r13_d": "Valable uniquement pendant la partie au cours de laquelle il a été activé (chaque activation peut être utilisée jusqu’à 3 fois). Les utilisations restantes sont perdues à la fin ou à la réinitialisation de la partie.",
+  "r13_h": "Conditions d’utilisation du coup de la remontée",
+  "r13_d": "Chaque utilisation consomme 1 pièce, jusqu’à 3 utilisations par partie. La pièce est consommée lors de la confirmation de l’utilisation et n’est pas restituée après la fin ou la réinitialisation de la partie.",
   "r14_h": "Configuration requise",
   "r14_d": "Les dernières versions de Google Chrome, Safari, Microsoft Edge ou Firefox sont recommandées."
  }
