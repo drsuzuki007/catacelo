@@ -15,8 +15,8 @@
  *     // コインショップの購入ボタン
  *     shopBuyBtn.onclick = () => wallet.startCheckout();
  *
- *     // 逆転の一手（3コイン）／ヒント（1コイン）
- *     const rest = await wallet.spend(3, 'comeback_move');
+ *     // 逆転の一手（1回につき1コイン・1対局3回まで）／ヒント（1コイン）
+ *     const rest = await wallet.spend(1, 'comeback_move');
  *   </script>
  */
 
@@ -141,17 +141,9 @@ export class CataceloWallet {
     return (await rpc(this.session, "get_coin_lots", {})) || [];
   }
 
-  /** 初回スターターボーナス（サーバー側で1回だけ付与される） */
-  async claimStarterBonus(coins = 5) {
-    this.session = await ensureSession();
-    this.balance = Number(await rpc(this.session, "grant_starter_bonus", { p_coins: coins })) || 0;
-    this.#emit();
-    return this.balance;
-  }
-
   /**
    * コインを消費する。
-   * @param {number} amount 消費枚数（逆転の一手=3、ヒント=1）
+   * @param {number} amount 消費枚数（逆転の一手=1、ヒント=1）
    * @param {'comeback_move'|'hint'} reason
    * @returns {Promise<number>} 消費後の残高
    * @throws 残高不足のとき

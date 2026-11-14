@@ -181,10 +181,20 @@
   /* ===== コイン残高バー ===== */
   #creditBar {
     width: 92%; max-width: 640px; background: #eef7ee; border: 1px solid #aed8ae;
-    border-radius: 10px; padding: 10px 14px; margin-bottom: 10px;
+    border-radius: 10px; padding: 6px 14px; margin-bottom: 10px;
     font-size: 13px; color: #1b5e20; line-height: 1.6;
-    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 14px;
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 14px;
+    /* 残りコイン数は常に見えるよう、スクロールしても画面上部に固定する */
+    position: sticky; top: 56px; z-index: 900; box-shadow: 0 2px 6px rgba(0,0,0,.12);
   }
+  #demoBadge { font-size: 11px; font-weight: bold; color: #fff; background: #c62828; border-radius: 4px; padding: 1px 6px; letter-spacing: .05em; }
+  #shopDemoBanner { background: #ffebee; border: 2px solid #c62828; color: #b71c1c; border-radius: 8px; padding: 10px 12px; font-size: 13px; font-weight: bold; line-height: 1.6; margin: 8px 0; }
+  #cardModal .demo-note { background: #ffebee; border: 2px solid #c62828; color: #b71c1c; font-weight: bold; font-size: 13px; line-height: 1.6; }
+  #cardModal input[readonly] { background: #eee; color: #555; cursor: not-allowed; }
+  #cardModal .demoWatermark { text-align: center; font-size: 12px; color: #c62828; font-weight: bold; letter-spacing: .3em; margin: 6px 0 0; }
+  #walletNote { font-size: 12px; color: #c62828; cursor: pointer; text-decoration: underline; display: none; }
+  #walletNote.connecting { color: #777; cursor: default; text-decoration: none; }
+  #bonusLeftBadge { font-size: 12px; color: #ad1457; background: #fce4ec; border-radius: 999px; padding: 2px 10px; font-weight: bold; white-space: nowrap; }
   #creditBar .creditMain { font-size: 14px; display: inline-flex; align-items: center; gap: 6px; }
   #creditBar #creditBalance { font-size: 22px; font-weight: bold; color: #7a4a00; font-variant-numeric: tabular-nums; display:inline-block; }
   #creditBar #creditBalance.bump { animation: coinBump .45s ease-out; }
@@ -349,11 +359,14 @@
     <span class="coinIcon"></span>
     <span id="creditBalance">0</span>
     <span class="coinWord" data-i18n="creditUnit">コイン</span>
+    <span id="demoBadge" data-i18n="demoBadge" style="display:none;">デモ版</span>
     <span id="streakBadge" style="display:none;"></span>
+    <span id="walletNote" role="button" tabindex="0"></span>
   </span>
   <span class="creditActions">
-    <button id="registerBtn" data-i18n="registerBtn">初回登録</button>
-    <button id="topupBtn" data-i18n="topupBtn" style="display:none;">🪙 コインショップ</button>
+    <span id="bonusLeftBadge"></span>
+    <button id="registerBtn" data-i18n="registerBtn" style="display:none;">初回登録</button>
+    <button id="topupBtn" data-i18n="topupBtn">🪙 コインショップ</button>
   </span>
 </div>
 <!-- ※価格・有効期限などの特商法・資金決済法上の表示は、円が実際に動く「コインショップ」画面（shopModal）に集約 -->
@@ -395,7 +408,7 @@
 <div id="passBonusArea">
   <button id="hintBtn" data-i18n="hintBtn">💡 ヒント（🪙1）</button>
   <button id="passBonusUseBtn">✨ 逆転の一手を使う</button>
-  <button id="passBonusBuyBtn" data-i18n="bonusBuyBtn">✨ 逆転の一手（🪙3）</button>
+  <button id="passBonusBuyBtn">✨ 逆転の一手（🪙1）</button>
 </div>
 
 <!-- コイン消費の確認パネル（逆転の一手／ヒント共用）。ここでは円は一切出さない -->
@@ -403,7 +416,7 @@
   <h3 id="purchaseTitle">✨ 逆転の一手を発動しますか？</h3>
   <p id="purchasePayLine" class="payFromCredit"></p>
   <div style="display:flex; gap:10px; justify-content:center; margin-top:10px;">
-    <button id="purchaseConfirmBtn">🪙3 で発動する</button>
+    <button id="purchaseConfirmBtn">🪙1 で発動する</button>
     <button id="purchaseCancelBtn" data-i18n="purchaseCancel">やめる</button>
   </div>
 </div>
@@ -419,37 +432,33 @@
 </div>
 <button id="resetBtn" data-i18n="resetBtn">ゲームをリセット</button>
 
-<!-- クレジットカード登録モーダル -->
+<!-- デモ用のカード入力（購入）画面。
+     実際の決済は行わない。入力欄は見本を入れた読み取り専用で、本物のカード情報を入力できないようにしてある。
+     本番の決済は Stripe の決済ページで行うため、この画面は DEMO_MODE のときだけ使う。 -->
 <div id="cardModal" class="modal-overlay">
   <div class="modal">
-    <h3 data-i18n="cardModalTitle">クレジットカード情報の登録</h3>
+    <h3 data-i18n="cardModalTitle">【デモ画面】コイン50枚パックの購入</h3>
     <div class="demo-note" data-i18n="cardModalNote">
-      ※これはデモ用の入力フォームです。入力された情報はどこにも送信・保存されません。
-      本番運用では、生のカード番号を直接扱わず、Stripe Elements 等でトークン化してください。
+      これはデモ画面です。実際の決済は行われず、料金は一切かかりません。
     </div>
-    <!-- 【本番移行時】上のデモ用の断り書きは次の文言に差し替え：
-         「カード情報は決済代行事業者（Stripe）により暗号化・トークン化して処理され、当社サーバーには送信・保存されません。」 -->
     <label data-i18n="cardNumber">カード番号</label>
-    <input id="ccNumber" inputmode="numeric" placeholder="4242 4242 4242 4242" maxlength="19" autocomplete="off">
+    <input id="ccNumber" value="4242 4242 4242 4242" readonly tabindex="-1" autocomplete="off">
     <div class="row">
       <div>
         <label data-i18n="cardExpiry">有効期限 (MM/YY)</label>
-        <input id="ccExpiry" placeholder="12/28" maxlength="5" autocomplete="off">
+        <input id="ccExpiry" value="12/30" readonly tabindex="-1" autocomplete="off">
       </div>
       <div>
         <label data-i18n="cardCvc">セキュリティコード</label>
-        <input id="ccCvc" inputmode="numeric" placeholder="123" maxlength="4" autocomplete="off">
+        <input id="ccCvc" value="123" readonly tabindex="-1" autocomplete="off">
       </div>
     </div>
     <label data-i18n="cardName">カード名義</label>
-    <input id="ccName" placeholder="TARO YAMADA" autocomplete="off">
+    <input id="ccName" value="DEMO TARO" readonly tabindex="-1" autocomplete="off">
+    <p class="demoWatermark">DEMO ・ DEMO ・ DEMO</p>
     <div id="cardError"></div>
-    <label style="display:flex;align-items:flex-start;gap:8px;margin:12px 0 4px;font-size:13px;line-height:1.6;cursor:pointer;">
-      <input type="checkbox" id="agreeTerms" style="margin-top:3px;">
-      <span id="agreeLabel"><a href="terms.html" target="_blank" rel="noopener">利用規約</a>および<a href="privacy.html" target="_blank" rel="noopener">プライバシーポリシー</a>に同意する</span>
-    </label>
     <div class="modal-actions">
-      <button id="cardSaveBtn" data-i18n="cardSaveBtn">登録する</button>
+      <button id="cardSaveBtn" data-i18n="cardSaveBtn">デモ購入する（50コイン・請求なし）</button>
       <button id="cardCancelBtn" data-i18n="cardCancelBtn">キャンセル</button>
     </div>
   </div>
@@ -460,15 +469,16 @@
   <div class="modal">
     <h3 data-i18n="shopTitle">🪙 コインショップ</h3>
     <p id="shopBalanceLine"></p>
+    <div id="shopDemoBanner" data-i18n="shopDemoBanner" style="display:none;"></div>
     <div class="shopPack">
       <div class="packName" data-i18n="shopPackName">コイン 50枚パック</div>
       <div class="packCoins"><span class="coinIcon"></span><span id="shopPackCoins">50</span></div>
       <div class="packDesc" data-i18n="shopPackDesc">逆転の一手 16回分 ＋ ヒント 2回分 に相当</div>
-      <div class="packPrice" data-i18n="shopPackPrice">1,000円（税込）</div>
+      <div class="packPrice" id="shopPackPrice">1,000円（税込）</div>
     </div>
     <div id="shopShort"></div>
     <div class="modal-actions">
-      <button id="shopBuyBtn" data-i18n="shopBuyBtn">1,000円で購入する</button>
+      <button id="shopBuyBtn">1,000円で購入する</button>
       <button id="shopCloseBtn" data-i18n="shopClose">閉じる</button>
     </div>
     <div id="shopNotes">
@@ -539,11 +549,21 @@ const I18N = {
     aiThinking:'AIが3手先まで深く読んでいます...',
     deepMsg:'お待たせしてすみません。現在、深く分析中ですので、もう少々お時間がかかります。そのままお待ちください。',
     black:'黒', white:'白', toPlace:'配置へ', toMove:'移動へ', passBtn:'パスする',
-    bonusBuyBtn:'✨ 逆転の一手（🪙3）',
+    bonusBuyBtn:'✨ 逆転の一手（🪙1・この対局あと{n}回）',
+    demoBadge:'デモ版',
+    shopDemoBanner:'現在はデモ版です。実際の購入・決済はできません。次の画面は「デモ用のカード入力画面」で、そこでデモ購入をすると 50コイン が貯まります（料金はかかりません）。',
+    shopDemoBuyBtn:'デモ画面へ進む',
+    shopDemoPrice:'1,000円（税込）※デモ版のため請求されません',
+    demoPaid:'🪙 デモ購入が完了しました。{amt}コインを追加（残高 {bal}コイン・請求なし）',
+    walletConnecting:'残高を確認中…',
+    walletError:'残高を取得できません（タップで再試行）',
+    bonusLeftBadge:'✨ 逆転の一手 あと{n}回',
+    bonusUsedUp:'✨ 逆転の一手はこの対局で3回使い切りました',
+    spendFailed:'コインを消費できませんでした。通信環境をご確認のうえ、もう一度お試しください。',
     bonusUseBtn:'✨ 逆転の一手を使う（残り{n}回）',
     purchaseTitle:'✨ 逆転の一手を発動しますか？',
-    purchaseConfirm:'🪙3 で発動する', purchaseCancel:'やめる', processing:'決済処理中...',
-    payFromCredit:'この対局で最大3回まで使えます。残高 🪙{bal} → 発動後 🪙{after}',
+    purchaseConfirm:'🪙1 で発動する', purchaseCancel:'やめる', processing:'決済処理中...',
+    payFromCredit:'1回につき🪙1。この対局であと{n}回使えます。残高 🪙{bal} → 発動後 🪙{after}',
     topupBtn:'🪙 コインショップ',
     toppedUp:'🪙 {amt}コインを追加しました！残高: {bal}コイン',
     needTopUp:'コインが足りません。コインショップで追加できます。',
@@ -554,14 +574,14 @@ const I18N = {
     whiteSlight:'白やや有利', whiteStrong:'白かなり有利',
     reasonCorner:'{who}が角を多く取っています', reasonMoves:'{who}の打てる場所が多いです',
     reasonDiscs:'石数は{who}が多いです', reasonDefault:'角を渡さず、次の相手の手を減らす手が大切です',
-    cardModalTitle:'クレジットカード情報の登録',
-    cardModalNote:'※これはデモ用の入力フォームです。入力された情報はどこにも送信・保存されません。本番運用では、生のカード番号を直接扱わず、Stripe Elements 等でトークン化してください。',
+    cardModalTitle:'【デモ画面】コイン50枚パックの購入',
+    cardModalNote:'これはデモ画面です。実際の決済は行われず、料金は一切かかりません。カード情報は見本があらかじめ入っており、変更できません。どこにも送信・保存されません。本物のカード情報は入力しないでください。',
     cardNumber:'カード番号', cardExpiry:'有効期限 (MM/YY)', cardCvc:'セキュリティコード',
-    cardName:'カード名義', cardSaveBtn:'登録する', cardCancelBtn:'キャンセル', registeringBtn:'登録中...',
+    cardName:'カード名義', cardSaveBtn:'デモ購入する（50コイン・請求なし）', cardCancelBtn:'キャンセル', registeringBtn:'登録中...',
     registerBtn:'初回登録', approvingBtn:'カードを承認中...',
     cardApprovedMsg:'カードが承認されました。🎁 スターターボーナス {bal}コイン を獲得！',
     cardNotApproved:'カードが承認されませんでした。情報をご確認ください。',
-    needRegister:'コインを使うには、先に「初回登録」でクレジットカードを登録してください。',
+    needRegister:'コイン機能に接続できませんでした。通信環境をご確認のうえ、もう一度お試しください。',
     rulesTitle:'ゲームのルール',
     rule1:'基本ルールは通常のオセロと同じです。あなたは白、AIは黒です。',
     rule2:'通常モードでは、相手の駒を挟んで自分の色に変えられる場所に駒を置きます。',
@@ -574,7 +594,7 @@ const I18N = {
     rule9:'両者がパスするか、盤面が埋まったらゲーム終了です。',
     bonusTitle:'逆転の一手・ヒント（コイン機能）',
     bonusRule1:'白（あなた）が「パスする」状態になったときだけ、「✨ 逆転の一手」ボタンが現れます。',
-    bonusRule2:'逆転の一手は 🪙3 で発動し、その対局中に最大3回まで使えます（対局の終了・リセットで残り回数は失効します）。',
+    bonusRule2:'逆転の一手は1回につき 🪙1 を消費し、1つの対局で最大3回まで使えます（使った回数ぶんだけコインが減ります）。',
     bonusRule3:'逆転の一手を使うと、挟めるか否かに関わらず、空いているマスのどこにでも白い駒を1個追加で置けます。',
     bonusRule4:'💡 ヒント（🪙1）：AIが読んだ「あなたのおすすめの一手」を盤上で光らせます。',
     bonusRule5:'コインが足りないときは「🪙 コインショップ」で追加できます（50コイン／1,000円）。',
@@ -584,7 +604,7 @@ const I18N = {
     moveKindMove:'移動 ({from}→{to})', moveKindPlace:'配置 ({to})',
     aiPassed:'AIは有効な手がないためパスしました',
     aiMoveInfo:'AIの手: {kind} ／ 読み: 3手先を保証（今回は{depth}手先まで到達）／ 思考時間: {ms}ms',
-    purchasedCredit:'✨ 逆転の一手を発動！この対局で最大3回まで使えます（残高 🪙{bal}）',
+    purchasedCredit:'✨ 逆転の一手を発動！（残高 🪙{bal}・この対局あと{n}回）',
     payFailed:'決済に失敗しました。もう一度お試しください。',
     cardRegFailed:'カードの登録に失敗しました。番号をご確認ください。',
     fillAll:'すべての項目を入力してください。',
@@ -605,7 +625,7 @@ const I18N = {
     shopBalance:'現在の残高：{bal}コイン',
     shopPackName:'コイン 50枚パック',
     shopPackPrice:'1,000円（税込）',
-    shopPackDesc:'逆転の一手 16回分 ＋ ヒント 2回分 に相当',
+    shopPackDesc:'逆転の一手・ヒント あわせて50回分',
     shopBuyBtn:'1,000円で購入する',
     shopClose:'閉じる',
     shopNote1:'価格：1,000円（税込）／ 内容：50コイン（1コイン＝20円相当）',
@@ -646,11 +666,21 @@ const I18N = {
     aiThinking:'AI is reading 3 plies deep...',
     deepMsg:'Sorry to keep you waiting. The AI is analyzing deeply, so it will take a little longer. Please wait.',
     black:'Black', white:'White', toPlace:'Place mode', toMove:'Move mode', passBtn:'Pass',
-    bonusBuyBtn:'✨ Comeback Move (🪙3)',
+    bonusBuyBtn:'✨ Comeback Move (🪙1 · {n} left this game)',
+    demoBadge:'Demo',
+    shopDemoBanner:'This is currently a demo. Real purchases and payments are not available. The next screen is a demo card form; completing the demo purchase there adds 50 coins (no charge).',
+    shopDemoBuyBtn:'Go to the demo screen',
+    shopDemoPrice:'1,000 yen (tax incl.) — demo, you will not be charged',
+    demoPaid:'🪙 Demo purchase complete. Added {amt} coins (balance {bal} coins, no charge)',
+    walletConnecting:'Checking balance…',
+    walletError:'Balance unavailable (tap to retry)',
+    bonusLeftBadge:'✨ Comeback Moves left: {n}',
+    bonusUsedUp:'✨ You have used all 3 Comeback Moves this game',
+    spendFailed:'The coin could not be spent. Please check your connection and try again.',
     bonusUseBtn:'✨ Use Comeback Move ({n} left)',
     purchaseTitle:'✨ Activate a Comeback Move?',
-    purchaseConfirm:'Activate for 🪙3', purchaseCancel:'Cancel', processing:'Processing...',
-    payFromCredit:'Up to 3 uses this game. Balance 🪙{bal} → 🪙{after} after',
+    purchaseConfirm:'Activate for 🪙1', purchaseCancel:'Cancel', processing:'Processing...',
+    payFromCredit:'🪙1 per use. {n} left this game. Balance 🪙{bal} → 🪙{after} after',
     topupBtn:'🪙 Coin shop',
     toppedUp:'🪙 Added {amt} coins! Balance: {bal} coins',
     needTopUp:'Not enough coins. You can add more in the coin shop.',
@@ -661,14 +691,14 @@ const I18N = {
     whiteSlight:'White slightly ahead', whiteStrong:'White clearly ahead',
     reasonCorner:'{who} holds more corners', reasonMoves:'{who} has more available moves',
     reasonDiscs:'{who} has more discs', reasonDefault:'Keep the corners and reduce the opponent\u2019s options',
-    cardModalTitle:'Register credit card',
-    cardModalNote:'This is a demo form. Nothing entered is sent or stored. In production, never handle raw card numbers directly; tokenize with Stripe Elements or similar.',
+    cardModalTitle:'[DEMO] Buy the 50-coin pack',
+    cardModalNote:'This is a demo screen. No real payment is made and you will not be charged. The card details are pre-filled samples that cannot be edited; nothing is sent or stored. Do not enter real card details.',
     cardNumber:'Card number', cardExpiry:'Expiry (MM/YY)', cardCvc:'Security code',
-    cardName:'Cardholder name', cardSaveBtn:'Register', cardCancelBtn:'Cancel', registeringBtn:'Registering...',
+    cardName:'Cardholder name', cardSaveBtn:'Complete demo purchase (50 coins, no charge)', cardCancelBtn:'Cancel', registeringBtn:'Registering...',
     registerBtn:'Register card', approvingBtn:'Approving card...',
     cardApprovedMsg:'Your card was approved. 🎁 Starter bonus: {bal} coins!',
     cardNotApproved:'The card was not approved. Please check your details.',
-    needRegister:'To use coins, register a credit card first via "Register card".',
+    needRegister:'Could not connect to the coin service. Please check your connection and try again.',
     rulesTitle:'How to play',
     rule1:'The base rules match standard Othello. You are White; the AI is Black.',
     rule2:'In place mode, place a piece where you flank and flip the opponent\u2019s discs.',
@@ -681,7 +711,7 @@ const I18N = {
     rule9:'The game ends when both sides pass or the board is full.',
     bonusTitle:'Comeback Move & Hints (coin features)',
     bonusRule1:'The "✨ Comeback Move" button appears only when you (White) are in a pass state.',
-    bonusRule2:'A Comeback Move costs 🪙3 and can be used up to 3 times in that game (unused uses expire when the game ends or resets).',
+    bonusRule2:'Each Comeback Move costs 🪙1 and can be used up to 3 times per game (you only pay for the ones you use).',
     bonusRule3:'A Comeback Move lets you add one White disc to any empty square, whether or not it flips anything.',
     bonusRule4:'💡 Hint (🪙1): highlights the move the AI would recommend for you.',
     bonusRule5:'If you run short of coins, add more in the coin shop (50 coins / 1,000 yen).',
@@ -691,7 +721,7 @@ const I18N = {
     moveKindMove:'Move ({from}\u2192{to})', moveKindPlace:'Place ({to})',
     aiPassed:'The AI had no valid move and passed',
     aiMoveInfo:'AI move: {kind} / lookahead: 3 plies guaranteed (reached {depth} this time) / time: {ms}ms',
-    purchasedCredit:'✨ Comeback Move activated! Up to 3 uses this game (balance 🪙{bal})',
+    purchasedCredit:'✨ Comeback Move activated! (balance 🪙{bal} · {n} left this game)',
     payFailed:'Payment failed. Please try again.',
     cardRegFailed:'Card registration failed. Please check the number.',
     fillAll:'Please fill in all fields.',
@@ -712,7 +742,7 @@ const I18N = {
     shopBalance:'Current balance: {bal} coins',
     shopPackName:'50-coin pack',
     shopPackPrice:'1,000 yen (tax incl.)',
-    shopPackDesc:'Enough for 16 Comeback Moves + 2 hints',
+    shopPackDesc:'Enough for 50 Comeback Moves or hints',
     shopBuyBtn:'Buy for 1,000 yen',
     shopClose:'Close',
     shopNote1:'Price: 1,000 yen (tax incl.) / Contents: 50 coins (1 coin = 20 yen equivalent)',
@@ -753,11 +783,21 @@ const I18N = {
     aiThinking:'AI 正在深入预读3步...',
     deepMsg:'让您久等了。AI 正在深入分析，还需要一点时间，请稍候。',
     black:'黑', white:'白', toPlace:'落子模式', toMove:'移动模式', passBtn:'过牌',
-    bonusBuyBtn:'✨ 逆转一手（🪙3）',
+    bonusBuyBtn:'✨ 逆转一手（🪙1・本局还剩{n}次）',
+    demoBadge:'演示版',
+    shopDemoBanner:'目前为演示版，无法进行实际购买和结算。下一个画面是“演示用卡片输入画面”，在那里完成演示购买即可获得 50 金币（不收取费用）。',
+    shopDemoBuyBtn:'前往演示画面',
+    shopDemoPrice:'1,000日元（含税）※演示版，不会扣款',
+    demoPaid:'🪙 演示购买已完成。已添加 {amt} 金币（余额 {bal} 金币・不扣款）',
+    walletConnecting:'正在确认余额…',
+    walletError:'无法获取余额（点击重试）',
+    bonusLeftBadge:'✨ 逆转一手 还剩{n}次',
+    bonusUsedUp:'✨ 本局的3次逆转一手已用完',
+    spendFailed:'金币扣除失败。请检查网络后重试。',
     bonusUseBtn:'✨ 使用逆转一手（剩余{n}次）',
     purchaseTitle:'✨ 是否发动逆转一手？',
-    purchaseConfirm:'用 🪙3 发动', purchaseCancel:'取消', processing:'结算处理中...',
-    payFromCredit:'本局最多可用3次。余额 🪙{bal} → 发动后 🪙{after}',
+    purchaseConfirm:'用 🪙1 发动', purchaseCancel:'取消', processing:'结算处理中...',
+    payFromCredit:'每次消耗 🪙1。本局还可使用{n}次。余额 🪙{bal} → 发动后 🪙{after}',
     topupBtn:'🪙 金币商店',
     toppedUp:'🪙 已添加 {amt} 金币！余额：{bal} 金币',
     needTopUp:'金币不足，可在金币商店添加。',
@@ -768,14 +808,14 @@ const I18N = {
     whiteSlight:'白略占优', whiteStrong:'白明显占优',
     reasonCorner:'{who}占据了更多的角', reasonMoves:'{who}的可落子位置更多',
     reasonDiscs:'{who}的棋子更多', reasonDefault:'守住角，并减少对手的可走步数',
-    cardModalTitle:'注册信用卡信息',
-    cardModalNote:'这是演示用表单，输入的信息不会被发送或保存。正式环境请勿直接处理原始卡号，应使用 Stripe Elements 等进行令牌化。',
+    cardModalTitle:'【演示画面】购买 50 金币礼包',
+    cardModalNote:'这是演示画面。不会进行实际结算，也不会产生任何费用。卡片信息为预先填入的示例，无法修改，不会被发送或保存。请勿输入真实的卡片信息。',
     cardNumber:'卡号', cardExpiry:'有效期 (MM/YY)', cardCvc:'安全码',
-    cardName:'持卡人姓名', cardSaveBtn:'注册', cardCancelBtn:'取消', registeringBtn:'注册中...',
+    cardName:'持卡人姓名', cardSaveBtn:'完成演示购买（50金币・不扣款）', cardCancelBtn:'取消', registeringBtn:'注册中...',
     registerBtn:'首次登记', approvingBtn:'正在审核卡片...',
     cardApprovedMsg:'信用卡已通过审核。🎁 新手奖励 {bal} 金币！',
     cardNotApproved:'卡片未通过审核，请检查信息。',
-    needRegister:'使用金币前，请先通过“首次注册”登记信用卡。',
+    needRegister:'无法连接金币服务。请检查网络后重试。',
     rulesTitle:'游戏规则',
     rule1:'基本规则与普通黑白棋相同。您执白，AI 执黑。',
     rule2:'落子模式下，将棋子放在能夹住并翻转对方棋子的位置。',
@@ -788,7 +828,7 @@ const I18N = {
     rule9:'双方都过牌或棋盘填满时，游戏结束。',
     bonusTitle:'逆转一手・提示（金币功能）',
     bonusRule1:'只有当白方（您）处于“过牌”状态时，才会出现“✨ 逆转一手”按钮。',
-    bonusRule2:'逆转一手需 🪙3 发动，本局内最多可使用3次（对局结束或重置后剩余次数失效）。',
+    bonusRule2:'逆转一手每次消耗 🪙1，每局最多可使用3次（只按实际使用次数扣除金币）。',
     bonusRule3:'使用逆转一手后，无论能否翻转，都可在任意空格额外放置1枚白子。',
     bonusRule4:'💡 提示（🪙1）：在棋盘上高亮显示 AI 为您推荐的一手。',
     bonusRule5:'金币不足时可在金币商店添加（50金币／1,000日元）。',
@@ -798,7 +838,7 @@ const I18N = {
     moveKindMove:'移动 ({from}\u2192{to})', moveKindPlace:'落子 ({to})',
     aiPassed:'AI 无有效着法，已过牌',
     aiMoveInfo:'AI 着法：{kind} / 预读：保证3步（本次达到{depth}步）/ 用时：{ms}ms',
-    purchasedCredit:'✨ 逆转一手已发动！本局最多可用3次（余额 🪙{bal}）',
+    purchasedCredit:'✨ 逆转一手已发动！（余额 🪙{bal}・本局还剩{n}次）',
     payFailed:'结算失败，请重试。',
     cardRegFailed:'卡片注册失败，请检查卡号。',
     fillAll:'请填写所有项目。',
@@ -819,7 +859,7 @@ const I18N = {
     shopBalance:'当前余额：{bal} 金币',
     shopPackName:'50 金币礼包',
     shopPackPrice:'1,000日元（含税）',
-    shopPackDesc:'相当于 16 次逆转一手 + 2 次提示',
+    shopPackDesc:'相当于共 50 次逆转一手或提示',
     shopBuyBtn:'以 1,000 日元购买',
     shopClose:'关闭',
     shopNote1:'价格：1,000日元（含税）／ 内容：50金币（1金币＝20日元）',
@@ -860,11 +900,21 @@ const I18N = {
     aiThinking:'AI가 3수 앞까지 깊이 읽는 중...',
     deepMsg:'기다리게 해서 죄송합니다. 현재 깊이 분석 중이라 조금 더 걸립니다. 잠시만 기다려 주세요.',
     black:'흑', white:'백', toPlace:'놓기 모드', toMove:'이동 모드', passBtn:'패스',
-    bonusBuyBtn:'✨ 역전의 한 수 (🪙3)',
+    bonusBuyBtn:'✨ 역전의 한 수 (🪙1 · 이 대국 남은 {n}회)',
+    demoBadge:'데모판',
+    shopDemoBanner:'현재는 데모판입니다. 실제 구매·결제는 할 수 없습니다. 다음 화면은 ‘데모용 카드 입력 화면’이며, 거기서 데모 구매를 하면 50코인이 쌓입니다(요금 없음).',
+    shopDemoBuyBtn:'데모 화면으로 이동',
+    shopDemoPrice:'1,000엔 (세금 포함) ※데모판이므로 청구되지 않습니다',
+    demoPaid:'🪙 데모 구매가 완료되었습니다. {amt}코인 추가 (잔액 {bal}코인 · 청구 없음)',
+    walletConnecting:'잔액 확인 중…',
+    walletError:'잔액을 가져올 수 없습니다 (탭하여 재시도)',
+    bonusLeftBadge:'✨ 역전의 한 수 남은 {n}회',
+    bonusUsedUp:'✨ 이 대국의 역전의 한 수 3회를 모두 사용했습니다',
+    spendFailed:'코인을 사용할 수 없었습니다. 통신 상태를 확인한 뒤 다시 시도해 주세요.',
     bonusUseBtn:'✨ 역전의 한 수 사용 (남은 {n}회)',
     purchaseTitle:'✨ 역전의 한 수를 발동할까요?',
-    purchaseConfirm:'🪙3 로 발동', purchaseCancel:'취소', processing:'결제 처리 중...',
-    payFromCredit:'이 대국에서 최대 3회 사용 가능. 잔액 🪙{bal} → 발동 후 🪙{after}',
+    purchaseConfirm:'🪙1 로 발동', purchaseCancel:'취소', processing:'결제 처리 중...',
+    payFromCredit:'1회당 🪙1. 이 대국에서 {n}회 더 사용할 수 있습니다. 잔액 🪙{bal} → 발동 후 🪙{after}',
     topupBtn:'🪙 코인 상점',
     toppedUp:'🪙 {amt}코인을 추가했습니다! 잔액: {bal}코인',
     needTopUp:'코인이 부족합니다. 코인 상점에서 추가할 수 있습니다.',
@@ -875,14 +925,14 @@ const I18N = {
     whiteSlight:'백 약간 우세', whiteStrong:'백 크게 우세',
     reasonCorner:'{who}이(가) 코너를 더 많이 차지했습니다', reasonMoves:'{who}의 둘 수 있는 자리가 더 많습니다',
     reasonDiscs:'돌 수는 {who}이(가) 많습니다', reasonDefault:'코너를 내주지 말고 상대의 수를 줄이는 것이 중요합니다',
-    cardModalTitle:'신용카드 정보 등록',
-    cardModalNote:'데모용 입력 양식입니다. 입력 정보는 어디에도 전송·저장되지 않습니다. 실제 운영에서는 원본 카드 번호를 직접 다루지 말고 Stripe Elements 등으로 토큰화하세요.',
+    cardModalTitle:'【데모 화면】코인 50개 팩 구매',
+    cardModalNote:'이것은 데모 화면입니다. 실제 결제는 이루어지지 않으며 요금이 전혀 부과되지 않습니다. 카드 정보는 미리 입력된 견본이며 변경할 수 없고, 어디에도 전송·저장되지 않습니다. 실제 카드 정보는 입력하지 마세요.',
     cardNumber:'카드 번호', cardExpiry:'유효기간 (MM/YY)', cardCvc:'보안 코드',
-    cardName:'카드 명의', cardSaveBtn:'등록', cardCancelBtn:'취소', registeringBtn:'등록 중...',
+    cardName:'카드 명의', cardSaveBtn:'데모 구매하기 (50코인 · 청구 없음)', cardCancelBtn:'취소', registeringBtn:'등록 중...',
     registerBtn:'최초 등록', approvingBtn:'카드 승인 중...',
     cardApprovedMsg:'카드가 승인되었습니다. 🎁 스타터 보너스 {bal}코인 획득!',
     cardNotApproved:'카드가 승인되지 않았습니다. 정보를 확인해 주세요.',
-    needRegister:'코인을 사용하려면 먼저 ‘최초 등록’으로 신용카드를 등록해 주세요.',
+    needRegister:'코인 서비스에 연결할 수 없습니다. 통신 상태를 확인한 뒤 다시 시도해 주세요.',
     rulesTitle:'게임 규칙',
     rule1:'기본 규칙은 일반 오델로와 같습니다. 당신은 백, AI는 흑입니다.',
     rule2:'놓기 모드에서는 상대 돌을 사이에 끼워 뒤집을 수 있는 자리에 돌을 놓습니다.',
@@ -895,7 +945,7 @@ const I18N = {
     rule9:'양쪽이 모두 패스하거나 판이 가득 차면 게임이 끝납니다.',
     bonusTitle:'역전의 한 수・힌트 (코인 기능)',
     bonusRule1:'백(당신)이 ‘패스’ 상태일 때만 ‘✨ 역전의 한 수’ 버튼이 나타납니다.',
-    bonusRule2:'역전의 한 수는 🪙3 으로 발동하며, 그 대국에서 최대 3회까지 사용할 수 있습니다(대국 종료·리셋 시 남은 횟수는 소멸).',
+    bonusRule2:'역전의 한 수는 1회당 🪙1 을 소비하며, 한 대국에서 최대 3회까지 사용할 수 있습니다(사용한 횟수만큼만 코인이 차감됩니다).',
     bonusRule3:'역전의 한 수를 쓰면, 뒤집을 수 있는지와 관계없이 빈 칸 어디에나 백 돌을 1개 추가로 놓을 수 있습니다.',
     bonusRule4:'💡 힌트 (🪙1): AI가 추천하는 당신의 다음 수를 보드에서 빛나게 표시합니다.',
     bonusRule5:'코인이 부족하면 코인 상점에서 추가할 수 있습니다(50코인／1,000엔).',
@@ -905,7 +955,7 @@ const I18N = {
     moveKindMove:'이동 ({from}\u2192{to})', moveKindPlace:'놓기 ({to})',
     aiPassed:'AI는 유효한 수가 없어 패스했습니다',
     aiMoveInfo:'AI의 수: {kind} / 읽기: 3수 보장 (이번엔 {depth}수 도달) / 사고 시간: {ms}ms',
-    purchasedCredit:'✨ 역전의 한 수 발동! 이 대국에서 최대 3회 사용 가능 (잔액 🪙{bal})',
+    purchasedCredit:'✨ 역전의 한 수 발동! (잔액 🪙{bal} · 이 대국 남은 {n}회)',
     payFailed:'결제에 실패했습니다. 다시 시도해 주세요.',
     cardRegFailed:'카드 등록에 실패했습니다. 번호를 확인해 주세요.',
     fillAll:'모든 항목을 입력해 주세요.',
@@ -926,7 +976,7 @@ const I18N = {
     shopBalance:'현재 잔액: {bal}코인',
     shopPackName:'코인 50개 팩',
     shopPackPrice:'1,000엔 (세금 포함)',
-    shopPackDesc:'역전의 한 수 16회 + 힌트 2회 분량',
+    shopPackDesc:'역전의 한 수·힌트 합계 50회 분량',
     shopBuyBtn:'1,000엔으로 구매',
     shopClose:'닫기',
     shopNote1:'가격: 1,000엔(세금 포함) ／ 내용: 50코인 (1코인＝20엔 상당)',
@@ -967,11 +1017,21 @@ const I18N = {
     aiThinking:'La IA lee 3 jugadas en profundidad...',
     deepMsg:'Perdón por la espera. La IA está analizando a fondo, así que tardará un poco más. Espera, por favor.',
     black:'Negras', white:'Blancas', toPlace:'Modo colocar', toMove:'Modo mover', passBtn:'Pasar',
-    bonusBuyBtn:'✨ Jugada de remontada (🪙3)',
+    bonusBuyBtn:'✨ Jugada de remontada (🪙1 · quedan {n} en esta partida)',
+    demoBadge:'Demo',
+    shopDemoBanner:'Actualmente es una versión de demostración. No se pueden hacer compras ni pagos reales. La siguiente pantalla es un formulario de tarjeta de demostración; al completar allí la compra de demo se añaden 50 monedas (sin cargo).',
+    shopDemoBuyBtn:'Ir a la pantalla de demo',
+    shopDemoPrice:'1.000 yen (imp. incl.) — demo, no se te cobrará',
+    demoPaid:'🪙 Compra de demo completada. Se añadieron {amt} monedas (saldo {bal} monedas, sin cargo)',
+    walletConnecting:'Comprobando saldo…',
+    walletError:'Saldo no disponible (toca para reintentar)',
+    bonusLeftBadge:'✨ Jugadas de remontada restantes: {n}',
+    bonusUsedUp:'✨ Ya has usado las 3 jugadas de remontada de esta partida',
+    spendFailed:'No se pudo gastar la moneda. Comprueba tu conexión e inténtalo de nuevo.',
     bonusUseBtn:'✨ Usar jugada de remontada ({n} restantes)',
     purchaseTitle:'✨ ¿Activar una jugada de remontada?',
-    purchaseConfirm:'Activar por 🪙3', purchaseCancel:'Cancelar', processing:'Procesando...',
-    payFromCredit:'Hasta 3 usos en esta partida. Saldo 🪙{bal} → 🪙{after} después',
+    purchaseConfirm:'Activar por 🪙1', purchaseCancel:'Cancelar', processing:'Procesando...',
+    payFromCredit:'🪙1 por uso. Quedan {n} en esta partida. Saldo 🪙{bal} → 🪙{after} después',
     topupBtn:'🪙 Tienda de monedas',
     toppedUp:'🪙 ¡Se añadieron {amt} monedas! Saldo: {bal} monedas',
     needTopUp:'No tienes suficientes monedas. Puedes añadir más en la tienda de monedas.',
@@ -982,14 +1042,14 @@ const I18N = {
     whiteSlight:'Blancas algo mejor', whiteStrong:'Blancas claramente mejor',
     reasonCorner:'{who} tiene más esquinas', reasonMoves:'{who} tiene más movimientos disponibles',
     reasonDiscs:'{who} tiene más fichas', reasonDefault:'Conserva las esquinas y reduce las opciones del rival',
-    cardModalTitle:'Registrar tarjeta de crédito',
-    cardModalNote:'Este es un formulario de demostración. Nada de lo introducido se envía ni se guarda. En producción, no manejes números de tarjeta en bruto; tokeniza con Stripe Elements u otro.',
+    cardModalTitle:'[DEMO] Compra del pack de 50 monedas',
+    cardModalNote:'Esta es una pantalla de demostración. No se realiza ningún pago real ni se te cobrará nada. Los datos de la tarjeta son una muestra ya rellenada que no se puede modificar; no se envían ni se guardan. No introduzcas datos reales de tu tarjeta.',
     cardNumber:'Número de tarjeta', cardExpiry:'Caducidad (MM/AA)', cardCvc:'Código de seguridad',
-    cardName:'Titular', cardSaveBtn:'Registrar', cardCancelBtn:'Cancelar', registeringBtn:'Registrando...',
+    cardName:'Titular', cardSaveBtn:'Completar compra de demo (50 monedas, sin cargo)', cardCancelBtn:'Cancelar', registeringBtn:'Registrando...',
     registerBtn:'Registro inicial', approvingBtn:'Aprobando tarjeta...',
     cardApprovedMsg:'Tu tarjeta fue aprobada. 🎁 Bono de inicio: ¡{bal} monedas!',
     cardNotApproved:'La tarjeta no fue aprobada. Revisa tus datos.',
-    needRegister:'Para usar monedas, primero registra una tarjeta con "Registrar tarjeta".',
+    needRegister:'No se pudo conectar con el servicio de monedas. Comprueba tu conexión e inténtalo de nuevo.',
     rulesTitle:'Cómo jugar',
     rule1:'Las reglas básicas son las del Othello estándar. Tú eres blancas; la IA, negras.',
     rule2:'En modo colocar, pon una ficha donde flanquees y voltees fichas del rival.',
@@ -1002,7 +1062,7 @@ const I18N = {
     rule9:'La partida termina cuando ambos pasan o el tablero se llena.',
     bonusTitle:'Jugada de remontada y pistas (funciones con monedas)',
     bonusRule1:'El botón "✨ Jugada de remontada" aparece solo cuando tú (blancas) estás en estado de paso.',
-    bonusRule2:'Una jugada de remontada cuesta 🪙3 y puede usarse hasta 3 veces en esa partida (los usos no gastados caducan al terminar o reiniciar).',
+    bonusRule2:'Cada jugada de remontada cuesta 🪙1 y puede usarse hasta 3 veces por partida (solo pagas las que usas).',
     bonusRule3:'La jugada de remontada te permite añadir un disco blanco en cualquier casilla vacía, voltee o no.',
     bonusRule4:'💡 Pista (🪙1): resalta la jugada que la IA te recomendaría.',
     bonusRule5:'Si te faltan monedas, añade más en la tienda (50 monedas / 1.000 yen).',
@@ -1012,7 +1072,7 @@ const I18N = {
     moveKindMove:'Mover ({from}\u2192{to})', moveKindPlace:'Colocar ({to})',
     aiPassed:'La IA no tenía jugada válida y pasó',
     aiMoveInfo:'Jugada de la IA: {kind} / lectura: 3 jugadas garantizadas (esta vez {depth}) / tiempo: {ms}ms',
-    purchasedCredit:'✨ ¡Jugada de remontada activada! Hasta 3 usos en esta partida (saldo 🪙{bal})',
+    purchasedCredit:'✨ ¡Jugada de remontada activada! (saldo 🪙{bal} · quedan {n} en esta partida)',
     payFailed:'El pago falló. Inténtalo de nuevo.',
     cardRegFailed:'Falló el registro de la tarjeta. Revisa el número.',
     fillAll:'Rellena todos los campos.',
@@ -1033,7 +1093,7 @@ const I18N = {
     shopBalance:'Saldo actual: {bal} monedas',
     shopPackName:'Pack de 50 monedas',
     shopPackPrice:'1.000 yen (imp. incl.)',
-    shopPackDesc:'Equivale a 16 jugadas de remontada + 2 pistas',
+    shopPackDesc:'Equivale a 50 jugadas de remontada o pistas',
     shopBuyBtn:'Comprar por 1.000 yen',
     shopClose:'Cerrar',
     shopNote1:'Precio: 1.000 yen (imp. incl.) / Contenido: 50 monedas (1 moneda = 20 yen)',
@@ -1074,11 +1134,21 @@ const I18N = {
     aiThinking:'L’IA lit 3 coups en profondeur...',
     deepMsg:'Désolé pour l\u2019attente. L\u2019IA analyse en profondeur, cela prendra un peu plus de temps. Veuillez patienter.',
     black:'Noirs', white:'Blancs', toPlace:'Mode poser', toMove:'Mode déplacer', passBtn:'Passer',
-    bonusBuyBtn:'✨ Coup de la remontée (🪙3)',
+    bonusBuyBtn:'✨ Coup de la remontée (🪙1 · {n} restants dans cette partie)',
+    demoBadge:'Démo',
+    shopDemoBanner:'Il s’agit actuellement d’une version de démonstration. Les achats et paiements réels ne sont pas disponibles. L’écran suivant est un formulaire de carte de démonstration ; y terminer l’achat de démo ajoute 50 pièces (sans frais).',
+    shopDemoBuyBtn:'Aller à l’écran de démo',
+    shopDemoPrice:'1 000 yens (TTC) — démo, rien ne vous sera facturé',
+    demoPaid:'🪙 Achat de démo terminé. {amt} pièces ajoutées (solde {bal} pièces, sans frais)',
+    walletConnecting:'Vérification du solde…',
+    walletError:'Solde indisponible (touchez pour réessayer)',
+    bonusLeftBadge:'✨ Coups de la remontée restants : {n}',
+    bonusUsedUp:'✨ Vous avez utilisé les 3 coups de la remontée de cette partie',
+    spendFailed:'La pièce n’a pas pu être dépensée. Vérifiez votre connexion et réessayez.',
     bonusUseBtn:'✨ Utiliser le coup de la remontée ({n} restants)',
     purchaseTitle:'✨ Activer un coup de la remontée ?',
-    purchaseConfirm:'Activer pour 🪙3', purchaseCancel:'Annuler', processing:'Traitement...',
-    payFromCredit:'Jusqu’à 3 utilisations dans cette partie. Solde 🪙{bal} → 🪙{after} après',
+    purchaseConfirm:'Activer pour 🪙1', purchaseCancel:'Annuler', processing:'Traitement...',
+    payFromCredit:'🪙1 par utilisation. {n} restants dans cette partie. Solde 🪙{bal} → 🪙{after} après',
     topupBtn:'🪙 Boutique de pièces',
     toppedUp:'🪙 {amt} pièces ajoutées ! Solde : {bal} pièces',
     needTopUp:'Pièces insuffisantes. Vous pouvez en ajouter dans la boutique.',
@@ -1089,14 +1159,14 @@ const I18N = {
     whiteSlight:'Blancs légèrement devant', whiteStrong:'Blancs nettement devant',
     reasonCorner:'{who} tiennent plus de coins', reasonMoves:'{who} ont plus de coups disponibles',
     reasonDiscs:'{who} ont plus de pions', reasonDefault:'Gardez les coins et réduisez les options de l\u2019adversaire',
-    cardModalTitle:'Enregistrer une carte bancaire',
-    cardModalNote:'Ceci est un formulaire de démonstration. Rien de ce qui est saisi n\u2019est envoyé ni stocké. En production, ne manipulez jamais les numéros de carte bruts ; tokenisez avec Stripe Elements ou équivalent.',
+    cardModalTitle:'[DÉMO] Achat du pack de 50 pièces',
+    cardModalNote:'Ceci est un écran de démonstration. Aucun paiement réel n’est effectué et rien ne vous sera facturé. Les informations de carte sont un exemple prérempli et non modifiable ; rien n’est envoyé ni stocké. Ne saisissez pas de vraies informations de carte.',
     cardNumber:'Numéro de carte', cardExpiry:'Expiration (MM/AA)', cardCvc:'Code de sécurité',
-    cardName:'Titulaire', cardSaveBtn:'Enregistrer', cardCancelBtn:'Annuler', registeringBtn:'Enregistrement...',
+    cardName:'Titulaire', cardSaveBtn:'Terminer l’achat de démo (50 pièces, sans frais)', cardCancelBtn:'Annuler', registeringBtn:'Enregistrement...',
     registerBtn:'Inscription initiale', approvingBtn:'Validation de la carte...',
     cardApprovedMsg:'Votre carte a été approuvée. 🎁 Bonus de départ : {bal} pièces !',
     cardNotApproved:'La carte n\u2019a pas été approuvée. Vérifiez vos informations.',
-    needRegister:'Pour utiliser des pièces, enregistrez d’abord une carte via « Enregistrer la carte ».',
+    needRegister:'Connexion au service de pièces impossible. Vérifiez votre connexion et réessayez.',
     rulesTitle:'Comment jouer',
     rule1:'Les règles de base sont celles de l\u2019Othello standard. Vous êtes les blancs ; l\u2019IA, les noirs.',
     rule2:'En mode poser, placez un pion là où vous encadrez et retournez les pions adverses.',
@@ -1109,7 +1179,7 @@ const I18N = {
     rule9:'La partie se termine quand les deux passent ou que le plateau est plein.',
     bonusTitle:'Coup de la remontée et indices (fonctions à pièces)',
     bonusRule1:'Le bouton « ✨ Coup de la remontée » n’apparaît que lorsque vous (blancs) êtes en situation de passe.',
-    bonusRule2:'Un coup de la remontée coûte 🪙3 et peut être utilisé jusqu’à 3 fois dans la partie (les utilisations restantes expirent à la fin ou à la réinitialisation).',
+    bonusRule2:'Chaque coup de la remontée coûte 🪙1 et peut être utilisé jusqu’à 3 fois par partie (vous ne payez que ceux que vous utilisez).',
     bonusRule3:'Il permet d’ajouter un disque blanc sur n’importe quelle case vide, qu’il retourne des disques ou non.',
     bonusRule4:'💡 Indice (🪙1) : met en évidence le coup que l’IA vous recommanderait.',
     bonusRule5:'S’il vous manque des pièces, ajoutez-en dans la boutique (50 pièces / 1 000 yens).',
@@ -1119,7 +1189,7 @@ const I18N = {
     moveKindMove:'Déplacer ({from}\u2192{to})', moveKindPlace:'Poser ({to})',
     aiPassed:'L\u2019IA n\u2019avait aucun coup valide et a passé',
     aiMoveInfo:'Coup de l’IA : {kind} / lecture : 3 coups garantis (cette fois {depth}) / temps : {ms}ms',
-    purchasedCredit:'✨ Coup de la remontée activé ! Jusqu’à 3 utilisations dans cette partie (solde 🪙{bal})',
+    purchasedCredit:'✨ Coup de la remontée activé ! (solde 🪙{bal} · {n} restants dans cette partie)',
     payFailed:'Le paiement a échoué. Réessayez.',
     cardRegFailed:'Échec de l\u2019enregistrement de la carte. Vérifiez le numéro.',
     fillAll:'Veuillez remplir tous les champs.',
@@ -1140,7 +1210,7 @@ const I18N = {
     shopBalance:'Solde actuel : {bal} pièces',
     shopPackName:'Pack de 50 pièces',
     shopPackPrice:'1 000 yens (TTC)',
-    shopPackDesc:'Équivaut à 16 coups de la remontée + 2 indices',
+    shopPackDesc:'Équivaut à 50 coups de la remontée ou indices',
     shopBuyBtn:'Acheter pour 1 000 yens',
     shopClose:'Fermer',
     shopNote1:'Prix : 1 000 yens (TTC) / Contenu : 50 pièces (1 pièce = 20 yens)',
@@ -1178,9 +1248,10 @@ function t(key, vars){
    - 円が動くのは「コインショップ」（1,000円＝50コイン）だけ。
      対局中の消費はすべてゲーム内通貨「コイン」で表現し、円換算は画面に出さない。
    - コインの使い道：
-       ✨ 逆転の一手（🪙3）… 白がパス状態のときだけ。対局中に最大3回、空きマスに白を自由配置
+       ✨ 逆転の一手（1回につき🪙1）… 白がパス状態のときだけ。1対局に最大3回、空きマスに白を自由配置
        💡 ヒント（🪙1）… AIが読んだ白のおすすめの一手を盤上で光らせる
-   - コインはコインショップでの購入（および初回登録時のスタータボーナス）でのみ増える
+   - コインはコインショップでの購入でのみ増える（無料のスターターボーナスは廃止）
+   - DEMO_MODE のあいだは実際の決済をせず、デモ購入で50コインが貯まる
    ========================================================= */
 
 const SIZE = 8, EMPTY = 0, BLACK = 1, WHITE = 2;
@@ -1195,13 +1266,19 @@ const INNER_BEAM = 22;               // 内部ノードでの候補手の絞り�
 const CREDIT_UNIT_YEN = 20;          // 1コインあたりの円換算額（帳簿・ショップ表示用）
 
 /* コインの使い道 */
-const PASS_BONUS_PRICE = 3;          // ✨ 逆転の一手：1回の発動に必要なコイン（＝旧「1機会60円」）
-const PASS_BONUS_USES  = 3;          // 1回の発動で得られる最大使用回数（対局内）
+const PASS_BONUS_PRICE = 1;          // ✨ 逆転の一手：1回使うごとに消費するコイン（1コイン＝20円相当）
+const PASS_BONUS_USES  = 3;          // 1つの対局で使える最大回数
 const HINT_COST        = 1;          // 💡 ヒント：1回に必要なコイン
 const HINT_TIME_MS     = 500;        // ヒント探索の思考時間上限
 
-/* コインの入手方法（コインショップでの購入のみ） */
-const SUPPORT_CREDIT = 50;           // 初回登録時に1回だけ付与するスタータボーナス（不要なら 0 に）
+/* ★ デモモード ★
+   true のあいだは実際の決済を行わない。コイン残高はこの端末のブラウザ内だけに保存し、
+   「デモ用のカード入力画面」でデモ購入をすると 50コインが貯まる（料金はかからない）。
+   Stripe・サーバー側の準備が整って本番の課金を始めるときに false にする。 */
+const DEMO_MODE = true;
+const DEMO_WALLET_KEY = 'catacelo_demo_wallet_v1';
+
+/* コインの入手方法（コインショップでの購入のみ。無料のスターターボーナスは廃止した） */
 const CREDIT_TOPUP_YEN = 1000;       // 1パックのカード決済額（円）
 const CREDIT_TOPUP   = 50;           // 1パックで付与されるコイン数（1,000円 ÷ 20円）
 
@@ -1650,7 +1727,7 @@ let myMediproRevenue = 0;       // MyMedipro(株) のカード決済による累
 let purchaseCount = 0;          // 累計の購入機会数
 /* コイン残高 */
 let coinBalance = 0;            // 現在のコイン残高（コインショップでの購入・スタータボーナスでのみ増える）
-let starterGranted = false;     // スタータボーナスを付与済みか（1回のみ）
+let starterGranted = false;     // （廃止）旧スターターボーナスの付与済みフラグ。保存データの互換のためだけに残す
 let winStreak = 0, bestStreak = 0;
 /* 対局内の一時状態 */
 let wildStones = new Set();     // 逆転の一手で置いた白の位置（光らせる）
@@ -1661,8 +1738,9 @@ let confirmMode = 'bonus';      // 確認パネルの用途 'bonus' | 'hint'
 let statusKey = 'yourTurn', statusVars = null;
 let aiInfoKey = null, aiInfoVars = null;
 /* 各対局ごとにリセット */
-let bonusUsesRemaining = 0;     // この対局で残っている逆転の一手の使用回数
+let bonusUsesRemaining = PASS_BONUS_USES; // この対局であと何回、逆転の一手を使えるか（1対局3回まで）
 let awaitingBonusPlacement = false; // 自由配置（白を空きマスに置く）待ちか
+let bonusSpending = false;          // 逆転の一手のコイン消費を通信中か（二重消費の防止）
 let resultRecorded = false;     // この対局の勝敗を戦績に反映済みか（二重カウント防止）
 
 /* --- 戦績（カード登録者のみ・登録日から集計） --- */
@@ -1705,6 +1783,8 @@ const shopNote2El = document.getElementById('shopNote2');
 const shopAgreeLine = document.getElementById('shopAgreeLine');
 const toastArea = document.getElementById('toastArea');
 const registerBtn = document.getElementById('registerBtn');
+const walletNoteEl = document.getElementById('walletNote');
+const bonusLeftBadgeEl = document.getElementById('bonusLeftBadge');
 const topupBtn = document.getElementById('topupBtn');
 const advantageLabelEl = document.getElementById('advantageLabel');
 const advantageScoreEl = document.getElementById('advantageScore');
@@ -1881,15 +1961,78 @@ function coinsUsable(){ return !!wallet; }
    残高の正はサーバー。localStorage の値は表示用のキャッシュに過ぎない。
    ========================================================= */
 let wallet = null;
+let walletState = 'connecting';   // 'connecting'（接続中）| 'ready'（利用可）| 'error'（接続失敗）
+let walletInitPromise = null;
+let walletLastError = '';
 
-async function initWallet(){
+/* ウォレットへ接続する。失敗しても対局は続けられ、あとから何度でも再試行できる。
+   （以前は接続に失敗するとデモ用のカード入力画面が開いていたが、それは廃止した） */
+function initWallet(){
+  if (wallet) return Promise.resolve(true);
+  if (!walletInitPromise){
+    walletState = 'connecting';
+    updateBonusUI();
+    walletInitPromise = connectWallet().then(function(ok){
+      walletInitPromise = null;
+      walletState = ok ? 'ready' : 'error';
+      bumpBalance();
+      updateBonusUI();
+      return ok;
+    });
+  }
+  return walletInitPromise;
+}
+
+/* デモ用ウォレット。本番用（coin-wallet.js）と同じ使い方ができる。
+   残高はこの端末のブラウザ（localStorage）にだけ保存し、サーバーにも Stripe にも一切通信しない。 */
+function createDemoWallet(){
+  let balance = 0;
   try {
-    const mod = await import('./coin-wallet.js');
-    wallet = await mod.CataceloWallet.init();
+    const s = JSON.parse(localStorage.getItem(DEMO_WALLET_KEY) || 'null');
+    if (s && Number.isFinite(s.balance) && s.balance > 0) balance = Math.floor(s.balance);
+  } catch (e){ /* 保存できない環境では、ページを開いているあいだだけ残高を持つ */ }
+  const listeners = new Set();
+  const w = {
+    isDemo: true,
+    balance: balance,
+    onChange(fn){ listeners.add(fn); return () => listeners.delete(fn); },
+    _commit(){
+      try { localStorage.setItem(DEMO_WALLET_KEY, JSON.stringify({ balance: w.balance })); } catch (e){}
+      listeners.forEach(fn => fn(w.balance));
+    },
+    async refresh(){ return w.balance; },
+    async spend(amount, reason){
+      if (!(amount > 0)) throw new Error('invalid amount');
+      if (w.balance < amount) throw new Error('insufficient coins: balance=' + w.balance + ' required=' + amount);
+      w.balance -= amount;
+      w._commit();
+      return w.balance;
+    },
+    /* デモ購入でコインを加える（請求なし） */
+    creditDemoPurchase(coinsToAdd){
+      w.balance += coinsToAdd;
+      w._commit();
+      return w.balance;
+    }
+  };
+  return w;
+}
+
+async function connectWallet(){
+  let w;
+  try {
+    if (DEMO_MODE){
+      w = createDemoWallet();
+    } else {
+      const mod = await import('./coin-wallet.js');
+      w = await mod.CataceloWallet.init();
+    }
   } catch (e) {
     console.error('wallet init failed', e);
-    return;                     // 残高0のまま。購入・消費はできないが対局は続けられる。
+    walletLastError = String((e && e.message) || e).slice(0, 200);   // 原因調査用（残高表示のツールチップに出す）
+    return false;               // 残高は未取得のまま。購入・消費はできないが対局は続けられる。
   }
+  wallet = w;
 
   /* サーバー側で残高が変わったら画面に反映する */
   wallet.onChange(function(b){
@@ -1903,17 +2046,23 @@ async function initWallet(){
   cardRegistered = true;
   cardApproved   = true;
 
-  coinBalance = wallet.balance;
-
-  /* スターターボーナスはサーバー側で1ユーザー1回だけ付与される */
-  if (SUPPORT_CREDIT > 0){
-    try { coinBalance = await wallet.claimStarterBonus(SUPPORT_CREDIT); } catch (e){}
-  }
-
-  bumpBalance();
-  updateBonusUI();
+  coinBalance = wallet.balance;   // 無料のスターターボーナスは廃止。コインは購入した分だけ
+  return true;
 }
-initWallet();
+
+/* 残高の表示文字列。サーバーから取得できるまでは 0 ではなく「—」を出す（0枚と誤解させない） */
+function balanceText(){ return wallet ? fmt(coins()) : '—'; }
+
+/* ウォレットに接続できていないときの案内（カード入力画面は出さない）＋再接続 */
+function notifyWalletNotReady(){
+  setAiInfo('needRegister');
+  toast(t('needRegister'));
+  initWallet();
+}
+walletNoteEl.addEventListener('click', function(){ if (walletState === 'error') initWallet(); });
+walletNoteEl.addEventListener('keydown', function(e){
+  if ((e.key === 'Enter' || e.key === ' ') && walletState === 'error'){ e.preventDefault(); initWallet(); }
+});
 
 /* 残高から amount コインを消費する。サーバーが残高を検証する。
    reason は 'comeback_move'（逆転の一手）または 'hint'。 */
@@ -1922,9 +2071,18 @@ async function spendCoins(amount, reason){
   try {
     coinBalance = await wallet.spend(amount, reason);
   } catch (e) {
-    /* 残高不足・通信失敗。サーバーが拒否したので消費は成立していない。 */
-    toast(t('coinShort', { need: Math.max(1, amount - coinBalance) }));
-    openShop(Math.max(1, amount - coinBalance));
+    /* サーバーが拒否した／通信できなかったので、消費は成立していない。 */
+    if (/insufficient/i.test(String(e && e.message))){
+      /* 残高不足（別の端末・タブで使った等）。最新の残高を取り直してショップへ案内 */
+      try { await wallet.refresh(); } catch (e2){}
+      const need = Math.max(1, amount - coinBalance);
+      toast(t('coinShort', { need: need }));
+      openShop(need);
+    } else {
+      console.error('spend failed', e);
+      setAiInfo('spendFailed');
+      toast(t('spendFailed'));
+    }
     return false;
   }
   saveStats();
@@ -1952,7 +2110,7 @@ function toast(msg, cls){
   setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 320); }, 2600);
 }
 function bumpBalance(){
-  creditBalanceEl.textContent = fmt(coins());
+  creditBalanceEl.textContent = balanceText();
   creditBalanceEl.classList.remove('bump');
   void creditBalanceEl.offsetWidth;
   creditBalanceEl.classList.add('bump');
@@ -2007,9 +2165,14 @@ function updateShopText(){
     tokushoho: '<a href="tokushoho.html" target="_blank" rel="noopener">' + t('tokushohoLink') + '</a>'
   });
   document.getElementById('shopPackCoins').textContent = CREDIT_TOPUP;
+  /* デモ版では「実際の購入はできない」ことを先に明示し、決済・返金などの本番用の注記は出さない */
+  document.getElementById('shopDemoBanner').style.display = DEMO_MODE ? 'block' : 'none';
+  document.getElementById('shopNotes').style.display = DEMO_MODE ? 'none' : '';
+  document.getElementById('shopPackPrice').textContent = t(DEMO_MODE ? 'shopDemoPrice' : 'shopPackPrice');
+  if (!shopBuyBtn.disabled) shopBuyBtn.textContent = t(DEMO_MODE ? 'shopDemoBuyBtn' : 'shopBuyBtn');
 }
 function openShop(shortBy){
-  if (!wallet) return;                             // ウォレット準備前は開かない
+  if (!wallet){ notifyWalletNotReady(); return; }  // ウォレット未接続なら案内して再接続を試みる
   updateShopText();
   shopShortEl.textContent = shortBy > 0 ? t('coinShort', { need: shortBy }) : '';
   shopModal.classList.add('open');
@@ -2021,6 +2184,12 @@ topupBtn.addEventListener('click', () => openShop(0));
 /* 「1,000円で購入する」：承認済みカードから決済して有償コインを付与 */
 shopBuyBtn.addEventListener('click', async () => {
   if (!wallet) return;
+  if (DEMO_MODE){
+    /* デモ版：実際の決済はせず、デモ用のカード入力画面へ進む */
+    closeShop();
+    openCardModal();
+    return;
+  }
   shopBuyBtn.disabled = true;
   shopBuyBtn.textContent = t('processing');
   /* Stripe Checkout へ遷移する。カード情報はこのページを通らない。
@@ -2067,8 +2236,8 @@ function initGame(){
   consecutivePasses = 0;
   gameOver = false;
   busy = false;
-  /* 対局ごとのパスボーナス状態をリセット（収益・カード登録は維持） */
-  bonusUsesRemaining = 0;
+  /* 対局ごとに「逆転の一手」の残り回数を3回に戻す（コイン残高はサーバー側で維持） */
+  bonusUsesRemaining = PASS_BONUS_USES;
   awaitingBonusPlacement = false;
   resultRecorded = false;        // この対局の勝敗はまだ未記録
   wildStones = new Set();
@@ -2161,8 +2330,8 @@ function render(){
 
 /* コイン・逆転の一手・ヒント関連UIの表示更新 */
 function updateBonusUI(){
-  /* クレジットカード登録後は、このバー（未登録案内・残り回数・購入機会）を丸ごと隠す */
-  revenueBarEl.style.display = cardRegistered ? 'none' : '';
+  /* 旧デモ用の「カード未登録」バーは使わない（カード情報は Stripe の決済ページでのみ入力する） */
+  revenueBarEl.style.display = 'none';
 
   /* カード状態・残数・収益・コインの表示 */
   cardStatusEl.textContent = cardRegistered ? t('registered', { last4: cardLast4 }) : t('unregistered');
@@ -2170,13 +2339,23 @@ function updateBonusUI(){
   bonusRemainEl.textContent = bonusUsesRemaining;
   revenueAmountEl.textContent = fmt(myMediproRevenue);
   purchaseCountEl.textContent = purchaseCount;
-  creditBalanceEl.textContent = fmt(coins());
+  creditBalanceEl.textContent = balanceText();
 
-  /* ボタンの出し分け
-     ・未承認 → 「初回登録」（押すとカード入力画面 → 承認）
-     ・承認済み → 「🪙 コインショップ」（残高にかかわらず常に開ける） */
-  registerBtn.style.display = cardApproved ? 'none' : 'inline-block';
-  topupBtn.style.display = cardApproved ? 'inline-block' : 'none';
+  /* 残高の取得状況（接続中／失敗）と、この対局で逆転の一手をあと何回使えるかを常に表示 */
+  if (walletState === 'ready'){
+    walletNoteEl.style.display = 'none';
+  } else {
+    walletNoteEl.style.display = 'inline';
+    walletNoteEl.className = walletState === 'connecting' ? 'connecting' : '';
+    walletNoteEl.textContent = t(walletState === 'connecting' ? 'walletConnecting' : 'walletError');
+    walletNoteEl.title = walletState === 'error' ? walletLastError : '';
+  }
+  bonusLeftBadgeEl.textContent = t('bonusLeftBadge', { n: bonusUsesRemaining });
+
+  /* デモ用の「初回登録」（カード入力画面）は出さない。コインショップは常に開ける */
+  registerBtn.style.display = 'none';
+  topupBtn.style.display = 'inline-block';
+  document.getElementById('demoBadge').style.display = DEMO_MODE ? 'inline-block' : 'none';
 
   /* 各ボタンをいったん隠す */
   passBonusUseBtn.style.display = 'none';
@@ -2189,11 +2368,12 @@ function updateBonusUI(){
   }
 
   if (isHumanPassState()){
+    /* 1対局3回まで。残りがあるときだけ「逆転の一手」ボタンを出す */
     if (bonusUsesRemaining > 0){
-      passBonusUseBtn.style.display = 'inline-block';
-      passBonusUseBtn.textContent = t('bonusUseBtn', { n: bonusUsesRemaining });
-    } else {
       passBonusBuyBtn.style.display = 'inline-block';
+      passBonusBuyBtn.textContent = t('bonusBuyBtn', { n: bonusUsesRemaining });
+    } else if (confirmMode === 'bonus'){
+      purchasePanel.style.display = 'none';
     }
   } else {
     /* パス状態でなければ確認パネルも閉じる */
@@ -2210,16 +2390,15 @@ function openConfirm(kind){
   confirmMode = kind;
   const cost = kind === 'hint' ? HINT_COST : PASS_BONUS_PRICE;
   purchaseTitleEl.textContent = t(kind === 'hint' ? 'hintTitle' : 'purchaseTitle');
-  purchasePayLine.textContent = t(kind === 'hint' ? 'hintLine' : 'payFromCredit', { bal: fmt(coins()), after: fmt(coins() - cost) });
+  purchasePayLine.textContent = t(kind === 'hint' ? 'hintLine' : 'payFromCredit', { bal: fmt(coins()), after: fmt(coins() - cost), n: bonusUsesRemaining });
   purchaseConfirmBtn.textContent = t(kind === 'hint' ? 'hintConfirm' : 'purchaseConfirm');
   purchasePanel.style.display = 'block';
 }
-/* コインを使う前のチェック：未承認ならカード登録へ、不足ならショップへ。使えるなら true */
+/* コインを使う前のチェック：ウォレット未接続なら案内して再接続、不足ならショップへ。使えるなら true
+   （ここでカード入力画面は開かない。カード情報の入力は Stripe の決済ページだけで行う） */
 function ensureCoins(cost){
   if (!coinsUsable()){
-    setAiInfo('needRegister');
-    toast(t('needRegister'));
-    openCardModal();
+    notifyWalletNotReady();
     return false;
   }
   if (coins() < cost){
@@ -2279,7 +2458,8 @@ function endHumanTurn(){
   if (!checkGameEnd()) setTimeout(aiTurn, 120);
 }
 
-/* パスボーナスを1回使う（残り回数を消費して自由配置モードに入る） */
+/* 逆転の一手を1回使う（この対局の残り回数を1減らして自由配置モードに入る）。
+   呼び出し前に必ず1コインを消費済みであること。 */
 function useBonusPlacement(){
   if (bonusUsesRemaining <= 0 || !isHumanPassState()) return;
   bonusUsesRemaining--;
@@ -2299,9 +2479,10 @@ passBtn.addEventListener('click', () => {
 /* 「パスボーナスを使う」ボタン */
 passBonusUseBtn.addEventListener('click', useBonusPlacement);
 
-/* 「✨ 逆転の一手（🪙3）」ボタン → コイン確認パネルを開く */
+/* 「✨ 逆転の一手（🪙1）」ボタン → コイン確認パネルを開く */
 passBonusBuyBtn.addEventListener('click', () => {
   if (!isHumanPassState()) return;
+  if (bonusUsesRemaining <= 0){ toast(t('bonusUsedUp')); return; }
   if (!ensureCoins(PASS_BONUS_PRICE)) return;
   openConfirm('bonus');
 });
@@ -2327,14 +2508,25 @@ purchaseConfirmBtn.addEventListener('click', async () => {
     showHint();
     return;
   }
-  if (!isHumanPassState()) return;
+  if (!isHumanPassState() || awaitingBonusPlacement || bonusSpending) return;
+  if (bonusUsesRemaining <= 0){ toast(t('bonusUsedUp')); return; }
   if (!ensureCoins(PASS_BONUS_PRICE)) return;
-  if (!(await spendCoins(PASS_BONUS_PRICE, 'comeback_move'))) return;
+  /* 1回使うごとに1コインを消費する（1対局3回まで）。消費に成功したときだけ自由配置に進む */
+  bonusSpending = true;
+  const boardAtSpend = board;
+  let paid = false;
+  try { paid = await spendCoins(PASS_BONUS_PRICE, 'comeback_move'); } finally { bonusSpending = false; }
+  if (!paid) return;
+  if (board !== boardAtSpend || !isHumanPassState()){
+    /* 消費の通信中に対局がリセットされた等。コインは消費済みなので、その旨が分かるよう残高だけ更新する */
+    updateBonusUI();
+    return;
+  }
   purchaseCount++;
-  bonusUsesRemaining = PASS_BONUS_USES;   // 1回の発動で最大3回ぶんを付与
-  toast(t('purchasedCredit', { bal: fmt(coins()) }), 'gold');
-  setAiInfo('purchasedCredit', { bal: fmt(coins()) });
-  useBonusPlacement();                     // 続けて1回目を使用（自由配置モードへ）
+  const left = bonusUsesRemaining - 1;
+  toast(t('purchasedCredit', { bal: fmt(coins()), n: left }), 'gold');
+  setAiInfo('purchasedCredit', { bal: fmt(coins()), n: left });
+  useBonusPlacement();                     // 自由配置モードへ（残り回数を1減らす）
 });
 
 placeBtn.addEventListener('click', () => setMode('place'));
@@ -2373,57 +2565,17 @@ function closeCardModal(){
 }
 cardCancelBtn.addEventListener('click', closeCardModal);
 
-cardSaveBtn.addEventListener('click', async () => {
-  cardErrorEl.textContent = '';
-  const form = {
-    number: document.getElementById('ccNumber').value,
-    expiry: document.getElementById('ccExpiry').value,
-    cvc:    document.getElementById('ccCvc').value,
-    name:   document.getElementById('ccName').value
-  };
-  if (!form.number || !form.expiry || !form.cvc || !form.name){
-    cardErrorEl.textContent = t('fillAll');
-    return;
-  }
-  cardSaveBtn.disabled = true;
-  cardSaveBtn.textContent = t('approvingBtn');
-
-  /* 【連携ポイント①】カードの登録・承認（本番ではオーソリ等で正式に承認） */
-  let result;
-  try {
-    result = await registerCreditCard(form);
-  } catch (e) {
-    result = { success: false };
-  }
-
-  cardSaveBtn.disabled = false;
-  cardSaveBtn.textContent = t('cardSaveBtn');
-
-  /* 正式に承認されなければ登録扱いにしない（パスボーナスは使えないまま） */
-  if (!result || !result.success){
-    cardApproved = false;
-    cardErrorEl.textContent = t('cardNotApproved');
-    return;
-  }
-
-  /* 承認成功 */
-  cardRegistered = true;
-  cardApproved = true;
-  cardLast4 = result.last4 || '****';
-  /* 登録日を記録（初回登録時のみ）。以降この日からの戦績を集計する */
-  if (!registeredDate) registeredDate = todayStr();
+/* 「デモ購入する」：実際の決済は行わず、デモ用の残高に CREDIT_TOPUP（50）コインを加える。
+   画面のカード情報は見本（読み取り専用）で、どこにも送信・保存しない。 */
+cardSaveBtn.addEventListener('click', () => {
+  if (!DEMO_MODE || !wallet || !wallet.isDemo) return;
+  const bal = wallet.creditDemoPurchase(CREDIT_TOPUP);   // onChange 経由で画面の残高も更新される
+  if (!registeredDate) registeredDate = todayStr();      // 戦績の集計開始日（従来どおり初回の購入時）
+  saveStats();
   closeCardModal();
-  /* 初回登録の特典としてスタータボーナス（無償コイン）を1回だけ付与（不要なら SUPPORT_CREDIT を 0 に） */
-  if (!starterGranted && SUPPORT_CREDIT > 0){
-    starterGranted = true;
-    saveStats();
-    grantCoins(SUPPORT_CREDIT, 'cardApprovedMsg', { bal: fmt(SUPPORT_CREDIT) });
-    setAiInfo('cardApprovedMsg', { bal: fmt(SUPPORT_CREDIT) });
-  } else {
-    saveStats();
-    toast(t('cardApprovedAgain'));
-    setAiInfo('cardApprovedAgain');
-  }
+  toast(t('demoPaid', { amt: fmt(CREDIT_TOPUP), bal: fmt(bal) }), 'gold');
+  setAiInfo('demoPaid', { amt: fmt(CREDIT_TOPUP), bal: fmt(bal) });
+  flyCoins(8);
   updateStatsUI();
   updateBonusUI();
 });
@@ -2542,7 +2694,7 @@ initGame();
   a.addEventListener('click', function(e){
     e.preventDefault();
     if (!confirm(t('demoResetConfirm'))) return;
-    try { localStorage.removeItem(STATS_STORAGE_KEY); } catch(err){}
+    try { localStorage.removeItem(STATS_STORAGE_KEY); localStorage.removeItem(DEMO_WALLET_KEY); } catch(err){}
     location.reload();
   });
 })();
@@ -2551,6 +2703,7 @@ initGame();
 <!-- Back to landing page -->
 <a href="index.html" id="catacelo-home-btn" style="position:fixed;top:12px;left:12px;z-index:99999;display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#0E3B22;color:#F6F1E3;font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;font-size:13px;font-weight:700;letter-spacing:.05em;text-decoration:none;border-radius:999px;box-shadow:0 3px 8px rgba(0,0,0,.35);opacity:.92;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.92">&#9664; トップへ戻る</a>
 <script>catSyncLang(lang);</script>
+<script>initWallet();</script>
 <link rel="modulepreload" href="coin-wallet.js">
 <script src="static-site-seo.js"></script>
 </body>
