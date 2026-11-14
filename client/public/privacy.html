@@ -82,6 +82,8 @@
     th{border-bottom:none;padding-bottom:4px}
     td{padding-top:4px}
   }
+
+  .demo-notice { background: #ffebee; border: 2px solid #c62828; color: #b71c1c; border-radius: 8px; padding: 12px 14px; font-weight: bold; line-height: 1.7; margin: 14px 0; }
 </style>
 </head>
 <body>
@@ -100,14 +102,15 @@
 
 <main>
   <h1 data-i18n="h1">プライバシーポリシー</h1>
-  <p class="updated" data-i18n="updated">制定日：2026年7月10日</p>
+  <p class="updated" data-i18n="updated">制定日：2026年7月10日／最終改定日：2026年11月15日</p>
   <p class="lang-note" data-i18n="langNote"></p>
   <p class="lead" data-i18n="lead">MyMedipro株式会社（以下「当社」といいます）は、オンラインゲーム「Catacelo」および関連サービス（以下「本サービス」といいます）における個人情報の取扱いについて、以下のとおりプライバシーポリシーを定めます。</p>
+  <p class="demo-notice" data-i18n="demoNote">【現在はデモ版です】本サービスは現在デモ版として提供しており、コインの販売および決済は行っていません。そのため、現在は決済に関する情報（購入履歴、決済トークン等）を取得しておらず、決済代行事業者（Stripe社）への委託も行っていません。デモ用の購入画面に表示されるカード情報は見本であり、入力・送信・保存されることはありません。デモ用コインの残高は、ご利用の端末のブラウザ内にのみ保存されます。本ポリシーのうち決済に関する定めは、当社がコインの販売を正式に開始した時から適用されます。</p>
   <h2 data-i18n="s1">1. 事業者情報</h2>
   <p><span data-i18n="company">MyMedipro株式会社</span><br><span data-i18n="rep">代表取締役　鈴木 吉彦</span><br><span data-i18n="addr">〒102-0082 東京都千代田区一番町5番地3　アトラスビル1階</span></p>
   <h2 data-i18n="s2">2. 取得する情報</h2>
   <p data-i18n="s2p">当社は、本サービスの提供にあたり、以下の情報を取得します。</p>
-  <ul><li data-i18n="s2l_0">アカウント登録情報（メールアドレス、ニックネーム等）</li><li data-i18n="s2l_1">決済に関する情報（購入履歴、コイン残高、決済トークン等）　※クレジットカード番号そのものは、決済代行事業者（Stripe社）が直接取得・処理し、当社のサーバーには送信・保存されません。</li><li data-i18n="s2l_2">本サービスの利用履歴（対局記録、戦績、機能の利用状況等）</li><li data-i18n="s2l_3">端末情報・アクセスログ（IPアドレス、ブラウザ種別、Cookie等）</li></ul>
+  <ul><li data-i18n="s2l_0">対人戦で入力されたニックネーム、およびご利用のブラウザに自動的に発行される匿名の識別子（メールアドレスやパスワードによるアカウント登録は行っていません）</li><li data-i18n="s2l_1">決済に関する情報（購入履歴、コイン残高、決済トークン等）　※クレジットカード番号そのものは、決済代行事業者（Stripe社）が直接取得・処理し、当社のサーバーには送信・保存されません。</li><li data-i18n="s2l_2">本サービスの利用履歴（対局記録、戦績、機能の利用状況等）</li><li data-i18n="s2l_3">端末情報・アクセスログ（IPアドレス、ブラウザ種別、Cookie等）</li></ul>
   <h2 data-i18n="s3">3. 利用目的</h2>
   <p data-i18n="s3p">取得した情報は、以下の目的で利用します。</p>
   <ul><li data-i18n="s3l_0">本サービスの提供・維持・改善のため</li><li data-i18n="s3l_1">有償機能の決済処理、購入履歴・コイン残高の管理のため</li><li data-i18n="s3l_2">本人確認、不正利用の防止のため</li><li data-i18n="s3l_3">お問い合わせへの対応のため</li><li data-i18n="s3l_4">重要なお知らせ（規約変更、サービス変更・終了等）の通知のため</li><li data-i18n="s3l_5">利用状況の統計的な分析（個人を識別できない形式に加工したもの）のため</li></ul>
@@ -147,14 +150,15 @@ const I18N = {
   "navTokushoho": "特定商取引法に基づく表記",
   "back": "◀ トップページへ戻る",
   "copy": "© 2026 MyMedipro株式会社",
-  "updated": "制定日：2026年7月10日",
+  "updated": "制定日：2026年7月10日／最終改定日：2026年11月15日",
+  "demoNote": "【現在はデモ版です】本サービスは現在デモ版として提供しており、コインの販売および決済は行っていません。そのため、現在は決済に関する情報（購入履歴、決済トークン等）を取得しておらず、決済代行事業者（Stripe社）への委託も行っていません。デモ用の購入画面に表示されるカード情報は見本であり、入力・送信・保存されることはありません。デモ用コインの残高は、ご利用の端末のブラウザ内にのみ保存されます。本ポリシーのうち決済に関する定めは、当社がコインの販売を正式に開始した時から適用されます。",
   "langNote": "",
   "h1": "プライバシーポリシー",
   "lead": "MyMedipro株式会社（以下「当社」といいます）は、オンラインゲーム「Catacelo」および関連サービス（以下「本サービス」といいます）における個人情報の取扱いについて、以下のとおりプライバシーポリシーを定めます。",
   "s1": "1. 事業者情報",
   "s2": "2. 取得する情報",
   "s2p": "当社は、本サービスの提供にあたり、以下の情報を取得します。",
-  "s2l_0": "アカウント登録情報（メールアドレス、ニックネーム等）",
+  "s2l_0": "対人戦で入力されたニックネーム、およびご利用のブラウザに自動的に発行される匿名の識別子（メールアドレスやパスワードによるアカウント登録は行っていません）",
   "s2l_1": "決済に関する情報（購入履歴、コイン残高、決済トークン等）　※クレジットカード番号そのものは、決済代行事業者（Stripe社）が直接取得・処理し、当社のサーバーには送信・保存されません。",
   "s2l_2": "本サービスの利用履歴（対局記録、戦績、機能の利用状況等）",
   "s2l_3": "端末情報・アクセスログ（IPアドレス、ブラウザ種別、Cookie等）",
@@ -191,14 +195,15 @@ const I18N = {
   "navTokushoho": "Commercial Transactions Act Notice",
   "back": "◀ Back to top page",
   "copy": "© 2026 MyMedipro Inc.",
-  "updated": "Established: July 10, 2026",
+  "updated": "Established: July 10, 2026 / Last revised: November 15, 2026",
+  "demoNote": "[Currently a demo] The Service is currently offered as a demo version; Coins are not sold and no payments are processed. Accordingly, we do not currently obtain payment-related information (purchase history, payment tokens, etc.) and do not outsource anything to the payment processor (Stripe). The card details shown on the demo purchase screen are samples and are never entered, transmitted or stored. The Demo Coin balance is stored only in the browser of the device you use. The provisions of this Policy concerning payments apply from the time the Company officially begins selling Coins.",
   "langNote": "The Japanese version of this document is the authoritative text. Translations are provided for reference only; in case of any discrepancy, the Japanese version prevails.",
   "h1": "Privacy Policy",
   "lead": "MyMedipro Inc. (the \"Company\") sets out the following Privacy Policy regarding the handling of personal information in the online game \"Catacelo\" and related services (the \"Service\").",
   "s1": "1. Business Operator",
   "s2": "2. Information We Collect",
   "s2p": "In providing the Service, the Company collects the following information.",
-  "s2l_0": "Account registration details (e-mail address, nickname, etc.)",
+  "s2l_0": "The nickname entered for player-versus-player games and the anonymous identifier automatically issued to your browser (we do not register accounts with an email address or password)",
   "s2l_1": "Payment-related information (purchase history, coin balance, payment tokens, etc.). Credit card numbers themselves are collected and processed directly by our payment processor (Stripe) and are never transmitted to or stored on the Company’s servers.",
   "s2l_2": "Usage history of the Service (game records, results, feature usage, etc.)",
   "s2l_3": "Device information and access logs (IP address, browser type, cookies, etc.)",
@@ -235,14 +240,15 @@ const I18N = {
   "navTokushoho": "特定商业交易法标示",
   "back": "◀ 返回首页",
   "copy": "© 2026 MyMedipro株式会社",
-  "updated": "制定日：2026年7月10日",
+  "updated": "制定日：2026年7月10日／最后修订日：2026年11月15日",
+  "demoNote": "【目前为演示版】本服务目前以演示版提供，不销售金币，也不进行任何结算。因此，目前不获取与结算有关的信息（购买记录、支付令牌等），也未向支付服务商（Stripe公司）进行委托。演示购买画面上显示的卡片信息仅为示例，不会被输入、发送或保存。演示金币余额仅保存在您所用设备的浏览器中。本政策中有关结算的规定，自本公司正式开始销售金币时起适用。",
   "langNote": "本文件以日文版为正式文本。译文仅供参考，如有歧义，以日文版为准。",
   "h1": "隐私政策",
   "lead": "MyMedipro株式会社（以下称“本公司”）就在线游戏“Catacelo”及相关服务（以下称“本服务”）中的个人信息处理，制定以下隐私政策。",
   "s1": "1. 经营者信息",
   "s2": "2. 收集的信息",
   "s2p": "本公司在提供本服务时收集以下信息。",
-  "s2l_0": "账户注册信息（电子邮件地址、昵称等）",
+  "s2l_0": "对人对战中输入的昵称，以及自动向您的浏览器发放的匿名识别码（本服务不使用电子邮箱或密码注册账户）",
   "s2l_1": "与支付相关的信息（购买记录、金币余额、支付令牌等）　※信用卡号本身由支付代理商（Stripe）直接获取和处理，不会传送或保存到本公司服务器。",
   "s2l_2": "本服务的使用记录（对局记录、战绩、功能使用情况等）",
   "s2l_3": "设备信息与访问日志（IP地址、浏览器类型、Cookie等）",
@@ -279,14 +285,15 @@ const I18N = {
   "navTokushoho": "특정상거래법에 따른 표기",
   "back": "◀ 첫 페이지로 돌아가기",
   "copy": "© 2026 MyMedipro Inc.",
-  "updated": "제정일: 2026년 7월 10일",
+  "updated": "제정일: 2026년 7월 10일 / 최종 개정일: 2026년 11월 15일",
+  "demoNote": "【현재는 데모판입니다】본 서비스는 현재 데모판으로 제공되며, 코인의 판매 및 결제는 이루어지지 않습니다. 따라서 현재는 결제에 관한 정보(구매 이력, 결제 토큰 등)를 취득하지 않으며, 결제대행 사업자(Stripe사)에 대한 위탁도 하지 않습니다. 데모용 구매 화면에 표시되는 카드 정보는 견본이며, 입력·전송·저장되지 않습니다. 데모용 코인 잔액은 이용 중인 기기의 브라우저 내에만 저장됩니다. 본 정책 중 결제에 관한 규정은 당사가 코인 판매를 정식으로 개시한 때부터 적용됩니다.",
   "langNote": "이 문서의 정본은 일본어판입니다. 번역본은 참고용이며, 해석에 차이가 있을 경우 일본어판이 우선합니다.",
   "h1": "개인정보 처리방침",
   "lead": "MyMedipro Inc.(이하 “당사”)는 온라인 게임 “Catacelo” 및 관련 서비스(이하 “본 서비스”)에서의 개인정보 취급에 관하여 다음과 같이 개인정보 처리방침을 정합니다.",
   "s1": "1. 사업자 정보",
   "s2": "2. 수집하는 정보",
   "s2p": "당사는 본 서비스 제공을 위해 다음 정보를 수집합니다.",
-  "s2l_0": "계정 등록 정보(이메일 주소, 닉네임 등)",
+  "s2l_0": "대인전에서 입력한 닉네임 및 이용 중인 브라우저에 자동으로 발급되는 익명 식별자(이메일 주소나 비밀번호를 이용한 계정 등록은 하지 않습니다)",
   "s2l_1": "결제 관련 정보(구매 이력, 코인 잔액, 결제 토큰 등) ※ 신용카드 번호 자체는 결제대행사(Stripe)가 직접 수집·처리하며, 당사 서버로 전송·저장되지 않습니다.",
   "s2l_2": "본 서비스 이용 이력(대국 기록, 전적, 기능 이용 현황 등)",
   "s2l_3": "기기 정보·접속 로그(IP 주소, 브라우저 종류, 쿠키 등)",
@@ -323,14 +330,15 @@ const I18N = {
   "navTokushoho": "Aviso conforme a la Ley de Transacciones Comerciales Específicas",
   "back": "◀ Volver a la página principal",
   "copy": "© 2026 MyMedipro Inc.",
-  "updated": "Establecido: 10 de julio de 2026",
+  "updated": "Establecido: 10 de julio de 2026 / Última revisión: 15 de noviembre de 2026",
+  "demoNote": "[Actualmente es una versión de demostración] El Servicio se ofrece actualmente como versión de demostración; no se venden monedas ni se procesa ningún pago. Por ello, actualmente no obtenemos información relativa a pagos (historial de compras, tokens de pago, etc.) ni encargamos nada al proveedor de pagos (Stripe). Los datos de tarjeta que aparecen en la pantalla de compra de demostración son una muestra y nunca se introducen, envían ni guardan. El saldo de monedas de demostración se guarda únicamente en el navegador del dispositivo que utilice. Las disposiciones de esta Política relativas a los pagos se aplicarán desde el momento en que la Empresa comience oficialmente a vender monedas.",
   "langNote": "La versión japonesa de este documento es el texto auténtico. Las traducciones se ofrecen solo a título informativo; en caso de discrepancia prevalece la versión japonesa.",
   "h1": "Política de privacidad",
   "lead": "MyMedipro Inc. (en adelante, «la Empresa») establece la siguiente Política de privacidad sobre el tratamiento de la información personal en el juego en línea «Catacelo» y los servicios relacionados (en adelante, «el Servicio»).",
   "s1": "1. Datos del operador",
   "s2": "2. Información que recogemos",
   "s2p": "Para prestar el Servicio, la Empresa recoge la siguiente información.",
-  "s2l_0": "Datos de registro de la cuenta (dirección de correo electrónico, apodo, etc.)",
+  "s2l_0": "El apodo introducido para las partidas entre jugadores y el identificador anónimo emitido automáticamente para su navegador (no registramos cuentas con correo electrónico ni contraseña)",
   "s2l_1": "Información relacionada con el pago (historial de compras, saldo de monedas, tokens de pago, etc.). Los números de tarjeta de crédito son recogidos y procesados directamente por el proveedor de pagos (Stripe) y nunca se transmiten ni almacenan en los servidores de la Empresa.",
   "s2l_2": "Historial de uso del Servicio (registros de partidas, resultados, uso de funciones, etc.)",
   "s2l_3": "Información del dispositivo y registros de acceso (dirección IP, tipo de navegador, cookies, etc.)",
@@ -367,14 +375,15 @@ const I18N = {
   "navTokushoho": "Mentions légales (loi sur les transactions commerciales)",
   "back": "◀ Retour à la page d’accueil",
   "copy": "© 2026 MyMedipro Inc.",
-  "updated": "Établi le : 10 juillet 2026",
+  "updated": "Établi le : 10 juillet 2026 / Dernière révision : 15 novembre 2026",
+  "demoNote": "[Version de démonstration actuellement] Le Service est actuellement proposé en version de démonstration ; aucune pièce n’est vendue et aucun paiement n’est traité. Par conséquent, nous ne recueillons actuellement aucune information relative aux paiements (historique d’achats, jetons de paiement, etc.) et ne confions rien au prestataire de paiement (Stripe). Les informations de carte affichées sur l’écran d’achat de démonstration sont un exemple et ne sont jamais saisies, transmises ni stockées. Le solde de pièces de démonstration est enregistré uniquement dans le navigateur de l’appareil utilisé. Les dispositions de la présente Politique relatives aux paiements s’appliqueront à compter du lancement officiel de la vente de pièces par la Société.",
   "langNote": "La version japonaise de ce document fait foi. Les traductions sont fournies à titre indicatif ; en cas de divergence, la version japonaise prévaut.",
   "h1": "Politique de confidentialité",
   "lead": "MyMedipro Inc. (ci-après « la Société ») établit la présente politique de confidentialité concernant le traitement des informations personnelles dans le jeu en ligne « Catacelo » et les services associés (ci-après « le Service »).",
   "s1": "1. Informations sur l’exploitant",
   "s2": "2. Informations collectées",
   "s2p": "Dans le cadre de la fourniture du Service, la Société collecte les informations suivantes.",
-  "s2l_0": "Informations d’inscription au compte (adresse e-mail, pseudonyme, etc.)",
+  "s2l_0": "Le pseudonyme saisi pour les parties entre joueurs et l’identifiant anonyme automatiquement attribué à votre navigateur (nous n’enregistrons pas de compte avec une adresse e-mail ou un mot de passe)",
   "s2l_1": "Informations relatives au paiement (historique d’achats, solde de pièces, jetons de paiement, etc.). Les numéros de carte bancaire sont collectés et traités directement par le prestataire de paiement (Stripe) et ne sont jamais transmis ni stockés sur les serveurs de la Société.",
   "s2l_2": "Historique d’utilisation du Service (enregistrements de parties, résultats, utilisation des fonctions, etc.)",
   "s2l_3": "Informations sur l’appareil et journaux d’accès (adresse IP, type de navigateur, cookies, etc.)",
