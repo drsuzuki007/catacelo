@@ -34,3 +34,13 @@ Turnstileのキー共有を行わない方針に変更したため、Supabaseの
 Cloudflare TurnstileをCAPTCHAプロバイダーとして選び、提供済みのSecret KeyをSupabase AuthenticationのAttack Protectionへ保存しました。クライアントは提供済みSitekeyでTurnstileを表示し、匿名認証時にCAPTCHAトークンを送信します。Secret Keyはこの記録やソースコードには保存していません。開発プレビューではCloudflareの許可ホスト名外となる場合があるため、本番ホスト名で確認します。
 
 Turnstileの接続障害が匿名認証を停止したため、SupabaseのCAPTCHA保護を一時停止し、クライアントもTurnstile表示を停止しました。`catacelo`のサーバー側レート制限とRPC専用の書込み制御は維持しています。CAPTCHAは、Cloudflare側で接続障害を解消してから再有効化します。
+
+## 2026-11-18 Supabaseプロジェクトの作り直し
+
+旧プロジェクト `kxdwcnzxrujsagljbvqe`（suzukiyoshihiko's Project）のホスト名が解決できなくなり（NXDOMAIN）、匿名ログインが失敗して「卓を開く」等が押せなくなった。drsuzuki007 のSupabaseアカウントからは旧プロジェクトが見えなかったため、同アカウントの組織「drsuzuki007's Org」に新プロジェクト `lnuihnjajdlxesdsjleb`（名前: catacelo、ap-south-1）を作成した。
+
+- 適用したSQL: `catacelo_remote_battle.sql` → `007` → `008` → `009`（004〜006は完全セットアップSQLに含まれる）。
+- Data APIのExposed schemasに `catacelo` を追加、AuthenticationのAnonymous Sign-Insを有効化。
+- クライアントの接続先とpublishable keyを新プロジェクトに差し替え（`client/src/lib/supabase.ts`、`client/public/coin-wallet.js`、`scripts/integration_check.mjs`）。
+- 旧プロジェクトの対局帳・コイン残高は引き継いでいない。
+- Cloudflare Pagesの `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY`（Stripe決済用）は新プロジェクトの値への差し替えが必要。

@@ -4,8 +4,8 @@
  */
 import { createClient } from "@supabase/supabase-js";
 
-const url = "https://kxdwcnzxrujsagljbvqe.supabase.co";
-const key = "sb_publishable_YzwwvEY6n5f4aXoVCKl8Ng_irdJR2s9";
+const url = "https://lnuihnjajdlxesdsjleb.supabase.co";
+const key = "sb_publishable_A7qYFkN558MyTFgZxah-5Q_3mRRvsKL";
 const initialBoard = "0000000000000000000000000002100000012000000000000000000000000000";
 const roomCode = `T${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
 

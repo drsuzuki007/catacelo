@@ -20,8 +20,8 @@
  *   </script>
  */
 
-const SUPABASE_URL = "https://kxdwcnzxrujsagljbvqe.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_YzwwvEY6n5f4aXoVCKl8Ng_irdJR2s9";
+const SUPABASE_URL = "https://lnuihnjajdlxesdsjleb.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_A7qYFkN558MyTFgZxah-5Q_3mRRvsKL";
 
 const SESSION_KEY = "catacelo_auth_session_v1";
 

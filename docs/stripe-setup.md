@@ -70,7 +70,7 @@ Cloudflare ダッシュボード → Workers & Pages → **catacelo** → 設定
 | `STRIPE_SECRET_KEY` | **シークレット** | `sk_test_...`（本番移行時に `sk_live_...`） |
 | `STRIPE_PRICE_ID` | テキスト | `price_...` |
 | `STRIPE_WEBHOOK_SECRET` | **シークレット** | `whsec_...` |
-| `SUPABASE_URL` | テキスト | `https://kxdwcnzxrujsagljbvqe.supabase.co` |
+| `SUPABASE_URL` | テキスト | `https://lnuihnjajdlxesdsjleb.supabase.co` |
 | `SUPABASE_SERVICE_ROLE_KEY` | **シークレット** | Supabase の service_role キー |
 
 > `SUPABASE_SERVICE_ROLE_KEY` は RLS を無視できる全権キー。**必ず「シークレット」種別**で登録し、
