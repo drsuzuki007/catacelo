@@ -118,6 +118,23 @@
     width: 92%; max-width: 640px; margin: 6px 0 0;
     display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
   }
+  #passBonusArea { align-items: center; }
+  /* 逆転の一手の設定回数（1対局の上限を3回／5回から選ぶ） */
+  #bonusLimitSetting {
+    display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center;
+    background: #fff; border: 1px solid #d9b8e6; border-radius: 8px; padding: 4px 6px 4px 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.12);
+  }
+  #bonusLimitLabel { font-size: 13px; font-weight: bold; color: #6a1b9a; white-space: nowrap; }
+  #bonusLimitSetting .seg { display: inline-flex; border-radius: 6px; overflow: hidden; border: 1px solid #6a1b9a; }
+  #bonusLimitSetting .bonusLimitBtn {
+    background: #fff; color: #6a1b9a; border-radius: 0; box-shadow: none;
+    font-size: 14px; font-weight: bold; padding: 6px 14px; min-width: 48px;
+  }
+  #bonusLimitSetting .bonusLimitBtn + .bonusLimitBtn { border-left: 1px solid #6a1b9a; }
+  #bonusLimitSetting .bonusLimitBtn:hover { background: #f3e5f5; }
+  #bonusLimitSetting .bonusLimitBtn.active { background: #6a1b9a; color: #fff; }
+  #bonusLimitSetting .bonusLimitBtn:focus-visible { outline: 2px solid #ffd54a; outline-offset: -2px; }
   #passBonusUseBtn { background: #e65100; display: none; }
   #passBonusUseBtn:hover { background: #ef6c00; }
   #passBonusBuyBtn { background: #ad1457; display: none; }
@@ -407,6 +424,14 @@
 <!-- 逆転の一手（パス状態のときだけ）／ヒント（自分の手番のとき）ボタン -->
 <div id="passBonusArea">
   <button id="hintBtn" data-i18n="hintBtn">💡 ヒント（🪙1）</button>
+  <!-- 逆転の一手の設定回数：1対局で使える上限を3回／5回から選ぶ（ヒントボタンの右側） -->
+  <span id="bonusLimitSetting" role="group" aria-labelledby="bonusLimitLabel">
+    <span id="bonusLimitLabel" data-i18n="bonusLimitLabel">逆転の一手の設定回数</span>
+    <span class="seg">
+      <button type="button" class="bonusLimitBtn" data-limit="3" aria-pressed="true">3回</button>
+      <button type="button" class="bonusLimitBtn" data-limit="5" aria-pressed="false">5回</button>
+    </span>
+  </span>
   <button id="passBonusUseBtn">✨ 逆転の一手を使う</button>
   <button id="passBonusBuyBtn">✨ 逆転の一手（🪙1）</button>
 </div>
@@ -558,7 +583,8 @@ const I18N = {
     walletConnecting:'残高を確認中…',
     walletError:'残高を取得できません（タップで再試行）',
     bonusLeftBadge:'✨ 逆転の一手 あと{n}回',
-    bonusUsedUp:'✨ 逆転の一手はこの対局で3回使い切りました',
+    bonusUsedUp:'✨ 逆転の一手はこの対局で{n}回使い切りました',
+    bonusLimitLabel:'逆転の一手の設定回数', bonusLimitOpt:'{n}回', bonusLimitChanged:'✨ 逆転の一手を1対局{n}回までに設定しました',
     spendFailed:'コインを消費できませんでした。通信環境をご確認のうえ、もう一度お試しください。',
     bonusUseBtn:'✨ 逆転の一手を使う（残り{n}回）',
     purchaseTitle:'✨ 逆転の一手を発動しますか？',
@@ -594,7 +620,7 @@ const I18N = {
     rule9:'両者がパスするか、盤面が埋まったらゲーム終了です。',
     bonusTitle:'逆転の一手・ヒント（コイン機能）',
     bonusRule1:'白（あなた）が「パスする」状態になったときだけ、「✨ 逆転の一手」ボタンが現れます。',
-    bonusRule2:'逆転の一手は1回につき 🪙1 を消費し、1つの対局で最大3回まで使えます（使った回数ぶんだけコインが減ります）。',
+    bonusRule2:'逆転の一手は1回につき 🪙1 を消費し、1つの対局で使える回数は「逆転の一手の設定回数」で3回または5回から選べます（使った回数ぶんだけコインが減ります）。',
     bonusRule3:'逆転の一手を使うと、挟めるか否かに関わらず、空いているマスのどこにでも白い駒を1個追加で置けます。',
     bonusRule4:'💡 ヒント（🪙1）：AIが読んだ「あなたのおすすめの一手」を盤上で光らせます。',
     bonusRule5:'現在はデモ版です。「🪙 コインショップ」では実際の決済は行われず、デモ購入で50コインが追加されます（料金はかかりません）。正式な販売開始後の価格は 50コイン／1,000円（税込）です。',
@@ -675,7 +701,8 @@ const I18N = {
     walletConnecting:'Checking balance…',
     walletError:'Balance unavailable (tap to retry)',
     bonusLeftBadge:'✨ Comeback Moves left: {n}',
-    bonusUsedUp:'✨ You have used all 3 Comeback Moves this game',
+    bonusUsedUp:'✨ You have used all {n} Comeback Moves this game',
+    bonusLimitLabel:'Comeback Moves per game', bonusLimitOpt:'{n}', bonusLimitChanged:'✨ Comeback Moves set to {n} per game',
     spendFailed:'The coin could not be spent. Please check your connection and try again.',
     bonusUseBtn:'✨ Use Comeback Move ({n} left)',
     purchaseTitle:'✨ Activate a Comeback Move?',
@@ -711,7 +738,7 @@ const I18N = {
     rule9:'The game ends when both sides pass or the board is full.',
     bonusTitle:'Comeback Move & Hints (coin features)',
     bonusRule1:'The "✨ Comeback Move" button appears only when you (White) are in a pass state.',
-    bonusRule2:'Each Comeback Move costs 🪙1 and can be used up to 3 times per game (you only pay for the ones you use).',
+    bonusRule2:'Each Comeback Move costs 🪙1 and can be used up to 3 or 5 times per game, as chosen under “Comeback Moves per game” (you only pay for the ones you use).',
     bonusRule3:'A Comeback Move lets you add one White disc to any empty square, whether or not it flips anything.',
     bonusRule4:'💡 Hint (🪙1): highlights the move the AI would recommend for you.',
     bonusRule5:'This is currently a demo. No real payment is made in the coin shop; a demo purchase adds 50 coins (no charge). The price after official sales begin is 50 coins / 1,000 yen (tax incl.).',
@@ -792,7 +819,8 @@ const I18N = {
     walletConnecting:'正在确认余额…',
     walletError:'无法获取余额（点击重试）',
     bonusLeftBadge:'✨ 逆转一手 还剩{n}次',
-    bonusUsedUp:'✨ 本局的3次逆转一手已用完',
+    bonusUsedUp:'✨ 本局的{n}次逆转一手已用完',
+    bonusLimitLabel:'逆转一手的设定次数', bonusLimitOpt:'{n}次', bonusLimitChanged:'✨ 已将逆转一手设定为每局最多{n}次',
     spendFailed:'金币扣除失败。请检查网络后重试。',
     bonusUseBtn:'✨ 使用逆转一手（剩余{n}次）',
     purchaseTitle:'✨ 是否发动逆转一手？',
@@ -828,7 +856,7 @@ const I18N = {
     rule9:'双方都过牌或棋盘填满时，游戏结束。',
     bonusTitle:'逆转一手・提示（金币功能）',
     bonusRule1:'只有当白方（您）处于“过牌”状态时，才会出现“✨ 逆转一手”按钮。',
-    bonusRule2:'逆转一手每次消耗 🪙1，每局最多可使用3次（只按实际使用次数扣除金币）。',
+    bonusRule2:'逆转一手每次消耗 🪙1，每局可使用的次数可在“逆转一手的设定次数”中选择3次或5次（只按实际使用次数扣除金币）。',
     bonusRule3:'使用逆转一手后，无论能否翻转，都可在任意空格额外放置1枚白子。',
     bonusRule4:'💡 提示（🪙1）：在棋盘上高亮显示 AI 为您推荐的一手。',
     bonusRule5:'目前为演示版。在金币商店不会进行实际结算，演示购买可获得 50 金币（不收取费用）。正式开始销售后的价格为 50金币／1,000日元（含税）。',
@@ -909,7 +937,8 @@ const I18N = {
     walletConnecting:'잔액 확인 중…',
     walletError:'잔액을 가져올 수 없습니다 (탭하여 재시도)',
     bonusLeftBadge:'✨ 역전의 한 수 남은 {n}회',
-    bonusUsedUp:'✨ 이 대국의 역전의 한 수 3회를 모두 사용했습니다',
+    bonusUsedUp:'✨ 이 대국의 역전의 한 수 {n}회를 모두 사용했습니다',
+    bonusLimitLabel:'역전의 한 수 설정 횟수', bonusLimitOpt:'{n}회', bonusLimitChanged:'✨ 역전의 한 수를 한 대국 {n}회까지로 설정했습니다',
     spendFailed:'코인을 사용할 수 없었습니다. 통신 상태를 확인한 뒤 다시 시도해 주세요.',
     bonusUseBtn:'✨ 역전의 한 수 사용 (남은 {n}회)',
     purchaseTitle:'✨ 역전의 한 수를 발동할까요?',
@@ -945,7 +974,7 @@ const I18N = {
     rule9:'양쪽이 모두 패스하거나 판이 가득 차면 게임이 끝납니다.',
     bonusTitle:'역전의 한 수・힌트 (코인 기능)',
     bonusRule1:'백(당신)이 ‘패스’ 상태일 때만 ‘✨ 역전의 한 수’ 버튼이 나타납니다.',
-    bonusRule2:'역전의 한 수는 1회당 🪙1 을 소비하며, 한 대국에서 최대 3회까지 사용할 수 있습니다(사용한 횟수만큼만 코인이 차감됩니다).',
+    bonusRule2:'역전의 한 수는 1회당 🪙1 을 소비하며, 한 대국에서 쓸 수 있는 횟수는 ‘역전의 한 수 설정 횟수’에서 3회 또는 5회 중 선택할 수 있습니다(사용한 횟수만큼만 코인이 차감됩니다).',
     bonusRule3:'역전의 한 수를 쓰면, 뒤집을 수 있는지와 관계없이 빈 칸 어디에나 백 돌을 1개 추가로 놓을 수 있습니다.',
     bonusRule4:'💡 힌트 (🪙1): AI가 추천하는 당신의 다음 수를 보드에서 빛나게 표시합니다.',
     bonusRule5:'현재는 데모판입니다. 코인 상점에서는 실제 결제가 이루어지지 않으며, 데모 구매로 50코인이 추가됩니다(요금 없음). 정식 판매 개시 후의 가격은 50코인／1,000엔(세금 포함)입니다.',
@@ -1026,7 +1055,8 @@ const I18N = {
     walletConnecting:'Comprobando saldo…',
     walletError:'Saldo no disponible (toca para reintentar)',
     bonusLeftBadge:'✨ Jugadas de remontada restantes: {n}',
-    bonusUsedUp:'✨ Ya has usado las 3 jugadas de remontada de esta partida',
+    bonusUsedUp:'✨ Ya has usado las {n} jugadas de remontada de esta partida',
+    bonusLimitLabel:'Jugadas de remontada por partida', bonusLimitOpt:'{n}', bonusLimitChanged:'✨ Jugadas de remontada: hasta {n} por partida',
     spendFailed:'No se pudo gastar la moneda. Comprueba tu conexión e inténtalo de nuevo.',
     bonusUseBtn:'✨ Usar jugada de remontada ({n} restantes)',
     purchaseTitle:'✨ ¿Activar una jugada de remontada?',
@@ -1062,7 +1092,7 @@ const I18N = {
     rule9:'La partida termina cuando ambos pasan o el tablero se llena.',
     bonusTitle:'Jugada de remontada y pistas (funciones con monedas)',
     bonusRule1:'El botón "✨ Jugada de remontada" aparece solo cuando tú (blancas) estás en estado de paso.',
-    bonusRule2:'Cada jugada de remontada cuesta 🪙1 y puede usarse hasta 3 veces por partida (solo pagas las que usas).',
+    bonusRule2:'Cada jugada de remontada cuesta 🪙1 y puede usarse hasta 3 o 5 veces por partida, según lo elegido en «Jugadas de remontada por partida» (solo pagas las que usas).',
     bonusRule3:'La jugada de remontada te permite añadir un disco blanco en cualquier casilla vacía, voltee o no.',
     bonusRule4:'💡 Pista (🪙1): resalta la jugada que la IA te recomendaría.',
     bonusRule5:'Actualmente es una versión de demostración. En la tienda de monedas no se realiza ningún pago real; la compra de demo añade 50 monedas (sin cargo). El precio tras el inicio de la venta oficial es de 50 monedas / 1.000 yen (imp. incl.).',
@@ -1143,7 +1173,8 @@ const I18N = {
     walletConnecting:'Vérification du solde…',
     walletError:'Solde indisponible (touchez pour réessayer)',
     bonusLeftBadge:'✨ Coups de la remontée restants : {n}',
-    bonusUsedUp:'✨ Vous avez utilisé les 3 coups de la remontée de cette partie',
+    bonusUsedUp:'✨ Vous avez utilisé les {n} coups de la remontée de cette partie',
+    bonusLimitLabel:'Coups de la remontée par partie', bonusLimitOpt:'{n}', bonusLimitChanged:'✨ Coups de la remontée : jusqu’à {n} par partie',
     spendFailed:'La pièce n’a pas pu être dépensée. Vérifiez votre connexion et réessayez.',
     bonusUseBtn:'✨ Utiliser le coup de la remontée ({n} restants)',
     purchaseTitle:'✨ Activer un coup de la remontée ?',
@@ -1179,7 +1210,7 @@ const I18N = {
     rule9:'La partie se termine quand les deux passent ou que le plateau est plein.',
     bonusTitle:'Coup de la remontée et indices (fonctions à pièces)',
     bonusRule1:'Le bouton « ✨ Coup de la remontée » n’apparaît que lorsque vous (blancs) êtes en situation de passe.',
-    bonusRule2:'Chaque coup de la remontée coûte 🪙1 et peut être utilisé jusqu’à 3 fois par partie (vous ne payez que ceux que vous utilisez).',
+    bonusRule2:'Chaque coup de la remontée coûte 🪙1 et peut être utilisé jusqu’à 3 ou 5 fois par partie, selon le réglage « Coups de la remontée par partie » (vous ne payez que ceux que vous utilisez).',
     bonusRule3:'Il permet d’ajouter un disque blanc sur n’importe quelle case vide, qu’il retourne des disques ou non.',
     bonusRule4:'💡 Indice (🪙1) : met en évidence le coup que l’IA vous recommanderait.',
     bonusRule5:'Il s’agit actuellement d’une version de démonstration. Aucun paiement réel n’est effectué dans la boutique ; l’achat de démo ajoute 50 pièces (sans frais). Le prix après le lancement officiel de la vente est de 50 pièces / 1 000 yens (TTC).',
@@ -1248,7 +1279,7 @@ function t(key, vars){
    - 円が動くのは「コインショップ」（1,000円＝50コイン）だけ。
      対局中の消費はすべてゲーム内通貨「コイン」で表現し、円換算は画面に出さない。
    - コインの使い道：
-       ✨ 逆転の一手（1回につき🪙1）… 白がパス状態のときだけ。1対局に最大3回、空きマスに白を自由配置
+       ✨ 逆転の一手（1回につき🪙1）… 白がパス状態のときだけ。1対局の上限は3回／5回から選択（設定ボタン）、空きマスに白を自由配置
        💡 ヒント（🪙1）… AIが読んだ白のおすすめの一手を盤上で光らせる
    - コインはコインショップでの購入でのみ増える（無料のスターターボーナスは廃止）
    - DEMO_MODE のあいだは実際の決済をせず、デモ購入で50コインが貯まる
@@ -1267,7 +1298,9 @@ const CREDIT_UNIT_YEN = 20;          // 1コインあたりの円換算額（帳
 
 /* コインの使い道 */
 const PASS_BONUS_PRICE = 1;          // ✨ 逆転の一手：1回使うごとに消費するコイン（1コイン＝20円相当）
-const PASS_BONUS_USES  = 3;          // 1つの対局で使える最大回数
+const PASS_BONUS_USES  = 3;          // 1つの対局で使える回数の初期値
+const BONUS_LIMIT_OPTIONS = [3, 5];  // 「逆転の一手の設定回数」で選べる上限
+const BONUS_LIMIT_KEY  = 'catacelo_bonus_limit'; // 選んだ上限をこの端末に保存するキー
 const HINT_COST        = 1;          // 💡 ヒント：1回に必要なコイン
 const HINT_TIME_MS     = 500;        // ヒント探索の思考時間上限
 
@@ -1738,7 +1771,10 @@ let confirmMode = 'bonus';      // 確認パネルの用途 'bonus' | 'hint'
 let statusKey = 'yourTurn', statusVars = null;
 let aiInfoKey = null, aiInfoVars = null;
 /* 各対局ごとにリセット */
-let bonusUsesRemaining = PASS_BONUS_USES; // この対局であと何回、逆転の一手を使えるか（1対局3回まで）
+let bonusLimit = PASS_BONUS_USES;   // 1対局で使える上限（3 または 5。設定ボタンで切替）
+try { const v = parseInt(localStorage.getItem(BONUS_LIMIT_KEY), 10); if (BONUS_LIMIT_OPTIONS.indexOf(v) >= 0) bonusLimit = v; } catch(e){}
+let bonusUsedThisGame = 0;          // この対局で逆転の一手を使った回数
+let bonusUsesRemaining = bonusLimit; // この対局であと何回、逆転の一手を使えるか（上限 − 使用済み）
 let awaitingBonusPlacement = false; // 自由配置（白を空きマスに置く）待ちか
 let bonusSpending = false;          // 逆転の一手のコイン消費を通信中か（二重消費の防止）
 let resultRecorded = false;     // この対局の勝敗を戦績に反映済みか（二重カウント防止）
@@ -1773,6 +1809,7 @@ const purchasePayLine = document.getElementById('purchasePayLine');
 const creditBalanceEl = document.getElementById('creditBalance');
 const streakBadgeEl = document.getElementById('streakBadge');
 const hintBtn = document.getElementById('hintBtn');
+const bonusLimitBtns = Array.prototype.slice.call(document.querySelectorAll('#bonusLimitSetting .bonusLimitBtn'));
 const purchaseTitleEl = document.getElementById('purchaseTitle');
 const shopModal = document.getElementById('shopModal');
 const shopBuyBtn = document.getElementById('shopBuyBtn');
@@ -2236,8 +2273,9 @@ function initGame(){
   consecutivePasses = 0;
   gameOver = false;
   busy = false;
-  /* 対局ごとに「逆転の一手」の残り回数を3回に戻す（コイン残高はサーバー側で維持） */
-  bonusUsesRemaining = PASS_BONUS_USES;
+  /* 対局ごとに「逆転の一手」の残り回数を設定回数（3回／5回）に戻す（コイン残高はサーバー側で維持） */
+  bonusUsedThisGame = 0;
+  bonusUsesRemaining = bonusLimit;
   awaitingBonusPlacement = false;
   resultRecorded = false;        // この対局の勝敗はまだ未記録
   wildStones = new Set();
@@ -2351,6 +2389,13 @@ function updateBonusUI(){
     walletNoteEl.title = walletState === 'error' ? walletLastError : '';
   }
   bonusLeftBadgeEl.textContent = t('bonusLeftBadge', { n: bonusUsesRemaining });
+  /* 「逆転の一手の設定回数」ボタン：選択中の回数を強調 */
+  bonusLimitBtns.forEach(b => {
+    const n = parseInt(b.getAttribute('data-limit'), 10);
+    b.textContent = t('bonusLimitOpt', { n: n });
+    b.classList.toggle('active', n === bonusLimit);
+    b.setAttribute('aria-pressed', n === bonusLimit ? 'true' : 'false');
+  });
 
   /* デモ用の「初回登録」（カード入力画面）は出さない。コインショップは常に開ける */
   registerBtn.style.display = 'none';
@@ -2368,7 +2413,7 @@ function updateBonusUI(){
   }
 
   if (isHumanPassState()){
-    /* 1対局3回まで。残りがあるときだけ「逆転の一手」ボタンを出す */
+    /* 1対局の上限（設定回数）まで。残りがあるときだけ「逆転の一手」ボタンを出す */
     if (bonusUsesRemaining > 0){
       passBonusBuyBtn.style.display = 'inline-block';
       passBonusBuyBtn.textContent = t('bonusBuyBtn', { n: bonusUsesRemaining });
@@ -2462,7 +2507,8 @@ function endHumanTurn(){
    呼び出し前に必ず1コインを消費済みであること。 */
 function useBonusPlacement(){
   if (bonusUsesRemaining <= 0 || !isHumanPassState()) return;
-  bonusUsesRemaining--;
+  bonusUsedThisGame++;
+  bonusUsesRemaining = Math.max(0, bonusLimit - bonusUsedThisGame);
   awaitingBonusPlacement = true;
   setStatus('bonusPlacePrompt', { n: bonusUsesRemaining });
   render();
@@ -2482,10 +2528,22 @@ passBonusUseBtn.addEventListener('click', useBonusPlacement);
 /* 「✨ 逆転の一手（🪙1）」ボタン → コイン確認パネルを開く */
 passBonusBuyBtn.addEventListener('click', () => {
   if (!isHumanPassState()) return;
-  if (bonusUsesRemaining <= 0){ toast(t('bonusUsedUp')); return; }
+  if (bonusUsesRemaining <= 0){ toast(t('bonusUsedUp', { n: bonusLimit })); return; }
   if (!ensureCoins(PASS_BONUS_PRICE)) return;
   openConfirm('bonus');
 });
+
+/* 「逆転の一手の設定回数」3回／5回の切替。
+   対局の途中で変えた場合は「新しい上限 − この対局で使った回数」が残り回数になる。 */
+bonusLimitBtns.forEach(b => b.addEventListener('click', () => {
+  const n = parseInt(b.getAttribute('data-limit'), 10);
+  if (BONUS_LIMIT_OPTIONS.indexOf(n) < 0 || n === bonusLimit) return;
+  bonusLimit = n;
+  try { localStorage.setItem(BONUS_LIMIT_KEY, String(n)); } catch(e){}
+  bonusUsesRemaining = Math.max(0, bonusLimit - bonusUsedThisGame);
+  toast(t('bonusLimitChanged', { n: n }));
+  updateBonusUI();
+}));
 
 /* 「💡 ヒント（🪙1）」ボタン → コイン確認パネルを開く */
 hintBtn.addEventListener('click', () => {
@@ -2509,9 +2567,9 @@ purchaseConfirmBtn.addEventListener('click', async () => {
     return;
   }
   if (!isHumanPassState() || awaitingBonusPlacement || bonusSpending) return;
-  if (bonusUsesRemaining <= 0){ toast(t('bonusUsedUp')); return; }
+  if (bonusUsesRemaining <= 0){ toast(t('bonusUsedUp', { n: bonusLimit })); return; }
   if (!ensureCoins(PASS_BONUS_PRICE)) return;
-  /* 1回使うごとに1コインを消費する（1対局3回まで）。消費に成功したときだけ自由配置に進む */
+  /* 1回使うごとに1コインを消費する（1対局の設定回数まで）。消費に成功したときだけ自由配置に進む */
   bonusSpending = true;
   const boardAtSpend = board;
   let paid = false;
